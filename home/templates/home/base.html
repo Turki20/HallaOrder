@@ -1,0 +1,59 @@
+{% load bootstrap5 %}
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    {% bootstrap_css %}
+    {% bootstrap_javascript %}
+    <link rel="stylesheet" href="{% static 'css/base.css' %}">
+    {% block style %}{% endblock style %}
+    <script src="https://kit.fontawesome.com/aa8d28d2d0.js" crossorigin="anonymous"></script>
+    <title>{% block title %}{% endblock title %}</title>
+</head>
+
+<body dir="rtl">
+    <!-- {% include "home/header_platform.html" %}
+    <button class="btn btn-orange">Button</button>
+    <button class="btn btn-blue">Button</button>
+    <button class="btn btn-dark"><i class="fa-brands fa-python"></i></button>
+    <div class="card">
+        <h3>Card</h3>
+    </div> -->
+
+
+    <!-- <main>
+        <div class="sidebar" id="sidebar">
+            <button id="close_menu" class="toggle-btn" onclick="toggleSidebar()"><i class="fa-solid fa-xmark"></i></button>
+            <h3>HellaOrder</h3>
+            <ul>
+                <li data-page="home" class="active"><a href=""><i class="fa-solid fa-house"></i>الصفحة الرئيسية</a></li>
+                <li data-page="products"><a href=""><i class="fa-solid fa-file"></i>التقارير</a></li>
+                <li data-page="products"><a href=""><i class="fa-solid fa-file"></i>التقارير</a></li>
+                <li data-page="products"><a href=""><i class="fa-solid fa-file"></i>التقارير</a></li>
+            </ul>
+        </div>
+        <div class="content">
+            <header> 
+                <button onclick="toggleSidebar()"><i class="fa-solid fa-bars"></i></button> 
+                <span>Dashboard</span> 
+            </header>
+            <div id="mainContent">
+                <h2>Home</h2>
+                <p>Welcome to the dashboard!</p>
+            </div>
+        </div>
+    </main> -->
+
+
+    {% block content %}
+
+    {% endblock content %}
+
+    <script src="{% static 'js/slidebar.js' %}"></script>
+</body>
+
+</html>
