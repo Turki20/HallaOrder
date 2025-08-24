@@ -70,6 +70,7 @@ body {
     border: none;
     background-color: var(--white_color);
     color: var(--dark_blue_color);
+    box-shadow: 0 8px 30px rgba(0, 75, 89, 0.08);
 }
 
 
@@ -107,7 +108,19 @@ body {
     color: var(--orange_color);
 }
 
+.element-bg {
+  background: linear-gradient(
+    135deg,
+    var(--light_blue_color) 0%,
+    var(--blue_color) 65%,
+    var(--dark_blue_color) 100%
+  );
+  color: #fff; /* لو النص أبيض يبان فوق التدرج */
+}
 
+.alert-danger {
+    
+}
 
 /* slidebar  */
 

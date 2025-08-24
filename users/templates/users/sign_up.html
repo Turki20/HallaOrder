@@ -1,0 +1,117 @@
+
+{% extends "home/base.html" %}
+
+{% load static %}
+
+
+{% block style %}
+<link rel="stylesheet" href="{% static 'css/index.css' %}">
+{% endblock style %}
+
+{% block content %}
+<style>
+    #dashbaord {
+        display: none;
+    }
+</style>
+
+<div class="row p-4 w-100">
+    <div class="col"></div>
+    <div class="col-10">
+        <div class="card w-100 element-bg">
+            <h1 class="w-100 text-center">تسجيل</h1>
+        </div>
+    </div>
+    <div class="col"></div>
+</div>
+
+<div class="row p-4 w-100">
+    <div class="col"></div>
+    <div class="col-10">
+        
+        <div class="card w-100">
+            <div class="alert alert-danger">
+                <i class="fa-solid fa-circle-exclamation"></i>
+                <span>هناك خطأ ما</span>
+            </div>    
+            <form action="" method="post" class="row g-3">
+              {% csrf_token %}
+
+              <!-- User: username -->
+              <div class="col-md-6">
+                <label for="username" class="form-label">اسم المستخدم</label>
+                <input type="text" class="form-control" id="username" name="username" required />
+                <div class="form-text">اسم فريد (بالإنجليزية أو أرقام).</div>
+              </div>
+
+              <!-- User: email -->
+              <div class="col-md-6">
+                <label for="email" class="form-label">البريد الإلكتروني</label>
+                <input type="email" class="form-control" id="email" name="email" required/>
+              </div>
+
+              <!-- User: first_name -->
+              <div class="col-md-6">
+                <label for="first_name" class="form-label">الاسم الأول</label>
+                <input type="text" class="form-control" id="first_name" name="first_name" required/>
+              </div>
+
+              <!-- User: last_name -->
+              <div class="col-md-6">
+                <label for="last_name" class="form-label">اسم العائلة</label>
+                <input type="text" class="form-control" id="last_name" name="last_name" required/>
+              </div>
+
+              <!-- User: password (يمكنك استخدام password1/password2 للتأكيد) -->
+              <div class="col-md-6">
+                <label for="password1" class="form-label">كلمة المرور</label>
+                <input type="password" class="form-control" id="password1" name="password1" required minlength="8" />
+                <div class="form-text">8 أحرف على الأقل.</div>
+              </div>
+
+              <div class="col-md-6">
+                <label for="password2" class="form-label">تأكيد كلمة المرور</label>
+                <input type="password" class="form-control" id="password2" name="password2" required minlength="8" />
+              </div>
+
+              <hr class="mt-4" />
+
+              <!-- Profile: phone -->
+              <div class="col-md-6">
+                <label for="phone" class="form-label">رقم الجوال</label>
+                <input
+                  type="text"
+                  class="form-control"
+                  id="phone"
+                  name="phone"
+                  pattern="\d{10}"
+                  placeholder="مثال: 0501234567"
+                  required
+                />
+                <div class="form-text">10 أرقام بدون مسافات.</div>
+              </div>
+
+              <!-- Profile: role -->
+              <div class="col-md-6">
+                <label for="role" class="form-label">الدور (Role)</label>
+                <select class="form-select" id="role" name="role" required>
+                  <option value="" selected disabled>اختر الدور</option>
+                  {% for val, label in roles %}
+                        <option value="{{val}}">{{label}}</option>
+                  {% endfor %}
+                </select>
+              </div>
+
+              <div class="col-12 d-flex gap-2">
+                <button type="submit" class="btn btn-blue">حفظ</button>
+                <button type="reset" class="btn btn-orange">تفريغ الحقول</button>
+              </div>
+            </form>
+
+        </div>
+    </div>
+    <div class="col"></div>
+</div>
+
+
+{% endblock content %}

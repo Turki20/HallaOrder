@@ -1,0 +1,32 @@
+
+{% extends "home/base.html" %}
+
+{% load static %}
+
+
+{% block style %}
+<link rel="stylesheet" href="{% static 'css/index.css' %}">
+{% endblock style %}
+
+{% block content %}
+<style>
+    #dashbaord {
+        display: none;
+    }
+</style>
+{% include "home/header_platform.html" %}
+<div id="index">
+    <div class="top_content">
+        <h1>منصتك الشاملة لإدارة الطلبات بدون عمولة</h1>
+        <p>
+            هل تملك مطعمًا أو كافيهًا وتريد زيادة أرباحك بعيدًا عن عمولات التطبيقات المرتفعة؟
+            <br>
+            مع HalaOrder، نوفر لك موقعًا وتطبيقًا خاصًا بمطعمك في دقائق فقط.
+        </p>
+    </div>
+
+    <div class="top_content">
+        <a href="{% url 'home:create_restaurant_identity' %}" class="btn btn-orange">جرب الان</a>
+    </div>
+</div>
+{% endblock content %}
