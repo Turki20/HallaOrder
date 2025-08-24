@@ -11,7 +11,7 @@ class Profile(models.Model):
         ('Staff', 'Staff'),
         ('Customer', 'Customer'),
     ]
-
+    user = models.OneToOneField(User, on_delete=models.CASCADE)
     phone = models.CharField(max_length=10)
     role = models.CharField(max_length=20, choices=ROLE_CHOICES)
     created_at = models.DateTimeField(auto_now_add=True)

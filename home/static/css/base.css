@@ -119,7 +119,12 @@ body {
 }
 
 .alert-danger {
-    
+
+}
+
+.text-blue {
+    color: var(--light_blue_color);
+    text-decoration: none;
 }
 
 /* slidebar  */
