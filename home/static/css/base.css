@@ -119,6 +119,7 @@ body {
     transition: all 0.3s;
     overflow: hidden;
     height: 100vh;
+    z-index: 1000;
 }
 
 .sidebar h3 {

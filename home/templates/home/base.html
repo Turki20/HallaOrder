@@ -17,6 +17,7 @@
 
 <body dir="rtl">
     <!-- {% include "home/header_platform.html" %}
+
     <button class="btn btn-orange">Button</button>
     <button class="btn btn-blue">Button</button>
     <button class="btn btn-dark"><i class="fa-brands fa-python"></i></button>
@@ -25,7 +26,7 @@
     </div> -->
 
 
-    <!-- <main>
+    <main id="dashbaord">
         <div class="sidebar" id="sidebar">
             <button id="close_menu" class="toggle-btn" onclick="toggleSidebar()"><i class="fa-solid fa-xmark"></i></button>
             <h3>HellaOrder</h3>
@@ -42,17 +43,29 @@
                 <span>Dashboard</span> 
             </header>
             <div id="mainContent">
-                <h2>Home</h2>
-                <p>Welcome to the dashboard!</p>
+                {% block dashboard_content %}
+                  <!-- <div class="row p-4 g-4">
+                    <div class="col-12 col-md-6">
+                        <div class="card">
+                            <h1>card</h1>
+                        </div>
+                    </div>
+                    <div class="col-12 col-md-6">
+                        <div class="card">
+                            <h1>card</h1>
+                        </div>
+                    </div>
+                  </div> -->
+                {% endblock dashboard_content %}
             </div>
         </div>
-    </main> -->
+    </main>
 
 
     {% block content %}
 
     {% endblock content %}
-
+   
     <script src="{% static 'js/slidebar.js' %}"></script>
 </body>
 

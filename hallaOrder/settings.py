@@ -47,6 +47,7 @@ INSTALLED_APPS = [
     'users',
     'websites',
     'bootstrap5',
+    'restaurants',
 ]
 
 MIDDLEWARE = [
