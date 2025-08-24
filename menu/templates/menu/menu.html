@@ -1,0 +1,101 @@
+{% extends "home/base.html" %}
+{% load static %}
+
+{% block title %}إدارة المنتجات{% endblock title %}
+
+{% block style %}
+    <link rel="stylesheet" href="{% static 'css/menu.css' %}">
+{% endblock style %}
+
+
+{% block dashboard_content %}
+
+<div class="page-header mb-3">
+    <h1>المنتجات</h1>
+    <div class="d-flex gap-2 justify-content-end">
+        <button id="manageCategoriesBtn" class="btn btn-blue"><i class="fas fa-sitemap"></i> إدارة الفئات</button>
+        <button id="addProductBtn" class="btn btn-orange"><i class="fas fa-plus"></i> إضافة منتج جديد</button>
+    </div>
+</div>
+
+<div class="products-container card">
+    <div class="category-tabs">
+        {% for category in categories %}
+            <button class="tab-btn {% if forloop.first %}active{% endif %}" data-target="category-{{ category.id }}">{{ category.name }}</button>
+        {% empty %}
+            <span class="p-4 text-muted">لم يتم إضافة فئات بعد.</span>
+        {% endfor %}
+    </div>
+    <div class="products-content">
+        {% for category in categories %}
+        <section class="category-section {% if forloop.first %}active{% endif %}" id="category-{{ category.id }}">
+            <div class="category-header"><h2>{{ category.name }}</h2></div>
+            <table class="products-table">
+               <thead><tr><th>المنتج</th><th>السعر</th><th>الحالة</th><th>إجراءات</th></tr></thead>
+               <tbody>
+                   {% for product in category.product_set.all %}
+                   <tr>
+                       <td><div class="product-info"><img src="{{ product.image|default:'https://via.placeholder.com/50' }}" alt="{{ product.name }}"><span>{{ product.name }}</span></div></td>
+                       <td>{{ product.price }} ر.س</td>
+                       <td><label class="toggle-switch"><input type="checkbox" {% if product.available %}checked{% endif %}><span class="slider"></span></label></td>
+                       <td><div class="action-buttons"><button class="action-btn edit-btn"><i class="fas fa-pen"></i></button><button class="action-btn delete-btn"><i class="fas fa-trash"></i></button></div></td>
+                   </tr>
+                   {% empty %}
+                   <tr><td colspan="4" class="text-center text-muted">لا توجد منتجات في هذه الفئة.</td></tr>
+                   {% endfor %}
+               </tbody>
+            </table>
+        </section>
+        {% empty %}
+            <p>يرجى إضافة فئة أولاً من خلال 'إدارة الفئات'.</p>
+        {% endfor %}
+    </div>
+</div>
+
+<!-- Manage Categories Modal -->
+<div id="manageCategoriesModal" class="modal-overlay">
+    <div class="modal-content">
+        <header class="modal-header"><h2>إدارة الفئات الرئيسية</h2><button class="close-btn">&times;</button></header>
+        <main class="modal-body">
+            <h3>الفئات الحالية</h3>
+            <ul class="category-list">
+                {% for category in categories %}
+                <li><span>{{ category.name }}</span><button class="action-btn delete-btn"><i class="fas fa-trash"></i></button></li>
+                {% empty %}<li>لا توجد فئات لعرضها.</li>{% endfor %}
+            </ul>
+            <form style="margin-top: 30px;">
+                {% csrf_token %}
+                <h3>إضافة فئة جديدة</h3>
+                <div class="form-group"><label for="new-cat-name">اسم الفئة</label><input type="text" name="name" id="new-cat-name" placeholder="مثال: المشروبات" required></div>
+                <div class="modal-footer"><button type="submit" name="add_category" class="btn btn-orange">حفظ الفئة</button></div>
+            </form>
+        </main>
+    </div>
+</div>
+
+<!-- Add/Edit Product Modal -->
+<div id="productModal" class="modal-overlay">
+    <div class="modal-content">
+        <header class="modal-header"><h2>إضافة منتج جديد</h2><button class="close-btn">&times;</button></header>
+        <main class="modal-body">
+            <form>
+                {% csrf_token %}
+                <div class="form-grid">
+                    <div class="form-group"><label for="prod-name">اسم المنتج</label><input type="text" name="name" id="prod-name" required></div>
+                    <div class="form-group"><label for="prod-price">السعر الأساسي</label><input type="number" name="price" id="prod-price" placeholder="0.00" step="0.01" required></div>
+                    <div class="form-group"><label for="prod-category">الفئة</label>
+                        <select id="prod-category" name="category" required>
+                            {% for category in categories %}<option value="{{ category.id }}">{{ category.name }}</option>{% endfor %}
+                        </select>
+                    </div>
+                    <div class="form-group"><label for="prod-image">رابط الصورة</label><input type="text" name="image" id="prod-image" placeholder="https://example.com/image.png"></div>
+                    <div class="form-group full-width"><label for="prod-desc">الوصف</label><textarea id="prod-desc" name="description" rows="3" required></textarea></div>
+                </div>
+                <div class="modal-footer"><button type="submit" name="add_product" class="btn btn-orange">حفظ المنتج</button></div>
+            </form>
+        </main>
+    </div>
+</div>
+<script src="{% static 'js/menu.js' %}"></script>
+{% endblock dashboard_content %}
+
