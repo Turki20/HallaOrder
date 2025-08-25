@@ -77,7 +77,7 @@
         <div class="card">
             <div class="row">
                 <div class="col-1" style="font-size: x-large;">
-                    {% if request.user.restaurants.category_set.name == 'None' %}
+                    {% if request.user.restaurants.category_set.first %}
                     <i class="fa-solid fa-square-check text-blue"></i>
                     {% else %}
                     <i class="fa-regular fa-square"></i>
@@ -87,7 +87,7 @@
                     <p>اضافة اول طبق لقائمة الطعام</p>
                 </div>
                 <div class="col-1">
-                    {% if request.user.restaurants.category_set.name == 'None' %}
+                    {% if request.user.restaurants.category_set.first %}
                     {% else %}
                     <a href="{% url 'home:add_food_plate' %}" class="btn btn-dark">ابدأ</a>
                     {% endif %}
@@ -108,7 +108,7 @@
                     <p>اضافة الفرع الرئيسي للمطعم</p>
                 </div>
                 <div class="col-1">
-                    <a href="" class="btn btn-dark">ابدأ</a>
+                    <a href="{% url 'home:add_branch_view' %}" class="btn btn-dark">ابدأ</a>
                 </div>
             </div>
         </div>

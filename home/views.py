@@ -1,10 +1,12 @@
 from django.shortcuts import render, redirect
 from django.http import HttpRequest
 from django.contrib.auth.decorators import login_required
-from restaurants.models import SubscriptionPlan, Restaurant
+from restaurants.models import SubscriptionPlan, Restaurant, Branch
 from menu.models import Product, Category
 from django.contrib import messages
 from django.db import transaction
+from websites.models import Website
+
 
 # Create your views here.
 
@@ -56,21 +58,32 @@ def restaurant_identity(request:HttpRequest):
         restaurant_desc = request.POST['restaurant_desc']
         restaurant_logo = request.FILES['restaurant_logo']
         primary_color = request.POST['primary_color']
-        secondary_color = request.POST['secondary_color']
+        secondary_color = request.POST.get('secondary_color', '#FFFFFF')
         
         if not restaurant_name or not restaurant_desc or not restaurant_logo or not primary_color:
             messages.error(request, "الرجاء تعبئة جميع الحقول المطلوبة", 'alert-danger')
             return render(request, 'home/restaurant_identity.html')
         
-        restaurant = Restaurant(
-            name = restaurant_name,
-            description = restaurant_desc,
-            owner = request.user,
-            subscription_plan = SubscriptionPlan.objects.get(pk = subscriptionplan_data),
-            slug = restaurant_name
-        )
-        
-        restaurant.save()
+        with transaction.atomic():
+            restaurant = Restaurant(
+                name = restaurant_name,
+                description = restaurant_desc,
+                owner = request.user,
+                subscription_plan = SubscriptionPlan.objects.get(pk = subscriptionplan_data),
+                slug = restaurant_name
+            )
+            
+            restaurant.save()
+            
+            website = Website(
+                restaurant = restaurant,
+                custom_colors = primary_color,
+                secondary_color = secondary_color,
+                logo = restaurant_logo,
+                slug = restaurant.id # غيرها حسب رغبتك
+            )
+            
+            website.save()
         
         messages.success(request, "تم إنشاء هوية المطعم بنجاح", 'alert-success')
         return redirect('home:create_restaurant_identity')
@@ -100,21 +113,21 @@ def add_food_plate(request:HttpRequest):
 
         # تحقق أساسي من المدخلات
         if not category_name:
-            messages.error(request, "اسم الفئة مطلوب")
+            messages.error(request, "اسم الفئة مطلوب", 'alert-danger')
             return redirect('home:add_food_plate')
 
         if not dish_name:
-            messages.error(request, "اسم الطبق مطلوب")
+            messages.error(request, "اسم الطبق مطلوب", 'alert-danger')
             return redirect('home:add_food_plate')
 
         if not dish_price or not dish_price.replace(".", "", 1).isdigit():
-            messages.error(request, "الرجاء إدخال سعر صالح")
+            messages.error(request, "الرجاء إدخال سعر صالح", 'alert-danger')
             return redirect('home:add_food_plate')
 
         if dish_image:
             allowed_types = ["image/png", "image/jpeg", "image/webp", "image/svg+xml"]
             if dish_image.content_type not in allowed_types:
-                messages.error(request, "نوع الصورة غير مسموح. الأنواع المسموحة: PNG, JPG, WEBP, SVG")
+                messages.error(request, "نوع الصورة غير مسموح. الأنواع المسموحة: PNG, JPG, WEBP, SVG", 'alert-danger')
                 return redirect('home:add_food_plate')
 
         with transaction.atomic():
@@ -135,11 +148,46 @@ def add_food_plate(request:HttpRequest):
                 category=category,
             )
 
-        messages.success(request, f"تم إضافة الطبق '{dish.name}' بنجاح")
-        restaurant = Restaurant.objects.get(pk = request.user.restaurants.id)
-        restaurant.is_active = True
-        restaurant.save()
-        return redirect('restaurants')
-
+        messages.success(request, f"تم إضافة الطبق '{dish.name}' بنجاح", 'alert-success')
+        # restaurant = Restaurant.objects.get(pk = request.user.restaurants.id)
+        # restaurant.is_active = True
+        # restaurant.save()
+        # return redirect('restaurants')
+        return redirect('home:create_restaurant_identity')
 
     return render(request, 'home/add_food_plate.html', {})
+
+@login_required(login_url='/users/sign_up/')
+def add_branch_view(request:HttpRequest):
+    try:
+        request.user.restaurants
+    except:
+        messages.error(request, "يجب انشاء هوية المطعم اولا", 'alert-danger')
+        return redirect('home:create_restaurant_identity')
+    
+    if request.method == "POST":
+        branch_name = request.POST.get("name", "").strip()
+        branch_address = request.POST.get("address", "").strip()
+
+        if not branch_name:
+            messages.error(request, "يجب إدخال اسم الفرع", 'alert-danger')
+            return redirect("home:add_branch_view") 
+
+        elif not branch_address:
+            messages.error(request, "يجب إدخال عنوان الفرع", 'alert-danger')
+            return redirect("home:add_branch_view") 
+        
+        else:
+            # إنشاء الفرع
+            Branch.objects.create(
+                restaurant=request.user.restaurants,
+                name=branch_name,
+                address=branch_address
+            )
+            # messages.success(request, "تم إضافة الفرع بنجاح", 'alert-success')
+            restaurant = Restaurant.objects.get(pk = request.user.restaurants.id)
+            restaurant.is_active = True
+            restaurant.save()
+            return redirect('restaurants')
+        
+    return render(request, 'home/add_branch.html', {})

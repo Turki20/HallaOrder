@@ -30,6 +30,11 @@
         <div class="sidebar" id="sidebar">
             <button id="close_menu" class="toggle-btn" onclick="toggleSidebar()"><i class="fa-solid fa-xmark"></i></button>
             <h3>HellaOrder</h3>
+            {% if request.user.is_authenticated %}
+            {% if request.user.restaurants %}
+            <p class="w-100 text-center"><a href="{% url 'websites:site_home' request.user.restaurants.id %}" class="btn btn-orange"><i class="fa-solid fa-eye"></i><span>معاينة الموقع</span></a></p>
+            {% endif %}
+            {% endif %}
             <ul>
                 
                 <li class="{% if current_page == 'home' %}active{% endif %}">

@@ -6,6 +6,7 @@ class Website(models.Model):
     restaurant = models.ForeignKey(Restaurant, on_delete=models.CASCADE, related_name="websites")
     theme = models.CharField(max_length=100, default="default")
     custom_colors = models.CharField(max_length=255, blank=True, null=True)
+    secondary_color = models.CharField(max_length=255, blank=True, null=True)
     logo = models.CharField(max_length=255, blank=True, null=True)
     slug = models.SlugField(max_length=140, unique=True, null=True, blank=True)
     subdomain = models.CharField(max_length=63, blank=True, null=True)           

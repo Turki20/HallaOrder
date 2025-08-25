@@ -16,7 +16,7 @@
 
 body {
     min-height: 100vh;
-    /* background-color: var(--gray_color); */
+    background-color: var(--gray_color);
     display: flex;
     flex-direction: column;
     justify-content: start;
@@ -81,6 +81,7 @@ body {
     justify-content: space-between;
     align-items: center;
     padding: 10px 50px;
+    background-color: var(--white_color);
 }
 
 #header_platform img {
