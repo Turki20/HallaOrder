@@ -1,4 +1,5 @@
 from django.contrib import admin
+
 from .models import SubscriptionPlan, Restaurant, Branch
 # Register your models here.
 

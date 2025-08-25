@@ -25,4 +25,5 @@ urlpatterns = [
     path('', include ('restaurants.urls')), # edit
     path('menu/', include('menu.urls')),
     path('users/', include('users.urls')),
+    path("", include("websites.urls")),  
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
