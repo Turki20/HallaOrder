@@ -18,9 +18,9 @@
 }
 
 .top_content {
-    min-height: 50vh;
+    min-height: 30vh;
     display: flex;
-    justify-content: center;
+    justify-content: end;
     align-items: center;
     flex-direction: column;
     text-align: center;

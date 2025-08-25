@@ -1,14 +1,8 @@
 from django.contrib import admin
-from .models import Restaurant
-from .models import SubscriptionPlan, Restaurant, Branch 
 
-@admin.register(Restaurant)
-class RestaurantAdmin(admin.ModelAdmin):
-    list_display = ("id", "name", "slug")
-    search_fields = ("name", "slug")
+from .models import SubscriptionPlan, Restaurant, Branch
+# Register your models here.
 
-@admin.register(SubscriptionPlan)
-class SubscriptionPlanAdmin(admin.ModelAdmin):
-    list_display = ("id", "name", "price", "created_at", "updated_at")
-
-
+admin.site.register(SubscriptionPlan)
+admin.site.register(Branch)
+admin.site.register(Restaurant)

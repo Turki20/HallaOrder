@@ -1,0 +1,44 @@
+{% extends "home/base.html" %}
+{% block title %}المطاعم{% endblock %}
+
+{% block dashboard_content %}
+<div class="container p-4">
+    <h2 class="mb-4">المطاعم</h2>
+    <a href="{% url 'restaurants_add' %}" class="btn btn-blue mb-3">+ إضافة مطعم</a>
+    <table class="table table-bordered table-hover">
+        <thead class="table-light">
+            <tr>
+                <th>رقم</th>
+                <th>الاسم</th>
+                <th>المالك</th>
+                <th>خطة الاشتراك</th>
+                <th>الخيارات</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for restaurant in restaurants %}
+            <tr>
+                <td>{{ restaurant.id }}</td>
+                <td>{{ restaurant.name }}</td>
+                <td>{{ restaurant.owner.username }}</td>
+                <td>
+                    {% if restaurant.subscription_plan %}
+                        {{ restaurant.subscription_plan.name }}
+                    {% else %}
+                        -
+                    {% endif %}
+                </td>
+                <td>
+                    <a href="{% url 'restaurants_edit' restaurant.pk %}" class="btn btn-sm btn-primary"> تعديل</a>
+                    <a href="{% url 'restaurants_delete' restaurant.pk %}" class="btn btn-sm btn-danger"> حذف</a>
+                </td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="5" class="text-center">لا يوجد مطاعم</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}
