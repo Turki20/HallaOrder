@@ -1,0 +1,58 @@
+{% extends "home/base.html" %}
+
+{% block title %}الفروع{% endblock title %}
+
+{% block dashboard_content %}
+<div class="container-fluid mt-4">
+
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <h2>الفروع</h2>
+                    <a href="{% url 'branch_add' %}" class="btn btn-blue">+ إضافة فرع جديد</a>
+                </div>
+                <div class="table-responsive">
+                    <table class="table table-bordered table-striped align-middle">
+                        <thead class="table-dark text-center">
+                            <tr>
+                                <th>الفرع</th>
+                                <th>المطعم</th>
+                                <th>العنوان</th>
+                                <th>رمز QR</th>
+                                <th>تاريخ الإنشاء</th>
+                                <th>إجراءات</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for branch in branches %}
+                            <tr>
+                                <td>{{ branch.name }}</td>
+                                <td>{{ branch.restaurant.name }}</td>
+                                <td>{{ branch.address }}</td>
+                                <td class="text-center">
+                                    {% if branch.qr_code %}
+                                    <img src="{{ branch.qr_code }}" alt="QR Code" width="60">
+                                    {% else %}
+                                    <span class="text-muted">لا يوجد</span>
+                                    {% endif %}
+                                </td>
+                                <td>{{ branch.created_at|date:"Y-m-d" }}</td>
+                                <td class="text-center">
+                                    <a href="{% url 'branch_edit' branch.pk %}" class="btn btn-sm btn-primary">تعديل</a>
+                                    <a href="{% url 'branch_delete' branch.pk %}" class="btn btn-sm btn-danger">حذف</a>
+                                </td>
+                            </tr>
+                            {% empty %}
+                            <tr>
+                                <td colspan="6" class="text-center">🚫 لا يوجد فروع</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock dashboard_content %}
