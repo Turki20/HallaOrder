@@ -30,7 +30,6 @@ def subscriptionplan_view(request:HttpRequest):
 
 @login_required(login_url='/users/sign_up/')
 def create_restaurant_identity(request:HttpRequest):
-    print(request.user.restaurants.category_set.name)    
     # لازم قبل يسوي انشاء للمطعم يختار الباقه
     subscriptionplan_data = request.session.get('subscriptionplan_id', None)
     if subscriptionplan_data is None:
@@ -68,6 +67,7 @@ def restaurant_identity(request:HttpRequest):
             description = restaurant_desc,
             owner = request.user,
             subscription_plan = SubscriptionPlan.objects.get(pk = subscriptionplan_data),
+            slug = restaurant_name
         )
         
         restaurant.save()
