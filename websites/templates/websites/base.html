@@ -1,0 +1,125 @@
+{% load static %}
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>{% block title %}{{ website.restaurant.name }} — HalaOrder{% endblock %}</title>
+
+  <style>
+    :root{
+      --hoa-brand: #0ea5e9;      
+      --hoa-ink:   #0f172a;      
+      --hoa-muted: #64748b;     
+      --hoa-bg:    #f5f7fb;      
+      --hoa-card:  #ffffff;      
+      --hoa-radius: 16px;
+      --hoa-shadow: 0 6px 20px rgba(15,23,42,.06);
+      --hoa-gap: 16px;
+    }
+    :root{ {{ website.custom_colors|default:'' }} }
+
+    *{box-sizing:border-box}
+    body{
+      margin:0; font-family:system-ui,Segoe UI,Roboto,Arial,sans-serif;
+      background:var(--hoa-bg); color:var(--hoa-ink);
+    }
+    a{color:var(--brand, var(--hoa-brand)); text-decoration:none}
+    .container{max-width:1100px; margin:auto; padding:20px}
+
+    .topbar{
+      background:#fff; box-shadow:var(--hoa-shadow);
+    }
+    .topbar__inner{
+      display:flex; align-items:center; gap:16px; padding:12px 20px;
+    }
+    .logo{
+      display:flex; align-items:center; gap:10px; font-weight:800; letter-spacing:.2px
+    }
+    .logo img{height:28px}
+    .brand-tag{
+      display:inline-flex; align-items:center; gap:6px;
+      font-size:12px; color:var(--hoa-muted); background:#eef7fb;
+      padding:6px 10px; border-radius:999px;
+    }
+    .spacer{flex:1}
+    .cta{
+      display:inline-flex; align-items:center; justify-content:center;
+      padding:10px 14px; border-radius:12px; background:var(--brand, var(--hoa-brand)); color:#fff;
+      box-shadow:var(--hoa-shadow);
+    }
+
+    .site-head{
+      display:flex; align-items:center; gap:16px; padding:24px 0 8px 0;
+    }
+    .site-head img{height:56px; border-radius:12px}
+    .site-title{margin:0; font-size:28px}
+
+    .card{
+      background:var(--hoa-card); border-radius:var(--hoa-radius);
+      padding:22px; box-shadow:var(--hoa-shadow); margin:16px 0;
+    }
+    .muted{color:var(--hoa-muted)}
+    .section-title{margin:0 0 10px 0; font-size:18px}
+
+    footer{padding:24px 0 40px 0; color:var(--hoa-muted); font-size:14px}
+    .footer-line{height:1px; background:#e6ecf2; margin:16px 0}
+
+    @media (max-width:640px){
+      .site-title{font-size:22px}
+      .topbar__inner{padding:10px 14px}
+    }
+  </style>
+
+  {# ملف CSS للثيم (اختياري): ضعه في static ومرره هنا حسب website.theme #}
+  {% block theme_css %}{% endblock %}
+  {% block head_extra %}{% endblock %}
+</head>
+<body>
+
+  <div class="topbar">
+    <div class="topbar__inner container">
+      <div class="logo">
+        <img src="{% static 'img/halaorder-logo.svg' %}" alt="HalaOrder" onerror="this.style.display='none'">
+        <span>HalaOrder</span>
+        <span class="brand-tag">منصة المواقع والطلبات</span>
+      </div>
+      <div class="spacer"></div>
+      <a class="cta" href="/s/{{ website.slug }}/menu/">{% block topbar_cta %}اطلب الآن{% endblock %}</a>
+    </div>
+  </div>
+
+  <div class="container">
+    <header class="site-head">
+      {% if website.logo %}
+        <img src="{{ website.logo }}" alt="{{ website.restaurant.name }}" onerror="this.remove()">
+      {% endif %}
+      <h1 class="site-title">
+        {{ website.restaurant.name }}
+      </h1>
+    </header>
+
+    {% block hero %}
+      <div class="card">
+        <p>مرحبًا بك في موقع {{ website.restaurant.name }}.</p>
+        <p class="muted">مدعوم بواسطة <strong>HalaOrder</strong>.</p>
+        <a class="cta" href="/s/{{ website.slug }}/menu/">اطلب الآن</a>
+      </div>
+    {% endblock %}
+
+    {% block content %}{% endblock %}
+
+    {% block sections %}{% endblock %}
+
+    <footer>
+      <div class="footer-line"></div>
+      <div class="muted">
+        تم بناء هذا الموقع بواسطة <strong>HalaOrder</strong>. جميع الحقوق محفوظة.
+      </div>
+      {% block footer_extra %}{% endblock %}
+    </footer>
+  </div>
+
+  {% block scripts %}{% endblock %}
+</body>
+</html>
