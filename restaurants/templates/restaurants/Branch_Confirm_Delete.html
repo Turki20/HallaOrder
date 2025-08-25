@@ -1,0 +1,15 @@
+{% extends "home/base.html" %}
+
+{% block title %}حذف فرع{% endblock title %}
+
+{% block dashboard_content %}
+<div class="container mt-4">
+    <h2 class="mb-4">حذف فرع</h2>
+    <p>هل أنت متأكد أنك تريد حذف الفرع: <strong>{{ branch.name }}</strong>؟</p>
+    <form method="post">
+        {% csrf_token %}
+        <button type="submit" class="btn btn-danger">حذف</button>
+        <a href="{% url 'branches' %}" class="btn btn-secondary">إلغاء</a>
+    </form>
+</div>
+{% endblock dashboard_content %}
