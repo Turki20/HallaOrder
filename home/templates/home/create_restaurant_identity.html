@@ -1,0 +1,120 @@
+{% extends "home/base.html" %}
+
+{% load static %}
+
+
+{% block style %}
+<link rel="stylesheet" href="{% static 'css/index.css' %}">
+{% endblock style %}
+
+{% block content %}
+<style>
+    #dashbaord {
+        display: none;
+    }
+</style>
+
+{% include "home/header_platform.html" %}
+
+
+<div class="row p-4 w-100">
+    <div class="col"></div>
+    <div class="col-10">
+        <div class="card w-100 element-bg">
+            <h1 class="w-100 text-center">انشاء المطعم</h1>
+        </div>
+    </div>
+    <div class="col"></div>
+</div>
+
+<div class="w-100">
+    {% if messages %}
+    <ul>
+        {% for message in messages %}
+        <div class="alert {{message.tags}}">
+            <i class="fa-solid fa-circle-exclamation"></i>
+            <span>{{message}}</span>
+        </div>
+        {% endfor %}
+    </ul>
+    {% endif %}
+</div>
+
+<div class="row p-4 w-100 g-4" style="font-weight: 500;">
+    <div class="col-1"></div>
+
+    <div class="col-10">
+        <div class="card">
+            <div class="row">
+                <div class="col-1" style="font-size: x-large;">
+                    <i class="fa-solid fa-square-check text-blue"></i>
+                </div>
+                <div class="col-10 text-end">
+                    <p>انشاء هوية المطعم</p>
+                </div>
+                <div class="col-1">
+                    <a href="{% url 'home:restaurant_identity' %}" class="btn btn-dark">ابدأ</a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-1"></div>
+
+    <div class="col-1"></div>
+    <div class="col-10">
+        <div class="card">
+            <div class="row">
+                <div class="col-1" style="font-size: x-large;">
+                    <i class="fa-regular fa-square"></i>
+                </div>
+                <div class="col-10 text-end">
+                    <p>اضافة اول طبق لقائمة الطعام</p>
+                </div>
+                <div class="col-1">
+                    <a href="" class="btn btn-dark">ابدأ</a>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-1"></div>
+
+    <div class="col-1"></div>
+    <div class="col-10">
+        <div class="card">
+            <div class="row">
+                <div class="col-1" style="font-size: x-large;">
+                    <i class="fa-regular fa-square"></i>
+                </div>
+                <div class="col-10 text-end">
+                    <p>اضافة الفرع الرئيسي للمطعم</p>
+                </div>
+                <div class="col-1">
+                    <a href="" class="btn btn-dark">ابدأ</a>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-1"></div>
+
+    <div class="col-1"></div>
+    <div class="col-10">
+        <div class="card">
+            <div class="row">
+                <div class="col-1" style="font-size: x-large;">
+                    <i class="fa-regular fa-square"></i>
+                </div>
+                <div class="col-10 text-end">
+                    <p>توثيق المطعم</p>
+                </div>
+                <div class="col-1">
+                    <a href="" class="btn btn-dark">ابدأ</a>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-1"></div>
+
+</div>
+
+{% endblock content %}
