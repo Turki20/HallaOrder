@@ -27,8 +27,10 @@
     <div class="col"></div>
 </div>
 
-<div class="w-100">
-    {% if messages %}
+<div class="row w-100 p-4">
+    <div class="col"></div>
+    <div class="col-10">
+        {% if messages %}
     <ul>
         {% for message in messages %}
         <div class="alert {{message.tags}}">
@@ -38,6 +40,8 @@
         {% endfor %}
     </ul>
     {% endif %}
+    </div>
+    <div class="col"></div>
 </div>
 
 <div class="row p-4 w-100 g-4" style="font-weight: 500;">
@@ -47,13 +51,20 @@
         <div class="card">
             <div class="row">
                 <div class="col-1" style="font-size: x-large;">
+                    {% if request.user.restaurants %}
                     <i class="fa-solid fa-square-check text-blue"></i>
+                    {% else %}
+                    <i class="fa-regular fa-square"></i>
+                    {% endif %}
                 </div>
                 <div class="col-10 text-end">
                     <p>انشاء هوية المطعم</p>
                 </div>
                 <div class="col-1">
+                    {% if request.user.restaurants %}
+                    {% else %}
                     <a href="{% url 'home:restaurant_identity' %}" class="btn btn-dark">ابدأ</a>
+                    {% endif %}
                 </div>
             </div>
         </div>
@@ -66,13 +77,20 @@
         <div class="card">
             <div class="row">
                 <div class="col-1" style="font-size: x-large;">
+                    {% if request.user.restaurants.category_set.name == 'None' %}
+                    <i class="fa-solid fa-square-check text-blue"></i>
+                    {% else %}
                     <i class="fa-regular fa-square"></i>
+                    {% endif %}
                 </div>
                 <div class="col-10 text-end">
                     <p>اضافة اول طبق لقائمة الطعام</p>
                 </div>
                 <div class="col-1">
-                    <a href="" class="btn btn-dark">ابدأ</a>
+                    {% if request.user.restaurants.category_set.name == 'None' %}
+                    {% else %}
+                    <a href="{% url 'home:add_food_plate' %}" class="btn btn-dark">ابدأ</a>
+                    {% endif %}
                 </div>
             </div>
         </div>

@@ -1,6 +1,8 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from .models import SubscriptionPlan, Restaurant, Branch
 from .forms import RestaurantForm ,BranchForm
+from django.contrib.auth.models import User
+from django.contrib import messages
 
 # عرض باقات الاشتراك
 def subscription_plans_list(request):
@@ -13,6 +15,15 @@ def subscription_plans_list(request):
 
 # عرض المطاعم
 def restaurants_list(request):
+    # التحقق هل المطعم فعال ام لم يتم تفعيلة
+    try:
+        if not request.user.restaurants.is_active:
+            messages.error(request, "الرجاء اكمال معلومات المطعم للوصول للوحة التحكم", 'alert-danger')
+            return redirect('home:create_restaurant_identity')
+    except:
+            messages.error(request, "الرجاء اكمال معلومات المطعم للوصول للوحة التحكم", 'alert-danger')
+            return redirect('home:create_restaurant_identity')
+    
     restaurants = Restaurant.objects.all()
     context = {
         "restaurants": restaurants,

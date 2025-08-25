@@ -35,7 +35,7 @@
                 <li class="{% if current_page == 'home' %}active{% endif %}">
                     <a href="#"><i class="fa-solid fa-house"></i>الصفحة الرئيسية</a>
                 </li>
-                <li class="{% if current_page == 'menu' %}active{% endif %}">
+                <li class="{% if request.path == '/menu/' %}active{% endif %}">
                   <a href="{% url 'menu:menu_view' %}"><i class="fa-solid fa-file"></i>المنتجات</a>
                 </li>
                 <li class="{% if current_page == 'restaurants' %}active{% endif %}">
