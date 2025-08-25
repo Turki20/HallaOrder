@@ -31,8 +31,12 @@
             <button id="close_menu" class="toggle-btn" onclick="toggleSidebar()"><i class="fa-solid fa-xmark"></i></button>
             <h3>HellaOrder</h3>
             <ul>
+                
                 <li class="{% if current_page == 'home' %}active{% endif %}">
                     <a href="#"><i class="fa-solid fa-house"></i>الصفحة الرئيسية</a>
+                </li>
+                <li class="{% if current_page == 'menu' %}active{% endif %}">
+                  <a href="{% url 'menu:menu_view' %}"><i class="fa-solid fa-file"></i>المنتجات</a>
                 </li>
                 <li class="{% if current_page == 'restaurants' %}active{% endif %}">
                     <a href="{% url 'restaurants' %}"><i class="fa-solid fa-file"></i>المطاعم</a>
@@ -43,6 +47,7 @@
                 <li class="{% if current_page == 'subscription_plans' %}active{% endif %}">
                     <a href="{% url 'subscription_plans' %}"><i class="fa-solid fa-file"></i>الباقات</a>
                 </li>
+                <li data-page="products"><a href=""><i class="fa-solid fa-file"></i>التقارير</a></li>
             </ul>
         </div>
         <div class="content">
