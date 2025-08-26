@@ -1,0 +1,153 @@
+{% extends "home/base.html" %}
+{% load static %}
+
+{% block title %}تعديل الفئة - {{ category.name }}{% endblock title %}
+
+{% block style %}
+    <link rel="stylesheet" href="{% static 'css/menu.css' %}">
+{% endblock style %}
+
+{% block dashboard_content %}
+
+<div class="page-header mb-3">
+    <h1>تعديل الفئة: {{ category.name }}</h1>
+    <div class="d-flex gap-2 justify-content-end">
+        <a href="{% url 'menu:menu_view' %}" class="btn btn-secondary">
+            <i class="fas fa-arrow-right"></i> العودة للقائمة
+        </a>
+    </div>
+</div>
+
+<div class="card">
+    <div class="card-body">
+        <form method="POST" id="editCategoryForm">
+            {% csrf_token %}
+            
+            <div class="form-grid">
+                <div class="form-group">
+                    <label for="category-name">اسم الفئة *</label>
+                    <input 
+                        type="text" 
+                        name="name" 
+                        id="category-name" 
+                        value="{{ category.name }}" 
+                        placeholder="مثال: المشروبات الساخنة" 
+                        required
+                    >
+                </div>
+
+                <div class="form-group">
+                    <label for="category-status">حالة الفئة</label>
+                    <select name="status" id="category-status">
+                        <option value="active" {% if category.status == "active" %}selected{% endif %}>نشطة</option>
+                        <option value="inactive" {% if category.status == "inactive" %}selected{% endif %}>غير نشطة</option>
+                    </select>
+                </div>
+
+                <div class="form-group full-width">
+                    <label for="category-description">وصف الفئة</label>
+                    <textarea 
+                        name="description" 
+                        id="category-description" 
+                        rows="4" 
+                        placeholder="وصف مختصر عن الفئة (اختياري)"
+                    >{{ category.description }}</textarea>
+                </div>
+            </div>
+
+            <div class="form-actions mt-4">
+                <button type="submit" class="btn btn-orange">
+                    <i class="fas fa-save"></i> حفظ التغييرات
+                </button>
+                <a href="{% url 'menu:menu_view' %}" class="btn btn-secondary ms-2">
+                    <i class="fas fa-times"></i> إلغاء
+                </a>
+            </div>
+        </form>
+
+        <!-- Category Statistics -->
+        <div class="category-stats mt-4 pt-4" style="border-top: 2px solid #e9ecef;">
+            <h3>إحصائيات الفئة</h3>
+            <div class="stats-grid">
+                <div class="stat-item">
+                    <div class="stat-number">{{ total_products }}</div>
+                    <div class="stat-label">إجمالي المنتجات</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-number">{{ available_products }}</div>
+                    <div class="stat-label">المنتجات المتاحة</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-number">{{ unavailable_products }}</div>
+                    <div class="stat-label">المنتجات غير المتاحة</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Products in Category -->
+        {% if category.product_set.exists %}
+        <div class="category-products mt-4 pt-4" style="border-top: 2px solid #e9ecef;">
+            <h3>منتجات هذه الفئة</h3>
+            <div class="products-preview">
+                {% for product in category.product_set.all %}
+                <div class="product-preview-item">
+                    {% if product.image %}
+                    <img src="{{ product.image }}" alt="{{ product.name }}" class="product-preview-img">
+                    {% else %}
+                    <div class="product-preview-placeholder">
+                        <i class="fas fa-image"></i>
+                    </div>
+                    {% endif %}
+                    <div class="product-preview-info">
+                        <strong>{{ product.name }}</strong>
+                        <div class="product-preview-price">{{ product.price }} ر.س</div>
+                        <div class="product-preview-status">
+                            {% if product.available %}
+                            <span class="badge badge-success">متاح</span>
+                            {% else %}
+                            <span class="badge badge-danger">غير متاح</span>
+                            {% endif %}
+                        </div>
+                    </div>
+                    <div class="product-preview-actions">
+                        <a href="{% url 'menu:edit_product' product.id %}" class="btn-sm btn-blue">
+                            <i class="fas fa-edit"></i>
+                        </a>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+        {% endif %}
+
+        <!-- Danger Zone -->
+        <div class="danger-zone mt-4 pt-4" style="border-top: 2px solid #dc3545;">
+            <h3 style="color: #dc3545;">منطقة الخطر</h3>
+            <p class="text-muted">حذف هذه الفئة سيؤدي إلى حذف جميع المنتجات بداخلها نهائياً.</p>
+            <form method="POST" action="{% url 'menu:delete_category' category.id %}" onsubmit="return confirmDelete();">
+                {% csrf_token %}
+                <button type="submit" class="btn btn-danger">
+                    <i class="fas fa-trash"></i> حذف الفئة نهائياً
+                </button>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script>
+// Form validation
+document.getElementById('editCategoryForm').addEventListener('submit', function(e) {
+    const name = document.getElementById('category-name').value.trim();
+    if (!name) {
+        e.preventDefault();
+        alert('يرجى إدخال اسم الفئة');
+        return false;
+    }
+});
+
+function confirmDelete() {
+    return confirm('هل أنت متأكد من حذف هذه الفئة؟ سيتم حذف جميع المنتجات بداخلها نهائياً ولا يمكن التراجع عن هذا الإجراء.');
+}
+</script>
+
+{% endblock dashboard_content %}

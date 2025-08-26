@@ -7,7 +7,7 @@ urlpatterns = [
     # Main page: displays menu, handles adding categories and products
     path('', views.menu_view, name='menu_view'),
     
-    # URL for editing a category (e.g., /menu/category/5/edit/)
+    # URL for editing a category
     path('category/<int:category_id>/edit/', views.edit_category, name='edit_category'),
     
     # URL for deleting a category
@@ -18,4 +18,7 @@ urlpatterns = [
     
     # URL for deleting a product
     path('product/<int:product_id>/delete/', views.delete_product, name='delete_product'),
+    
+    # URL for toggling product availability (AJAX)
+    path('product/<int:product_id>/toggle/', views.toggle_product_availability, name='toggle_product'),
 ]
