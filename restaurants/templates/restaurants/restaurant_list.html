@@ -1,44 +1,122 @@
 {% extends "home/base.html" %}
+{% load static %}
+
 {% block title %}المطاعم{% endblock %}
 
 {% block dashboard_content %}
-<div class="container p-4">
-    <h2 class="mb-4">المطاعم</h2>
-    <a href="{% url 'restaurants_add' %}" class="btn btn-blue mb-3">+ إضافة مطعم</a>
-    <table class="table table-bordered table-hover">
-        <thead class="table-light">
-            <tr>
-                <th>رقم</th>
-                <th>الاسم</th>
-                <th>المالك</th>
-                <th>خطة الاشتراك</th>
-                <th>الخيارات</th>
-            </tr>
+<div class="container-fluid py-4" dir="rtl">
+
+  <!-- العنوان + زر الإضافة -->
+  <div class="d-flex flex-wrap justify-content-between align-items-start mb-3">
+    <div>
+      <h3 class="fw-bold mb-1">المطاعم</h3>
+      <div class="text-muted">إدارة قائمة المطاعم والاشتراكات</div>
+    </div>
+    <a href="{% url 'restaurants_add' %}" class="btn btn-dark d-inline-flex align-items-center gap-2" style="border-radius:.8rem;">
+      <i class="bi bi-plus-lg"></i> إضافة مطعم
+    </a>
+  </div>
+
+  <!-- البحث -->
+  <form method="get" action="" class="mb-3">
+    <div class="input-group input-group-md" style="max-width:560px;">
+      <span class="input-group-text bg-transparent border-end-0"><i class="bi bi-search"></i></span>
+      <input type="search" name="q" value="{{ request.GET.q }}" class="form-control border-start-0"
+             placeholder="ابحث بالاسم أو المالك…" style="border-radius:.8rem;">
+      <button class="btn btn-outline-secondary" type="submit" style="border-radius:.8rem;">بحث</button>
+    </div>
+  </form>
+
+  <!-- الجدول -->
+  <div class="card shadow-sm rounded-4">
+    <div class="table-responsive">
+      <table class="table table-hover align-middle mb-0">
+        <thead class="table-light sticky-top">
+          <tr class="text-nowrap">
+            <th style="width:72px;">#</th>
+            <th>الاسم</th>
+            <th>المالك</th>
+            <th>خطة الاشتراك</th>
+            <th>تاريخ الإنشاء</th>
+            <th class="text-center" style="width:160px;">الإجراءات</th>
+          </tr>
         </thead>
         <tbody>
-            {% for restaurant in restaurants %}
-            <tr>
-                <td>{{ restaurant.id }}</td>
-                <td>{{ restaurant.name }}</td>
-                <td>{{ restaurant.owner.username }}</td>
-                <td>
-                    {% if restaurant.subscription_plan %}
-                        {{ restaurant.subscription_plan.name }}
-                    {% else %}
-                        -
-                    {% endif %}
-                </td>
-                <td>
-                    <a href="{% url 'restaurants_edit' restaurant.pk %}" class="btn btn-sm btn-primary"> تعديل</a>
-                    <a href="{% url 'restaurants_delete' restaurant.pk %}" class="btn btn-sm btn-danger"> حذف</a>
-                </td>
-            </tr>
-            {% empty %}
-            <tr>
-                <td colspan="5" class="text-center">لا يوجد مطاعم</td>
-            </tr>
-            {% endfor %}
+          {% for restaurant in restaurants %}
+          <tr>
+            <td class="text-muted">#{{ restaurant.id }}</td>
+
+            <td class="fw-semibold">
+              <a href="{% url 'restaurants_edit' restaurant.pk %}" class="text-decoration-none text-dark">
+                {{ restaurant.name }}
+              </a>
+            </td>
+
+            <td class="text-muted">
+              <i class="bi bi-person-circle me-1 text-secondary"></i>
+              {{ restaurant.owner.username }}
+            </td>
+
+            <td>
+              {% if restaurant.subscription_plan %}
+                <span class="badge bg-success-subtle text-success border border-success-subtle" style="border-radius:.6rem;">
+                  {{ restaurant.subscription_plan.name }}
+                </span>
+              {% else %}
+                <span class="badge bg-secondary-subtle text-secondary border border-secondary-subtle" style="border-radius:.6rem;">
+                  بدون
+                </span>
+              {% endif %}
+            </td>
+
+            <td class="text-muted">
+              {{ restaurant.created_at|date:"Y-m-d" }}
+            </td>
+
+            <td class="text-center">
+              <div class="d-inline-flex gap-2">
+                <!-- تعديل -->
+                <a href="{% url 'restaurants_edit' restaurant.pk %}" class="icon-btn" title="تعديل">
+                  <i class="bi bi-pencil-square"></i>
+                </a>
+                <!-- حذف -->
+                <a href="{% url 'restaurants_delete' restaurant.pk %}" class="icon-btn text-danger" title="حذف">
+                  <i class="bi bi-trash"></i>
+                </a>
+              </div>
+            </td>
+          </tr>
+          {% empty %}
+          <tr>
+            <td colspan="6">
+              <div class="py-5 text-center">
+                <i class="bi bi-building-x fs-1 text-muted d-block mb-2"></i>
+                <div class="fw-semibold mb-2">لا يوجد مطاعم</div>
+                <a class="btn btn-dark btn-sm" href="{% url 'restaurants_add' %}" style="border-radius:.6rem;">
+                  <i class="bi bi-plus-lg me-1"></i> إضافة أول مطعم
+                </a>
+              </div>
+            </td>
+          </tr>
+          {% endfor %}
         </tbody>
-    </table>
+      </table>
+    </div>
+  </div>
+
 </div>
+
+<link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
+
+<style>
+  .table > :not(caption) > * > * { padding: .9rem .85rem; }
+  .icon-btn {
+    display:inline-flex; align-items:center; justify-content:center;
+    width:34px; height:34px; border-radius:.6rem;
+    background:#fff; border:1px solid #e9ecef; color:#6b7280; text-decoration:none;
+  }
+  .icon-btn:hover { background:#f8fafc; color:#111827; border-color:#dfe3e6; }
+  .card { border-radius:1rem; }
+  .btn, .form-control { border-radius:.75rem; }
+</style>
 {% endblock %}
