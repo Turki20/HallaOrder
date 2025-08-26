@@ -2,8 +2,9 @@
 # orders/models.py
 from django.db import models
 from django.conf import settings
-
-
+from django.contrib.auth.models import User
+from restaurants.models import Branch
+from menu.models import Product
 # -------- choices --------
 class OrderStatus(models.TextChoices):
     NEW = "New", "New"
@@ -18,18 +19,20 @@ class PaymentMethod(models.TextChoices):
     CASH = "Cash", "Cash"
     ONLINE = "Online", "Online"
 
-
 # -------- core models --------
 class Order(models.Model):
+
+        
+        
     customer = models.ForeignKey(
-        settings.AUTH_USER_MODEL,
+        User,
         on_delete=models.SET_NULL,
         null=True, blank=True,
         related_name="orders"
     )
     # Branch lives in the restaurants app
     branch = models.ForeignKey(
-        "restaurants.Branch",
+        Branch,
         on_delete=models.CASCADE,
         related_name="orders"
     )
@@ -58,7 +61,7 @@ class OrderItem(models.Model):
     order = models.ForeignKey(Order, on_delete=models.CASCADE, related_name="items")
     # Product lives in the menu app
     product = models.ForeignKey(
-        "menu.Product",
+        Product,
         on_delete=models.PROTECT,
         related_name="order_items"
     )

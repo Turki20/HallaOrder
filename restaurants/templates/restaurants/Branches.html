@@ -1,17 +1,20 @@
 {% extends "home/base.html" %}
 {% load static %}
-{% block title %}الفروع{% endblock %}
+{% block title %}الفروع{% endblock title%}
 
 {% block dashboard_content %}
 <div class="container-fluid py-4" dir="rtl">
 
-  <!-- العنوان + زر الإضافة -->
+  <div class="row p-1">
+    <div class="col">
+      <div class="card">
+         <!-- العنوان + زر الإضافة -->
   <div class="d-flex flex-wrap justify-content-between align-items-start mb-3">
     <div>
       <h3 class="fw-bold mb-1">الفروع</h3>
       <div class="text-muted">إدارة فروع المطاعم</div>
     </div>
-    <a href="{% url 'branch_add' %}" class="btn btn-dark d-inline-flex align-items-center gap-2"
+    <a href="{% url 'branch_add' %}" class="btn btn-blue d-inline-flex align-items-center gap-2"
        style="border-radius:.8rem;">
       <i class="bi bi-plus-lg"></i> إضافة فرع جديد
     </a>
@@ -48,65 +51,75 @@
       </div>
     </div>
   </form>
-
-  <!-- الجدول -->
-  <div class="card shadow-sm rounded-4">
-    <div class="table-responsive">
-      <table class="table table-hover align-middle mb-0">
-        <thead class="table-light">
-          <tr class="text-nowrap">
-            <th>الفرع</th>
-            <th>المطعم</th>
-            <th>العنوان</th>
-            <th class="text-center">رمز QR</th>
-            <th>تاريخ الإنشاء</th>
-            <th class="text-center">الإجراءات</th>
-          </tr>
-        </thead>
-        <tbody>
-        {% for b in branches %}
-          <tr>
-            <td class="fw-semibold">{{ b.name }}</td>
-            <td class="text-muted">{{ b.restaurant.name }}</td>
-            <td class="text-muted">{{ b.address|default:"—" }}</td>
-            <td class="text-center">
-              {% if b.qr_code %}
-                <span class="badge bg-success-subtle text-success border border-success-subtle" style="border-radius:.8rem;">يوجد</span>
-              {% else %}
-                <span class="badge bg-secondary-subtle text-secondary border border-secondary-subtle" style="border-radius:.8rem;">لا يوجد</span>
-              {% endif %}
-            </td>
-            <td class="text-muted">{{ b.created_at|date:"Y-m-d" }}</td>
-          <td class="text-center">
-            <div class="d-inline-flex gap-2">
-              {# عرض (إن لم يكن لديك صفحة تفاصيل، استعمل التعديل كعرض مؤقتًا) #}
-              <a href="{% url 'branch_edit' b.pk %}" class="icon-btn" title="عرض">
-                <i class="bi bi-eye"></i>
-              </a>
-          
-              {# تعديل #}
-              <a href="{% url 'branch_edit' b.pk %}" class="icon-btn" title="تعديل">
-                <i class="bi bi-pencil-square"></i>
-              </a>
-          
-              {# حذف #}
-              <a href="{% url 'branch_delete' b.pk %}" class="icon-btn text-danger" title="حذف">
-                <i class="bi bi-trash"></i>
-              </a>
-            </div>
-          </td>
-          </tr>
-        {% empty %}
-          <tr>
-            <td colspan="6" class="text-center py-4">
-              <span class="text-muted">لا توجد نتائج</span>
-            </td>
-          </tr>
-        {% endfor %}
-        </tbody>
-      </table>
+      </div>
     </div>
   </div>
+
+  <div class="row gap-4 p-2">
+  {% for b in branches %}
+    <div class="col-md-6 col-lg-4">
+      <div class="card h-100">
+        <div class="card-body">
+          <!-- اسم الفرع -->
+          <div class="row">
+            <div class="col-7">
+              <h3 class="">{{ b.name }}</h5>
+            </div>
+            <div class="col-5 text-start">
+              <!-- تعديل -->
+            <a href="{% url 'branch_edit' b.pk %}" class="btn btn-orange" title="تعديل">
+              <i class="bi bi-pencil-square"></i>
+            </a>
+            </div>
+          </div>
+
+          <hr>
+
+          <!-- اسم المطعم -->
+          <p class="mb-2">
+            <i class="bi bi-shop me-1 text-blue"></i>
+            <span class="text-muted">{{ b.restaurant.name }}</span>
+          </p>
+
+          <!-- العنوان -->
+          <p class="mb-2">
+            <i class="bi bi-geo-alt me-1 text-danger"></i>
+            <span class="text-muted">{{ b.address|default:"—" }}</span>
+          </p>
+
+          <!-- رمز QR -->
+          <p class="mb-2">
+            <i class="bi bi-qr-code me-1 text-success"></i>
+            {% if b.qr_code %}
+              <span class="badge bg-success-subtle text-success border border-success-subtle" style="border-radius:.8rem;">يوجد</span>
+            {% else %}
+              <span class="badge bg-secondary-subtle text-secondary border border-secondary-subtle" style="border-radius:.8rem;">لا يوجد</span>
+            {% endif %}
+          </p>
+
+          <!-- تاريخ الإنشاء -->
+          <p class="mb-2">
+            <i class="bi bi-calendar3 me-1 text-orange"></i>
+            <span class="text-muted">{{ b.created_at|date:"Y-m-d" }}</span>
+          </p>
+        </div>
+
+
+        <!-- حذف -->
+            <a href="{% url 'branch_delete' b.pk %}" class="btn btn-outline-danger" title="حذف">
+              <i class="bi bi-trash"></i>
+            </a>
+      </div>
+    </div>
+  {% empty %}
+    <div class="col">
+      <div class="card shadow-sm rounded-4 text-center py-4">
+        <span class="text-muted">لا توجد نتائج</span>
+      </div>
+    </div>
+  {% endfor %}
+</div>
+
 
   <!-- الترقيم + ملخص -->
   {% if branches.has_other_pages %}
@@ -142,4 +155,4 @@
   .icon-btn:hover { background:#f8fafc; color:#111827; border-color:#dfe3e6; }
   .table > :not(caption) > * > * { padding: .9rem .8rem; }
 </style>
-{% endblock %}
+{% endblock dashboard_content %}

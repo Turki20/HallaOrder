@@ -9,7 +9,7 @@
 
 {% block dashboard_content %}
 
-<div class="page-header mb-3">
+<div class="page-header mb-3 p-4">
     <h1>المنتجات</h1>
     <div class="d-flex gap-2 justify-content-end">
         <button id="manageCategoriesBtn" class="btn btn-blue"><i class="fas fa-sitemap"></i> إدارة الفئات</button>
@@ -79,8 +79,21 @@
             <h2>إدارة الفئات الرئيسية</h2>
             <button class="close-btn">&times;</button>
         </header>
-        <main class="modal-body">
-            <div class="categories-section">
+        <main class="modal-body row">
+            <div class="add-category-section col-12">
+                <form method="POST" action="{% url 'menu:menu_view' %}">
+                    {% csrf_token %}
+                    <h3>إضافة فئة جديدة</h3>
+                    <div class="form-group">
+                        <label for="new-cat-name">اسم الفئة</label>
+                        <input type="text" name="name" id="new-cat-name" placeholder="مثال: المشروبات" required>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="submit" name="add_category" class="btn btn-orange">حفظ الفئة</button>
+                    </div>
+                </form>
+            </div>
+            <div class="categories-section col-12">
                 <h3>الفئات الحالية</h3>
                 <div class="category-list">
                     {% for category in categories %}
@@ -99,20 +112,6 @@
                     {% endfor %}
                 </div>
             </div>
-            
-            <div class="add-category-section">
-                <form method="POST" action="{% url 'menu:menu_view' %}">
-                    {% csrf_token %}
-                    <h3>إضافة فئة جديدة</h3>
-                    <div class="form-group">
-                        <label for="new-cat-name">اسم الفئة</label>
-                        <input type="text" name="name" id="new-cat-name" placeholder="مثال: المشروبات" required>
-                    </div>
-                    <div class="modal-footer">
-                        <button type="submit" name="add_category" class="btn btn-orange">حفظ الفئة</button>
-                    </div>
-                </form>
-            </div>
         </main>
     </div>
 </div>
@@ -122,7 +121,7 @@
     <div class="modal-content">
         <header class="modal-header"><h2>إضافة منتج جديد</h2><button class="close-btn">&times;</button></header>
         <main class="modal-body">
-            <form method="POST" action="{% url 'menu:menu_view' %}">
+            <form method="POST" action="{% url 'menu:menu_view' %}" style="width: 100%;" enctype="multipart/form-data">
                 {% csrf_token %}
                 <div class="form-grid">
                     <div class="form-group">

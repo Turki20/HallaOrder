@@ -165,7 +165,6 @@ body {
 }
 
 .sidebar li {
-    padding: 10px;
     cursor: pointer;
 }
 
@@ -173,6 +172,9 @@ body {
     text-decoration: none;
     font-weight: 500;
     color: var(--white_color);
+    display: block;
+    width: 100%;
+    padding: 10px;
 }
 
 .sidebar li a i {

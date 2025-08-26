@@ -4,12 +4,12 @@ from .models import Category, Product
 from restaurants.models import Restaurant
 from decimal import Decimal
 
-def get_test_restaurant():
+def get_test_restaurant(resturant_id):
     """
     Helper function to get the first restaurant for testing purposes.
     Raises an error if no restaurants exist in the database.
     """
-    restaurant = Restaurant.objects.first()
+    restaurant = Restaurant.objects.get(pk = resturant_id)
     if not restaurant:
         raise Exception("DATABASE TEST ERROR: No restaurants found. Please create at least one restaurant in the Django Admin panel to proceed.")
     return restaurant
@@ -19,7 +19,7 @@ def menu_view(request):
     Main view to display the menu and handle ADDING new categories and products.
     """
     try:
-        test_restaurant = get_test_restaurant()
+        test_restaurant = get_test_restaurant(request.user.restaurants.id)
     except Exception as e:
         return HttpResponse(str(e))
 
@@ -28,7 +28,7 @@ def menu_view(request):
         if 'add_category' in request.POST:
             name = request.POST.get('name', '').strip()
             if name:
-                Category.objects.create(restaurant=test_restaurant, name=name)
+                Category.objects.create(restaurant=test_restaurant, name=name) # ماراح يضيف الفئة لصاحب المطعم راح يضيفها لاخر مطعم انضاف في الداتابيس
         
         # --- Handle ADD Product ---
         elif 'add_product' in request.POST:
@@ -37,7 +37,7 @@ def menu_view(request):
             category_id = request.POST.get('category')
             if name and price and category_id:
                 try:
-                    category = get_object_or_404(Category, id=category_id, restaurant=test_restaurant)
+                    category = get_object_or_404(Category, id=category_id, restaurant=test_restaurant) # نفس مشكله الفئات
                     Product.objects.create(
                         category=category,
                         name=name,
@@ -53,7 +53,7 @@ def menu_view(request):
             product_id = request.POST.get('product_id')
             if product_id:
                 try:
-                    product = get_object_or_404(Product, id=product_id, category__restaurant=test_restaurant)
+                    product = get_object_or_404(Product, id=product_id, category__restaurant=test_restaurant) # نفس مشكلة الفئات والمنتجات
                     product.available = not product.available
                     product.save()
                     return JsonResponse({'success': True, 'available': product.available})
@@ -63,15 +63,15 @@ def menu_view(request):
         return redirect('menu:menu_view')
 
     # --- Display the Page (GET Request) ---
-    categories = Category.objects.filter(restaurant=test_restaurant).prefetch_related('product_set')
+    categories = Category.objects.filter(restaurant=test_restaurant).prefetch_related('product_set') # بيرجع الفئات الخاصة بأول مطعم موجود في الداتابيس لازم تتعدل
     context = {'categories': categories}
     return render(request, 'menu/menu.html', context)
 
 def edit_category(request, category_id):
     """Edit category functionality"""
     try:
-        test_restaurant = get_test_restaurant()
-        category = get_object_or_404(Category, id=category_id, restaurant=test_restaurant)
+        test_restaurant = get_test_restaurant(request.user.restaurants.id)
+        category = get_object_or_404(Category, id=category_id, restaurant=test_restaurant) # ----
         
         if request.method == 'POST':
             name = request.POST.get('name', '').strip()
@@ -100,7 +100,7 @@ def edit_category(request, category_id):
 def edit_product(request, product_id):
     """Edit product functionality"""
     try:
-        test_restaurant = get_test_restaurant()
+        test_restaurant = get_test_restaurant(request.user.restaurants.id)
         product = get_object_or_404(Product, id=product_id, category__restaurant=test_restaurant)
         categories = Category.objects.filter(restaurant=test_restaurant)
         
@@ -134,7 +134,7 @@ def edit_product(request, product_id):
 def delete_category(request, category_id):
     """Delete category functionality"""
     try:
-        test_restaurant = get_test_restaurant()
+        test_restaurant = get_test_restaurant(request.user.restaurants.id)
         category = get_object_or_404(Category, id=category_id, restaurant=test_restaurant)
         if request.method == 'POST':
             category.delete()
@@ -145,7 +145,7 @@ def delete_category(request, category_id):
 def delete_product(request, product_id):
     """Delete product functionality"""
     try:
-        test_restaurant = get_test_restaurant()
+        test_restaurant = get_test_restaurant(request.user.restaurants.id)
         product = get_object_or_404(Product, id=product_id, category__restaurant=test_restaurant)
         if request.method == 'POST':
             product.delete()
@@ -157,7 +157,7 @@ def toggle_product_availability(request, product_id):
     """AJAX endpoint to toggle product availability"""
     if request.method == 'POST':
         try:
-            test_restaurant = get_test_restaurant()
+            test_restaurant = get_test_restaurant(request.user.restaurants.id)
             product = get_object_or_404(Product, id=product_id, category__restaurant=test_restaurant)
             product.available = not product.available
             product.save()

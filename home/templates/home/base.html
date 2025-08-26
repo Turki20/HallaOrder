@@ -47,14 +47,14 @@
                   <a href="{% url 'menu:menu_view' %}"><i class="fa-solid fa-file"></i>المنتجات</a>
                 </li>
                 <li class="{% if current_page == 'restaurants' %}active{% endif %}">
-                    <a href="{% url 'restaurants' %}"><i class="fa-solid fa-file"></i>المطاعم</a>
+                    <a href="{% url 'restaurants' %}"><i class="fa-solid fa-file"></i>المطعم</a>
                 </li>
                 <li class="{% if current_page == 'branches' %}active{% endif %}">
                     <a href="{% url 'branches' %}"><i class="fa-solid fa-file"></i>الفروع</a>
                 </li>
-                <li class="{% if current_page == 'subscription_plans' %}active{% endif %}">
+                <!-- <li class="{% if current_page == 'subscription_plans' %}active{% endif %}">
                     <a href="{% url 'subscription_plans' %}"><i class="fa-solid fa-file"></i>الباقات</a>
-                </li>
+                </li> -->
                 <li data-page="products"><a href=""><i class="fa-solid fa-file"></i>التقارير</a></li>
             </ul>
         </div>

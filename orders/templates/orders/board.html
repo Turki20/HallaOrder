@@ -97,16 +97,16 @@
                               data-detail-url="{% url 'orders:order_detail_fragment' order.pk %}"
                               data-bs-toggle="modal"
                               data-bs-target="#orderDetailModal"
-                              style="border-radius:.75rem; padding:.35rem .8rem;">
+                              >
                         التفاصيل
                       </button>
 
                         {% if order.status == "New" or order.status == "Preparing" or order.status == "Ready" %}
                           <form method="post" action="{% url 'orders:order_advance' order.pk %}">
                             {% csrf_token %}
-                            <button class="btn btn-outline-primary"
-                                    style="border-radius:.75rem; padding:.35rem .8rem;" type="submit">
-                              {% if order.status == "New" %}بدء التجهيز{% elif order.status == "Preparing" %}جاهز{% else %}تسليم{% endif %}
+                            <button class="btn btn-blue h-100"
+                              type="submit">
+                              {% if order.status == "New" %}تجهيز{% elif order.status == "Preparing" %}جاهز{% else %}تسليم{% endif %}
                             </button>
                           </form>
                         {% endif %}
@@ -114,8 +114,8 @@
                         {% if order.status != "Cancelled" and order.status != "Delivered" %}
                           <form method="post" action="{% url 'orders:order_cancel' order.pk %}">
                             {% csrf_token %}
-                            <button class="btn btn-outline-danger"
-                                    style="border-radius:.75rem; padding:.35rem .8rem;" type="submit">
+                            <button class="btn btn-orange h-100"
+                               type="submit">
                               إلغاء
                             </button>
                           </form>
@@ -182,17 +182,17 @@
                     <hr class="my-3" style="opacity:.1;">
                     <div class="d-flex justify-content-between align-items-center gap-2 flex-wrap">
                       <div class="d-flex gap-2">
-                        <a href="#" class="btn btn-dark" style="border-radius:.75rem; padding:.35rem .8rem;">التفاصيل</a>
+                        <a href="#" class="btn btn-dark" >التفاصيل</a>
                         {% if order.status == "New" or order.status == "Preparing" or order.status == "Ready" %}
                           <form method="post" action="{% url 'orders:order_advance' order.pk %}">{% csrf_token %}
-                            <button class="btn btn-outline-primary" style="border-radius:.75rem; padding:.35rem .8rem;" type="submit">
+                            <button class="btn btn-blue"  type="submit">
                               {% if order.status == "New" %}بدء التجهيز{% elif order.status == "Preparing" %}جاهز{% else %}تسليم{% endif %}
                             </button>
                           </form>
                         {% endif %}
                         {% if order.status != "Cancelled" and order.status != "Delivered" %}
                           <form method="post" action="{% url 'orders:order_cancel' order.pk %}">{% csrf_token %}
-                            <button class="btn btn-outline-danger" style="border-radius:.75rem; padding:.35rem .8rem;" type="submit">إلغاء</button>
+                            <button class="btn btn-orange"  type="submit">إلغاء</button>
                           </form>
                         {% endif %}
                       </div>
@@ -254,17 +254,17 @@
                     <hr class="my-3" style="opacity:.1;">
                     <div class="d-flex justify-content-between align-items-center gap-2 flex-wrap">
                       <div class="d-flex gap-2">
-                        <a href="#" class="btn btn-dark" style="border-radius:.75rem; padding:.35rem .8rem;">التفاصيل</a>
+                        <a href="#" class="btn btn-dark" >التفاصيل</a>
                         {% if order.status == "New" or order.status == "Preparing" or order.status == "Ready" %}
                           <form method="post" action="{% url 'orders:order_advance' order.pk %}">{% csrf_token %}
-                            <button class="btn btn-outline-primary" style="border-radius:.75rem; padding:.35rem .8rem;" type="submit">
+                            <button class="btn btn-blue"  type="submit">
                               {% if order.status == "New" %}بدء التجهيز{% elif order.status == "Preparing" %}جاهز{% else %}تسليم{% endif %}
                             </button>
                           </form>
                         {% endif %}
                         {% if order.status != "Cancelled" and order.status != "Delivered" %}
                           <form method="post" action="{% url 'orders:order_cancel' order.pk %}">{% csrf_token %}
-                            <button class="btn btn-outline-danger" style="border-radius:.75rem; padding:.35rem .8rem;" type="submit">إلغاء</button>
+                            <button class="btn btn-orange" type="submit">إلغاء</button>
                           </form>
                         {% endif %}
                       </div>

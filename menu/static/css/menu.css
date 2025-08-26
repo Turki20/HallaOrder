@@ -454,7 +454,6 @@ input:checked + .slider:before {
 }
 
 .add-category-section {
-    border-top: 2px solid #e9ecef;
     padding-top: 20px;
 }
 
