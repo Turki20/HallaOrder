@@ -1,0 +1,61 @@
+{% extends "websites/base_public.html" %}  
+{% load static %}
+
+{% block title %}تسجيل الدخول{% endblock %}
+
+{% block content %}
+<div class="container" style="max-width:980px;">
+  <div class="card" style="margin: 24px auto; padding: 24px;">
+    <h2 class="text-center" style="margin-bottom:16px;">تسجيل الدخول</h2>
+
+    <form method="post" action="">
+      {% csrf_token %}
+      <input type="hidden" name="next" value="{{ next|default:request.GET.next }}"/>
+
+      {# رسائل الأخطاء العامة #}
+      {% if form.non_field_errors %}
+        <div class="alert alert-danger" style="margin-bottom:12px;">
+          {{ form.non_field_errors }}
+        </div>
+      {% endif %}
+
+      <div class="grid" style="display:grid; gap:12px;">
+        <div>
+          <label>البريد الإلكتروني أو اسم المستخدم</label>
+          <input type="text" name="{{ form.username.name }}" value="{{ form.username.value|default_if_none:'' }}"
+                 class="input" placeholder="example@mail.com" required />
+          {% if form.username.errors %}
+            <div class="text-danger small">{{ form.username.errors|join:", " }}</div>
+          {% endif %}
+        </div>
+
+        <div>
+          <label>كلمة المرور</label>
+          <input type="password" name="{{ form.password.name }}" class="input" placeholder="••••••••" required />
+          {% if form.password.errors %}
+            <div class="text-danger small">{{ form.password.errors|join:", " }}</div>
+          {% endif %}
+        </div>
+      </div>
+
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-top:16px;">
+        <a href="{% url 'password_reset' %}" class="link">نسيت كلمة المرور؟</a>
+        <button type="submit" class="btn btn-primary">دخول</button>
+      </div>
+    </form>
+
+    <hr style="margin:20px 0;">
+    <div class="text-center">
+      ليس لديك حساب؟ <a class="link" href="#">إنشاء حساب</a>  {# اربطها لاحقًا بصفحة التسجيل عندك #}
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_css %}
+<style>
+  body, html { height: 100%; }
+  .page-wrap { min-height: 100%; display: flex; flex-direction: column; }
+  main { flex: 1; }
+</style>
+{% endblock %}

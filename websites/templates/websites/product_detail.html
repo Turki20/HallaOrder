@@ -1,0 +1,92 @@
+{% extends "websites/base.html" %}
+{% load static %}
+
+{% block title %}{{ p.name }} – {{ website.display_name }}{% endblock %}
+
+{% block head %}
+<style>
+  .detail{max-width:960px;margin:0 auto;display:grid;grid-template-columns:1.2fr 1fr;gap:24px}
+  @media (max-width:900px){.detail{grid-template-columns:1fr}}
+  .media{background:#fff;border:1px solid #eef2f7;border-radius:12px;overflow:hidden}
+  .media img{width:100%;display:block;object-fit:cover}
+  .info{background:#fff;border:1px solid #eef2f7;border-radius:12px;padding:16px;display:flex;flex-direction:column;gap:14px}
+  .h{font-weight:800;font-size:20px}
+  .muted{color:#6b7280}
+  .price{font-weight:700}
+  .group{display:flex;flex-wrap:wrap;gap:8px}
+  .pill{border:1px solid #e5e7eb;background:#fff;border-radius:12px;padding:8px 12px}
+  .qty{display:inline-flex;align-items:center;border:1px solid #e5e7eb;border-radius:12px;overflow:hidden}
+  .qty input{width:64px;text-align:center;border:0;padding:10px}
+  .qty button{all:unset;cursor:pointer;padding:10px 12px}
+  .actions{display:flex;gap:10px;align-items:center}
+  .btn-light{padding:10px 14px;border:1px solid #e5e7eb;border-radius:12px;background:#fff;cursor:pointer;text-decoration:none}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="detail">
+
+  <div class="media">
+    {% if p.image %}
+      <img src="{{ p.image.url }}" alt="{{ p.name }}">
+    {% else %}
+      <img src="{% static 'websites/placeholder.png' %}" alt="">
+    {% endif %}
+  </div>
+
+  <div class="info">
+    <div class="h">{{ p.name }}</div>
+    <div class="price">SAR {{ p.price|floatformat:2 }}</div>
+
+    <form method="post" action="{% url 'websites:add_to_cart' website.slug p.id %}">
+      {% csrf_token %}
+
+      <div class="group">
+        <label class="muted" style="width:100%">الكمية</label>
+        <div class="qty">
+          <button type="button" id="minus">−</button>
+          <input type="number" id="qty" name="qty" value="1" min="1" inputmode="numeric" pattern="[0-9]*">
+          <button type="button" id="plus">+</button>
+        </div>
+      </div>
+
+      <!-- الحجم اختياري -->
+      <div class="group">
+        <span class="muted" style="width:100%">الحجم (اختياري)</span>
+        <label class="pill"><input type="radio" name="size" value="صغير"> صغير</label>
+        <label class="pill"><input type="radio" name="size" value="وسط"> وسط</label>
+        <label class="pill"><input type="radio" name="size" value="كبير"> كبير</label>
+      </div>
+
+      <div class="group">
+        <span class="muted" style="width:100%">إضافات (اختياري)</span>
+        <label class="pill"><input type="checkbox" name="addons" value="جبنة"> جبنة</label>
+        <label class="pill"><input type="checkbox" name="addons" value="صوص"> صوص</label>
+        <label class="pill"><input type="checkbox" name="addons" value="مخلل"> مخلل</label>
+      </div>
+
+      <div class="actions">
+        <button type="submit" class="btn">أضف للسلة</button>
+        <a class="btn-light" href="{% url 'websites:menu' website.slug %}">رجوع للقائمة</a>
+      </div>
+    </form>
+  </div>
+
+</div>
+
+<script>
+(function(){
+  const minus=document.getElementById('minus');
+  const plus=document.getElementById('plus');
+  const qty=document.getElementById('qty');
+
+  function clamp(){
+    const v=parseInt(qty.value||'1',10);
+    qty.value = isNaN(v) || v<1 ? 1 : v;
+  }
+  minus && minus.addEventListener('click', ()=>{ clamp(); qty.value = Math.max(1, parseInt(qty.value,10)-1); });
+  plus && plus.addEventListener('click', ()=>{ clamp(); qty.value = parseInt(qty.value,10)+1; });
+  qty && qty.addEventListener('change', clamp);
+})();
+</script>
+{% endblock %}

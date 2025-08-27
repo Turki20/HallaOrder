@@ -1,0 +1,36 @@
+{% extends "websites/base.html" %}
+{% load static %}
+
+{% block title %}إنشاء حساب{% endblock %}
+
+{% block content %}
+<div class="card" style="max-width:560px;margin:24px auto;padding:24px;">
+  <h3 style="margin-bottom:12px;">إنشاء حساب</h3>
+
+  {% if form.errors %}
+    <div class="alert alert-danger">تحقق من الحقول أدناه.</div>
+  {% endif %}
+
+  <form method="post">
+    {% csrf_token %}
+    {% if next %}<input type="hidden" name="next" value="{{ next }}">{% endif %}
+
+    <div class="mb-2">
+      {{ form.username.label_tag }} {{ form.username }}
+    </div>
+    <div class="mb-2">
+      {{ form.password1.label_tag }} {{ form.password1 }}
+    </div>
+    <div class="mb-3">
+      {{ form.password2.label_tag }} {{ form.password2 }}
+    </div>
+
+    <button class="btn btn-primary w-100">إنشاء حساب</button>
+  </form>
+
+  <div style="margin-top:12px;text-align:center;">
+    لديك حساب؟
+    <a href="{% url 'websites:login' %}{% if next %}?next={{ next }}{% endif %}">تسجيل الدخول</a>
+  </div>
+</div>
+{% endblock %}

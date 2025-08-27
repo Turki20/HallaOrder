@@ -3,123 +3,185 @@
 <html lang="ar" dir="rtl">
 <head>
   <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width,initial-scale=1">
-  <title>{% block title %}{{ website.restaurant.name }} — HalaOrder{% endblock %}</title>
+  <title>{% block title %}{{ website.display_name|default:website.slug }}{% endblock %}</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
 
   <style>
     :root{
-      --hoa-brand: #0ea5e9;      
-      --hoa-ink:   #0f172a;      
-      --hoa-muted: #64748b;     
-      --hoa-bg:    #f5f7fb;      
-      --hoa-card:  #ffffff;      
-      --hoa-radius: 16px;
-      --hoa-shadow: 0 6px 20px rgba(15,23,42,.06);
-      --hoa-gap: 16px;
+      --hoa-accent:#ff7a45;
+      --hoa-accent-50:#ffeddc;
+      --hoa-accent-200:#ffd4ba;
+      --hoa-muted:#6b7280;
+      --hoa-card:#fff;
+      --hoa-bg:#f6f7fb;
+      --hoa-sep:#eef2f7;
+      --hoa-shadow:0 10px 20px rgba(0,0,0,.04);
+      --rad:12px;
+      --container:1120px;
     }
-    :root{ {{ website.custom_colors|default:'' }} }
-
     *{box-sizing:border-box}
-    body{
-      margin:0; font-family:system-ui,Segoe UI,Roboto,Arial,sans-serif;
-      background:var(--hoa-bg); color:var(--hoa-ink);
-    }
-    a{color:var(--brand, var(--hoa-brand)); text-decoration:none}
-    .container{max-width:1100px; margin:auto; padding:20px}
+    html,body{height:100%}
+    body{margin:0;background:var(--hoa-bg);font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial}
+    a{color:inherit;text-decoration:none}
 
-    .topbar{
-      background:#fff; box-shadow:var(--hoa-shadow);
-    }
-    .topbar__inner{
-      display:flex; align-items:center; gap:16px; padding:12px 20px;
-    }
-    .logo{
-      display:flex; align-items:center; gap:10px; font-weight:800; letter-spacing:.2px
-    }
-    .logo img{height:28px}
-    .brand-tag{
-      display:inline-flex; align-items:center; gap:6px;
-      font-size:12px; color:var(--hoa-muted); background:#eef7fb;
-      padding:6px 10px; border-radius:999px;
-    }
-    .spacer{flex:1}
-    .cta{
-      display:inline-flex; align-items:center; justify-content:center;
-      padding:10px 14px; border-radius:12px; background:var(--brand, var(--hoa-brand)); color:#fff;
-      box-shadow:var(--hoa-shadow);
-    }
+    .page{min-height:100%;display:flex;flex-direction:column}
+    main{flex:1}
 
-    .site-head{
-      display:flex; align-items:center; gap:16px; padding:24px 0 8px 0;
-    }
-    .site-head img{height:56px; border-radius:12px}
-    .site-title{margin:0; font-size:28px}
+    .topbar{background:#fff;border-bottom:1px solid var(--hoa-sep);position:sticky;top:0;z-index:30}
+    .topbar__inner{display:flex;align-items:center;gap:14px;padding:10px 16px;max-width:var(--container);margin:auto}
 
-    .card{
-      background:var(--hoa-card); border-radius:var(--hoa-radius);
-      padding:22px; box-shadow:var(--hoa-shadow); margin:16px 0;
-    }
-    .muted{color:var(--hoa-muted)}
-    .section-title{margin:0 0 10px 0; font-size:18px}
+    .brand{display:flex;align-items:center;gap:10px}
+    .logo{width:32px;height:32px;border-radius:8px;background:#eef2f7;display:inline-flex;align-items:center;justify-content:center;overflow:hidden}
+    .brand .title{font-weight:800}
 
-    footer{padding:24px 0 40px 0; color:var(--hoa-muted); font-size:14px}
-    .footer-line{height:1px; background:#e6ecf2; margin:16px 0}
+    .actions{display:flex;align-items:center;gap:10px;margin-inline-start:auto}
+    .btn-icon{display:inline-flex;align-items:center;gap:6px;padding:8px 10px;border:1px solid #e5e7eb;border-radius:var(--rad);background:#fff;cursor:pointer}
+    .badge{min-width:20px;height:20px;display:inline-flex;align-items:center;justify-content:center;background:var(--hoa-accent);color:#fff;border-radius:8px;font-size:12px;padding:0 6px}
 
-    @media (max-width:640px){
-      .site-title{font-size:22px}
-      .topbar__inner{padding:10px 14px}
-    }
+    .toolbar{max-width:var(--container);margin:12px auto;padding:0 16px;display:flex;gap:8px;align-items:center}
+    .search{flex:1}
+    .search input{width:100%;padding:10px 12px;border:1px solid #e5e7eb;border-radius:var(--rad);background:#fff}
+    .seg{display:flex;gap:6px;flex-wrap:wrap}
+    .pill{padding:8px 12px;border:1px solid #e5e7eb;background:#fff;border-radius:var(--rad)}
+    .pill.active{background:var(--hoa-accent-50);border-color:var(--hoa-accent-200)}
+
+    .container{max-width:var(--container);margin:auto;padding:0 16px}
+
+    .drawer{position:fixed;inset:0;display:none}
+    .drawer.open{display:block}
+    .mask{position:absolute;inset:0;background:rgba(0,0,0,.25)}
+    .panel{position:absolute;inset-inline-end:0;top:0;height:100%;width:min(420px,90%);background:#fff;box-shadow:var(--hoa-shadow);display:flex;flex-direction:column}
+    .panel header{padding:14px 16px;border-bottom:1px solid var(--hoa-sep);display:flex;justify-content:space-between;align-items:center}
+    .list{padding:12px;overflow:auto;flex:1;display:flex;flex-direction:column;gap:8px}
+    .item{display:flex;gap:10px;border:1px solid #f0f2f5;border-radius:var(--rad);padding:10px;background:#fff}
+    .item img{width:64px;height:64px;border-radius:10px;object-fit:cover;background:#f3f4f6}
+    .panel footer{padding:12px 16px;border-top:1px solid var(--hoa-sep);display:flex;justify-content:space-between;align-items:center}
+
+    .btn{padding:10px 14px;border:0;border-radius:var(--rad);background:var(--hoa-accent);color:#fff;cursor:pointer;display:inline-flex;align-items:center;gap:6px}
+    .btn-light{background:#fff;color:#111;border:1px solid #e5e7eb}
+    .muted{color:var(--hoa-muted);font-size:12px}
+
+    .footer{margin-top:24px;border-top:1px solid var(--hoa-sep);background:#fff}
+    .footer__inner{max-width:var(--container);margin:auto;padding:16px;text-align:center;color:#6b7280}
   </style>
 
-  {# ملف CSS للثيم (اختياري): ضعه في static ومرره هنا حسب website.theme #}
-  {% block theme_css %}{% endblock %}
-  {% block head_extra %}{% endblock %}
+  {% block head %}{% endblock %}
 </head>
 <body>
+<div class="page">
 
-  <div class="topbar">
-    <div class="topbar__inner container">
-      <div class="logo">
-        <img src="{% static 'img/halaorder-logo.svg' %}" alt="HalaOrder" onerror="this.style.display='none'">
-        <span>HalaOrder</span>
-        <span class="brand-tag">منصة المواقع والطلبات</span>
+  <header class="topbar">
+    <div class="topbar__inner">
+      <div class="brand">
+        <div class="logo">
+          {% if website.logo %}
+            <img src="{{ website.logo.url }}" alt="logo" style="width:100%;height:100%;object-fit:cover">
+          {% endif %}
+        </div>
+        <div class="title">{{ website.display_name|default:website.slug }}</div>
       </div>
-      <div class="spacer"></div>
-      <a class="cta" href="/s/{{ website.slug }}/menu/">{% block topbar_cta %}اطلب الآن{% endblock %}</a>
+
+      <div class="actions">
+        {% if request.user.is_authenticated %}
+          <a class="btn-icon" href="{% url 'logout' %}?next={{ request.path }}">تسجيل الخروج</a>
+        {% else %}
+          <a class="btn-icon" href="{% url 'login' %}?next={{ request.path }}">الدخول</a>
+        {% endif %}
+
+        <button class="btn-icon" id="openCart" type="button" aria-haspopup="dialog" aria-controls="cartDrawer">
+          <span class="badge">{{ cart_count|default:0 }}</span>
+          <span>السلة</span>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <div class="toolbar">
+    <div class="search">
+      <input type="search" placeholder="ابحث في الأصناف…">
+    </div>
+    <div class="seg">
+      <div class="pill {% if current_tab == 'home' %}active{% endif %}">داخل المطعم</div>
+      <div class="pill">استلام</div>
+      <div class="pill">توصيل</div>
+      <a class="pill {% if current_tab == 'menu' %}active{% endif %}" href="{% url 'websites:menu' website.slug %}">القائمة</a>
     </div>
   </div>
 
-  <div class="container">
-    <header class="site-head">
-      {% if website.logo %}
-        <img src="{{ website.logo }}" alt="{{ website.restaurant.name }}" onerror="this.remove()">
-      {% endif %}
-      <h1 class="site-title">
-        {{ website.restaurant.name }}
-      </h1>
+  <main>
+    <div class="container">
+      {% block content %}
+      <section class="card card-hero" style="background:#fff;border:1px solid #eef2f7;border-radius:var(--rad);padding:18px">
+        <p>مرحبًا بك في موقع <b>{{ website.display_name|default:website.slug }}</b>.</p>
+      </section>
+      {% endblock %}
+    </div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer__inner">
+      تم بناء هذا المتجر بواسطة <b>HalaOrder</b>. جميع الحقوق محفوظة.
+    </div>
+  </footer>
+
+</div>
+
+<div class="drawer" id="cartDrawer" aria-hidden="true">
+  <div class="mask" id="closeCart"></div>
+  <aside class="panel" role="dialog" aria-label="سلة المشتريات">
+    <header>
+      <div>سلة مشترياتك</div>
+      <button class="btn-icon" id="closeCartBtn" type="button">إغلاق</button>
     </header>
 
-    {% block hero %}
-      <div class="card">
-        <p>مرحبًا بك في موقع {{ website.restaurant.name }}.</p>
-        <p class="muted">مدعوم بواسطة <strong>HalaOrder</strong>.</p>
-        <a class="cta" href="/s/{{ website.slug }}/menu/">اطلب الآن</a>
-      </div>
-    {% endblock %}
+    <div class="list">
+      {% if cart and cart|length %}
+        {% for i in cart %}
+          <div class="item">
+            {% if i.image %}<img src="{{ i.image }}" alt="">{% endif %}
+            <div>
+              <div><b>{{ i.name }}</b> <span class="muted">× {{ i.qty }}</span></div>
+              <div class="muted">
+                {% if i.size %}الحجم: {{ i.size }} — {% endif %}
+                السعر: SAR {{ i.price }}
+              </div>
+            </div>
+          </div>
+        {% endfor %}
+      {% else %}
+        <div class="muted">سلتك فارغة.</div>
+      {% endif %}
 
-    {% block content %}{% endblock %}
-
-    {% block sections %}{% endblock %}
+      {% if request.user.is_authenticated %}
+        <a href="{% url 'logout' %}?next={{ request.path }}">تسجيل الخروج</a>
+      {% else %}
+        <a href="{% url 'login' %}?next={{ request.get_full_path|urlencode }}">الدخول</a>
+      {% endif %}
+    </div>
 
     <footer>
-      <div class="footer-line"></div>
-      <div class="muted">
-        تم بناء هذا الموقع بواسطة <strong>HalaOrder</strong>. جميع الحقوق محفوظة.
-      </div>
-      {% block footer_extra %}{% endblock %}
+      <a class="btn" href="{% url 'websites:cart' website.slug %}">إتمام الطلب</a>
+      <span class="muted">العناصر: {{ cart_count|default:0 }}</span>
     </footer>
-  </div>
+  </aside>
+</div>
 
-  {% block scripts %}{% endblock %}
+<script>
+  const drawer = document.getElementById('cartDrawer');
+  const openCart = document.getElementById('openCart');
+  const closeCart = document.getElementById('closeCart');
+  const closeCartBtn = document.getElementById('closeCartBtn');
+
+  [openCart, closeCart, closeCartBtn].forEach(el=>{
+    if(!el) return;
+    el.addEventListener('click', ()=> {
+      drawer.classList.toggle('open');
+      const open = drawer.classList.contains('open');
+      drawer.setAttribute('aria-hidden', open ? 'false' : 'true');
+    });
+  });
+</script>
+
+{% block extra_js %}{% endblock %}
 </body>
 </html>
