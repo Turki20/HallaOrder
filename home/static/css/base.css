@@ -71,6 +71,7 @@ body {
     background-color: var(--white_color);
     color: var(--dark_blue_color);
     box-shadow: 0 8px 30px rgba(0, 75, 89, 0.08);
+    border-radius: 12px;
 }
 
 
@@ -142,7 +143,8 @@ body {
     border-right: 1px solid #ddd;
     transition: all 0.3s;
     overflow: hidden;
-    height: 100vh;
+    min-height: 100vh;
+    height: auto;
     z-index: 1000;
 }
 

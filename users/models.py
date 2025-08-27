@@ -1,5 +1,5 @@
 from django.db import models
-from restaurants.models import Branch
+from restaurants.models import Branch, Restaurant
 from django.contrib.auth.models import User
 # Create your models here.
 
@@ -8,24 +8,27 @@ class Profile(models.Model):
     ROLE_CHOICES = [
         ('Admin', 'Admin'),
         ('RestaurantOwner', 'Restaurant Owner'),
-        ('Staff', 'Staff'),
+        ('BranchManager', 'Branch Manager'),
         ('Customer', 'Customer'),
+        ('Cashier', 'Cashier'),
     ]
     user = models.OneToOneField(User, on_delete=models.CASCADE)
     phone = models.CharField(max_length=10)
     role = models.CharField(max_length=20, choices=ROLE_CHOICES)
+    restaurant = models.ForeignKey(Restaurant, on_delete=models.CASCADE, null=True, blank=True)
+    branch = models.ForeignKey(Branch, on_delete=models.SET_NULL, null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
-# Employees
-class Employee(models.Model):
-    ROLE_CHOICES = [
-        ('Cashier', 'Cashier'),
-        ('KitchenStaff', 'Kitchen Staff'),
-    ]
+# # Employees
+# class Employee(models.Model):
+#     ROLE_CHOICES = [
+#         ('Cashier', 'Cashier'),
+#         ('KitchenStaff', 'Kitchen Staff'),
+#     ]
 
-    user = models.ForeignKey(User, on_delete=models.CASCADE)
-    branch = models.ForeignKey(Branch, on_delete=models.CASCADE, related_name="employees")
-    role = models.CharField(max_length=20, choices=ROLE_CHOICES)
-    permissions = models.TextField(blank=True, null=True)
-    created_at = models.DateTimeField(auto_now_add=True)
+#     user = models.ForeignKey(User, on_delete=models.CASCADE)
+#     branch = models.ForeignKey(Branch, on_delete=models.CASCADE, related_name="employees")
+#     role = models.CharField(max_length=20, choices=ROLE_CHOICES)
+#     permissions = models.TextField(blank=True, null=True)
+#     created_at = models.DateTimeField(auto_now_add=True)

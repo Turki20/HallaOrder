@@ -6,7 +6,7 @@ from menu.models import Product, Category
 from django.contrib import messages
 from django.db import transaction
 from websites.models import Website
-
+from django.contrib.auth.models import User
 
 # Create your views here.
 
@@ -195,9 +195,14 @@ def add_branch_view(request:HttpRequest):
                 address=branch_address
             )
             # messages.success(request, "تم إضافة الفرع بنجاح", 'alert-success')
-            restaurant = Restaurant.objects.get(pk = request.user.restaurants.id)
+            rest_id = request.user.restaurants.id
+            restaurant = Restaurant.objects.get(pk = rest_id)
             restaurant.is_active = True
             restaurant.save()
+            
+            user = User.objects.get(pk = request.user.id)
+            user.profile.restaurant = restaurant
+            user.profile.save()
             return redirect('restaurants')
         
     return render(request, 'home/add_branch.html', {})

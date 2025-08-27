@@ -1,0 +1,93 @@
+{% extends "home/base.html" %}
+{% load static %}
+
+{% block title %}إدارة المستخدمين{% endblock title %}
+
+{% block style %}
+<link rel="stylesheet" href="{% static 'css/users.css' %}">
+{% endblock style %}
+
+{% block dashboard_content %}
+
+<div class="row p-4">
+    <h3>
+        تعديل المستخدم:
+        {{user.username}}
+    </h3>
+</div>
+
+<div class="row">
+    <div class="col"></div>
+    <div class="col-10">
+        <div class="w-100">
+            {% if messages %}
+            <ul>
+                {% for message in messages %}
+                <div class="alert {{message.tags}}">
+                    <i class="fa-solid fa-circle-exclamation"></i>
+                    <span>{{message}}</span>
+                </div>
+                {% endfor %}
+            </ul>
+            {% endif %}
+        </div>
+    </div>
+    <div class="col"></div>
+</div>
+
+<div class="row p-4">
+    <div class="col">
+        <div class="card text-end">
+            <form action="{% url 'users:edit_user' user.id %}" method="post">
+                {% csrf_token %}
+                <div class="mb-3">
+                    <label class="form-label">اسم المستخدم</label>
+                    <input type="text" name="username" class="form-control" value="{{user.username}}">
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label">الاسم الاول</label>
+                    <input type="text" name="first_name" class="form-control" value="{{user.first_name}}">
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label">الاسم الاخير</label>
+                    <input type="text" name="last_name" class="form-control" value="{{user.last_name}}">
+                </div>
+
+                <div class="mb-3"><label class="form-label">البريد الإلكتروني</label><input type="email"
+                        class="form-control" name="email" placeholder="سيستخدم لتسجيل الدخول" value="{{user.email}}"></div>
+
+                <div class="mb-3"><label class="form-label">رقم الجوال</label><input type="number" class="form-control"
+                        name="phone" placeholder="" value="{{user.profile.phone}}"></div>
+
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label">الدور الوظيفي</label>
+                        <select class="form-select" name="role">
+                            <option selected disabled>اختر دور...</option>
+                            <option value="BranchManager">مدير فرع</option>
+                            <option value="Cashier">كاشير</option>
+                        </select>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label">الفرع</label>
+                        <select class="form-select" name="branch">
+                            <option selected disabled>اختر فرع...</option>
+                            {% for branch in branchs %}
+                            <option value="{{branch.id}}">{{branch.name}}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col"><a href="{% url 'users:all_users' %}" class="btn btn-secondary">إلغاء</a>
+                        <button type="submit" class="btn btn-blue">حفظ</button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+{% endblock dashboard_content %}

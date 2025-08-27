@@ -5,6 +5,8 @@ from .models import Profile
 from django.contrib import messages
 from django.db import transaction
 from django.contrib.auth import authenticate, login, logout
+from django.contrib.auth.decorators import login_required
+from restaurants.models import Restaurant, Branch
 # Create your views here.
 
 def sign_up_view(request:HttpRequest):
@@ -64,8 +66,79 @@ def log_in_view(request:HttpRequest):
 
     return render(request, 'users/login.html', {})
 
-
 def logout_view(request:HttpRequest):
     if request.user.is_authenticated:
         logout(request)
     return redirect("home:index_view")
+
+@login_required(login_url='/users/login/')
+def all_users(request:HttpRequest):
+    # تحقق ان المستخدم عنده مطعم 
+    restaurant = Restaurant.objects.get(pk=request.user.restaurants.id)
+    branchs = restaurant.branches.all()
+    all_users_in_restaurant = restaurant.profile_set.all().exclude(role='RestaurantOwner')
+    all_users_in_restaurant_count = all_users_in_restaurant.count()
+    BranchManager_count = restaurant.profile_set.filter(role='BranchManager').count()
+    Cashier_count = restaurant.profile_set.filter(role='Cashier').count()
+    
+    if request.method == 'POST':
+        username = request.POST.get('username')
+        first_name = request.POST.get('first_name')
+        last_name = request.POST.get('last_name')
+        email = request.POST.get('email')
+        password = request.POST.get('password')
+        phone = request.POST.get('phone')
+        role = request.POST.get('role')
+        branch_id = request.POST.get('branch')
+
+        if not all([username, first_name, last_name, email, password, phone, role, branch_id]):
+            messages.error(request, 'يرجى ملء جميع الحقول المطلوبة.', 'alert-danger')
+            return redirect('users:all_users')
+
+        if User.objects.filter(email=email).exists():
+            messages.error(request, 'البريد الإلكتروني مستخدم بالفعل.',  'alert-danger')
+            return redirect('users:all_users')
+
+        if not phone.isdigit() or len(phone) != 10:
+            messages.error(request, 'رقم الجوال يجب أن يكون مكونًا من 10 أرقام.', 'alert-danger')
+            return redirect('users:all_users')
+
+        try:
+            branch = Branch.objects.get(id=branch_id)
+        except:
+            messages.error(request, 'الفرع غير موجود.', 'alert-danger')
+            return redirect('users:all_users')
+
+        with transaction.atomic():
+            user = User.objects.create_user(
+                username=username,
+                first_name=first_name,
+                last_name=last_name,
+                email=email,
+                password=password
+            )
+
+            Profile.objects.create(
+                user=user,
+                phone=phone,
+                role=role,
+                branch=branch,
+                restaurant=branch.restaurant
+            )
+
+        messages.success(request, 'تم إنشاء المستخدم بنجاح.', 'alert-success')
+        return redirect('users:all_users')
+    
+    print(all_users_in_restaurant)
+    if request.method == 'POST':
+        pass
+    
+    return render(request, 'users/users_list.html', {'branchs':branchs, 'all_users_in_restaurant':all_users_in_restaurant, 'all_users_in_restaurant_count':all_users_in_restaurant_count, 'BranchManager_count':BranchManager_count, 'Cashier_count':Cashier_count})
+
+@login_required(login_url='/users/login/')
+def edit_user(request:HttpRequest, user_id):
+    if request.method == 'POST':
+        pass
+    
+    user = User.objects.get(pk=user_id)
+    return render(request, 'users/edit_user.html', {'user': user})

@@ -1,0 +1,193 @@
+{% extends "home/base.html" %}
+{% load static %}
+
+{% block title %}إدارة المستخدمين{% endblock title %}
+
+{% block style %}
+<link rel="stylesheet" href="{% static 'css/users.css' %}">
+{% endblock style %}
+
+{% block dashboard_content %}
+
+<!-- Main Content -->
+<div class="main-content">
+
+
+    <div class="row p-4">
+        <div class="col-8">
+            <h1 class="">إدارة الموظفين</h1>
+        </div>
+        <div class="col-4 text-start">
+            <button class="btn btn-orange" data-bs-toggle="modal" data-bs-target="#addEditStaffModal"><i
+                    class="fas fa-plus"></i> إضافة موظف جديد</button>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col"></div>
+        <div class="col-10">
+            <div class="w-100">
+            {% if messages %}
+            <ul>
+                {% for message in messages %}
+                <div class="alert {{message.tags}}">
+                    <i class="fa-solid fa-circle-exclamation"></i>
+                    <span>{{message}}</span>
+                </div>
+                {% endfor %}
+            </ul>
+            {% endif %}
+        </div>
+        </div>
+        <div class="col"></div>
+    </div>
+
+    <!-- KPI Summary -->
+    <section class="row p-4">
+        <div class="col-md-4">
+            <div class="card">
+                <p class="title">إجمالي الموظفين</p><span class="value">{{all_users_in_restaurant_count}}</span>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card">
+                <p class="title">مدراء الفروع</p><span class="value">{{BranchManager_count}}</span>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card">
+                <p class="title">كاشير</p><span class="value">{{Cashier_count}}</span>
+            </div>
+        </div>
+    </section>
+
+    <!-- Table and Filters -->
+    <div class="row p-4">
+        <div class="card">
+            <div class="card-body">
+                <div class="row mb-3">
+                    <div class="col-md-6"><input type="search" class="form-control"
+                            placeholder="ابحث بالاسم أو البريد الإلكتروني..."></div>
+                    <div class="col-md-3"><select class="form-select">
+                            <option>فلترة حسب الفرع</option>
+                            <option>فرع العليا</option>
+                            <option>فرع الملز</option>
+                        </select></div>
+                    <div class="col-md-3"><select class="form-select">
+                            <option>فلترة حسب الدور</option>
+                            <option>مدير فرع</option>
+                            <option>كاشير</option>
+                        </select></div>
+                </div>
+                <div class="table-responsive">
+                    <table class="staff-table">
+                        <thead>
+                            <tr>
+                                <th>الموظف</th>
+                                <th>الدور الوظيفي</th>
+                                <th>الفرع</th>
+                                <th>تاريخ الانضمام</th>
+                                <th>إجراءات</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for profile_user in all_users_in_restaurant %}
+                            <tr>
+                                <td>
+                                    <div class="staff-info"><span class="name">{{profile_user.user.first_name}}
+                                            {{profile_user.user.last_name}}</span><span
+                                            class="email">{{profile_user.user.email}}</span></div>
+                                </td>
+                                <td>{{profile_user.role}}</td>
+                                <td>{{profile_user.branch.name }}</td>
+                                <td>{{profile_user.created_at}}</td>
+                                <td>
+                                    <div class="d-flex gap-2">
+                                        <a class="btn btn-blue" href="{% url 'users:edit_user' profile_user.user.id %}"><i
+                                                class="fas fa-pen"></i></a>
+                                                <button class="btn btn-outline-danger"
+                                            title="حذف"><i class="fas fa-trash"></i></button>
+                                    </div>
+                                </td>
+                            </tr>
+                            {% empty %}
+                            <tr>
+                                <td>
+                                    <p>لا يوجد موظفين حتى الان</p>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- Add/Edit Staff Modal -->
+<div class="modal fade" id="addEditStaffModal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header w-100 d-flex" style="justify-content: space-between;">
+                <h5 class="modal-title">إضافة موظف</h5>
+                <button type="button" class="btn-close m-0" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <form action="{% url 'users:all_users' %}" method="post">
+                    {% csrf_token %}
+                    <div class="mb-3">
+                        <label class="form-label">اسم المستخدم</label>
+                        <input type="text" name="username" class="form-control" required>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label">الاسم الاول</label>
+                        <input type="text" name="first_name" class="form-control" required>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label">الاسم الاخير</label>
+                        <input type="text" name="last_name" class="form-control" required>
+                    </div>
+
+                    <div class="mb-3"><label class="form-label">البريد الإلكتروني</label><input type="email"
+                            class="form-control" name="email" placeholder="سيستخدم لتسجيل الدخول" required></div>
+
+                    <div class="mb-3"><label class="form-label">كلمة المرور</label><input type="password"
+                            class="form-control" name="password" placeholder=""></div>
+
+                    <div class="mb-3"><label class="form-label">رقم الجوال</label><input type="number"
+                            class="form-control" name="phone" placeholder=""></div>
+
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">الدور الوظيفي</label>
+                            <select class="form-select" name="role">
+                                <option selected disabled>اختر دور...</option>
+                                <option value="BranchManager">مدير فرع</option>
+                                <option value="Cashier">كاشير</option>
+                            </select>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">الفرع</label>
+                            <select class="form-select" name="branch">
+                                <option selected disabled>اختر فرع...</option>
+                                {% for branch in branchs %}
+                                <option value="{{branch.id}}">{{branch.name}}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col"><button type="button" class="btn btn-secondary"
+                                data-bs-dismiss="modal">إلغاء</button>
+                            <button type="submit" class="btn btn-blue">اضافة</button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock dashboard_content %}
