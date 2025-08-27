@@ -3,6 +3,7 @@ from .models import SubscriptionPlan, Restaurant, Branch
 from .forms import RestaurantForm ,BranchForm
 from django.contrib.auth.models import User
 from django.contrib import messages
+from websites.models import Website
 
 # عرض باقات الاشتراك
 def subscription_plans_list(request):
@@ -25,9 +26,10 @@ def restaurants_list(request):
             return redirect('home:create_restaurant_identity')
     
     restaurant = Restaurant.objects.get(pk = request.user.restaurants.id)
+    website = Website.objects.get(restaurant=restaurant)
     context = {
-        "restaurants": [],
         "restaurant": restaurant,
+        'website': website,
         "current_page": "restaurants",  
     }
     return render(request, "restaurants/restaurant_list.html", context)

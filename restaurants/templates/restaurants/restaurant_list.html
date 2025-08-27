@@ -68,6 +68,43 @@
         {% endif %}
       </div>
     </div>
+
+    <div class="col-md-6">
+      <div class="card h-100">
+        <h3>ثيم الموقع الالكتروني</h3>
+        <hr>
+        {% if website %}
+        <div class="mb-3">
+          <p>
+            <strong>الشعار</strong>
+          </p>
+          <img src="{{website.logo.url}}" alt="" class="w-50">
+        </div>
+        <p>
+          <strong style="padding: 5px 15px; border: 1px solid green; border-radius: 10px;">
+            {{ website.theme }}
+          </strong>
+        </p>
+        <p>
+          <strong>الالوان</strong>
+          <br>
+          <span>
+            {{ website.custom_colors }}
+          </span>
+          <br>
+          <span>
+            {{ website.secondary_color }}
+          </span>
+        </p>
+
+        {% else %}
+        <span class="badge bg-secondary-subtle text-secondary border border-secondary-subtle"
+          style="border-radius:.6rem;">
+          بدون
+        </span>
+        {% endif %}
+      </div>
+    </div>
   </div>
 
 </div>

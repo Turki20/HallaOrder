@@ -35,7 +35,7 @@
                        <td>
                            <div class="product-info">
                                {% if product.image %}
-                               <img src="{{ product.image }}" alt="{{ product.name }}">
+                               <img src="{{ product.image.url }}" alt="{{ product.name }}">
                                {% endif %}
                                <div>
                                    <strong>{{ product.name }}</strong>

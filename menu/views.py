@@ -109,7 +109,7 @@ def edit_product(request, product_id):
             price = request.POST.get('price')
             category_id = request.POST.get('category')
             description = request.POST.get('description', '').strip()
-            image = request.POST.get('image', '').strip()
+            image = request.FILES.get('image', None)
             available = request.POST.get('available', '1') == '1'
             
             if name and price and category_id:
@@ -119,7 +119,8 @@ def edit_product(request, product_id):
                     product.price = Decimal(price)
                     product.category = category
                     product.description = description
-                    product.image = image or None
+                    if image != None:
+                        product.image = image or None
                     product.available = available
                     product.save()
                     return redirect('menu:menu_view')
