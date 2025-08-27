@@ -1,0 +1,88 @@
+<!doctype html>
+<html lang="en" dir="ltr">
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Checkout (Stripe Test)</title>
+  <script src="https://js.stripe.com/v3/"></script>
+  <style>
+    body { font-family: system-ui, Arial, sans-serif; padding: 24px; }
+    .card { max-width: 520px; padding: 20px; border: 1px solid #ddd; border-radius: 12px; }
+    button { padding: 10px 16px; border-radius: 8px; border: 0; cursor: pointer; }
+    button[disabled]{ opacity:.6; cursor:not-allowed; }
+    .muted{ opacity:.7; }
+  </style>
+  <body>
+    <div class="card">
+      <h2>Test Checkout</h2>
+
+      <!-- Human-friendly total from the server -->
+      <p>
+        <strong>Total:</strong>
+        <span id="total">{{ display_total }}</span>
+        <strong><span id="currency">{{ currency|upper }}</span></strong>
+      </p>
+
+      <!-- Optional debug line (can remove): shows smallest unit too -->
+      <p class="muted">Smallest unit for Stripe (server-calculated, not sent from the browser): {{ amount }}</p>
+
+      <!-- We’ll pick order_id from here or from the URL (?order_id=123) -->
+      <button id="pay" data-order-id="{{ order_id }}">Pay with Stripe (Test)</button>
+      <p id="hint" class="muted" style="margin-top:12px;">
+        Use test card: <code>4242 4242 4242 4242</code>
+      </p>
+    </div>
+
+    <script>
+      // 1) Stripe key injected from Django
+      const pk = "{{ STRIPE_PUBLISHABLE_KEY|default:'' }}";
+      const stripe = Stripe(pk);
+
+      // 2) Helpers
+      function getCookie(name) {
+        const value = `; ${document.cookie}`;
+        const parts = value.split(`; ${name}=`);
+        if (parts.length === 2) return parts.pop().split(';').shift();
+      }
+      function getParam(name) {
+        return new URLSearchParams(window.location.search).get(name);
+      }
+
+      // 3) Resolve order_id and currency
+      const btn = document.getElementById("pay");
+      let orderId = btn.dataset.orderId || getParam("order_id") || "";
+      const currency = (document.getElementById("currency").textContent || "USD").toLowerCase();
+
+      if (!orderId) {
+        btn.disabled = true;
+        document.getElementById("hint").textContent =
+          "Missing order_id. Open this page as /payments/checkout/?order_id=123&currency=usd or pass order_id from the server.";
+      }
+
+      // 4) Create checkout session (server computes amount from Order)
+      btn.addEventListener("click", async () => {
+        try {
+          const res = await fetch("{% url 'payments:create_checkout_session' %}", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              "X-CSRFToken": getCookie("csrftoken"),
+            },
+            body: JSON.stringify({ order_id: orderId, currency }),
+          });
+
+          if (!res.ok) {
+            const text = await res.text();
+            alert("Failed to create session: " + text);
+            return;
+          }
+
+          const data = await res.json();
+          const { error } = await stripe.redirectToCheckout({ sessionId: data.id });
+          if (error) alert(error.message);
+        } catch (e) {
+          alert("Unexpected error: " + (e?.message || e));
+        }
+      });
+    </script>
+  </body>
+</html>
