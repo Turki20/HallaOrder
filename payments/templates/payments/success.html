@@ -1,0 +1,12 @@
+<!doctype html>
+<html lang="en">
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Payment Success</title>
+  <body style="font-family:system-ui,Arial,sans-serif;padding:24px;">
+    <h2>✅ Payment Success</h2>
+    <p>Session ID: <code>{{ session_id }}</code></p>
+    <p>Status: <strong>{{ status }}</strong></p>
+    <p><a href="{% url 'payments:checkout' %}">Make another test payment</a></p>
+  </body>
+</html>
