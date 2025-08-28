@@ -1,4 +1,4 @@
-{% extends "websites/base_public.html" %}  
+{% extends "websites/base.html" %}  
 {% load static %}
 
 {% block title %}تسجيل الدخول{% endblock %}
@@ -10,7 +10,7 @@
 
     <form method="post" action="">
       {% csrf_token %}
-      <input type="hidden" name="next" value="{{ next|default:request.GET.next }}"/>
+      <input type="hidden" name="next" value=""/>
 
       {# رسائل الأخطاء العامة #}
       {% if form.non_field_errors %}
@@ -39,7 +39,7 @@
       </div>
 
       <div style="display:flex; justify-content:space-between; align-items:center; margin-top:16px;">
-        <a href="{% url 'password_reset' %}" class="link">نسيت كلمة المرور؟</a>
+        <a href="" class="link">نسيت كلمة المرور؟</a>
         <button type="submit" class="btn btn-primary">دخول</button>
       </div>
     </form>

@@ -32,7 +32,7 @@
           <div class="name">{{ p.name }}</div>
           <div class="price">SAR {{ p.price|floatformat:2 }}</div>
           <div class="buttons">
-            <a class="btn-light" href="{% url 'websites:product' website.slug p.id %}">التفاصيل</a>
+            <a class="btn-light" href="{% url 'websites:product_detail' website.slug p.id %}">التفاصيل</a>
             <form method="post" action="{% url 'websites:add_to_cart' website.slug p.id %}">
               {% csrf_token %}
               <input type="hidden" name="qty" value="1">
