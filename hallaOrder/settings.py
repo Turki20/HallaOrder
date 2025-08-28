@@ -34,7 +34,6 @@ ALLOWED_HOSTS = []
 INSTALLED_APPS = [
     'django.contrib.admin',
     'django.contrib.auth',
-    "websites.apps.WebsitesConfig", 
     'django.contrib.contenttypes',
     'django.contrib.sessions',
     'django.contrib.messages',
@@ -46,6 +45,7 @@ INSTALLED_APPS = [
     'pos',
     'reports',
     'users',
+    'websites',
     'bootstrap5',
     'restaurants',
 ]
@@ -136,6 +136,3 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 MEDIA_URL = "/media/"
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 
-LOGIN_URL = "/accounts/login/"
-LOGIN_REDIRECT_URL = "/"          
-LOGOUT_REDIRECT_URL = "/"
