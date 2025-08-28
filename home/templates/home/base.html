@@ -41,31 +41,33 @@
                     <a href="#"><i class="fa-solid fa-house"></i>الصفحة الرئيسية</a>
                 </li>
                 <li class="{% if current_page == 'orders:order_board' %}active{% endif %}">
-                  <a href="{% url 'orders:order_board' %}"><i class="fa-solid fa-file"></i>حالة الطلبات</a>
-                </li>                
+                  <a href="{% url 'orders:order_board' %}"><i class="fa-solid fa-cart-shopping"></i>حالة الطلبات</a>
+                </li>
+                  {% if request.user.profile.role == 'RestaurantOwner' %}                
                 <li class="{% if request.path == '/menu/' %}active{% endif %}">
-                  <a href="{% url 'menu:menu_view' %}"><i class="fa-solid fa-file"></i>المنتجات</a>
+                  <a href="{% url 'menu:menu_view' %}"><i class="fa-solid fa-burger"></i>المنتجات</a>
                 </li>
                 <li class="{% if current_page == 'restaurants' %}active{% endif %}">
-                    <a href="{% url 'restaurants' %}"><i class="fa-solid fa-file"></i>المطعم</a>
+                    <a href="{% url 'restaurants' %}"><i class="fa-solid fa-store"></i>المطعم</a>
                 </li>
                 <li class="{% if current_page == 'branches' %}active{% endif %}">
-                    <a href="{% url 'branches' %}"><i class="fa-solid fa-file"></i>الفروع</a>
+                    <a href="{% url 'branches' %}"><i class="fa-solid fa-building"></i>الفروع</a>
                 </li>
                 <li class="{% if request.path == '/users/all_users/' %}active{% endif %}">
-                    <a href="{% url 'users:all_users' %}"><i class="fa-solid fa-file"></i>الموظفين</a>
+                    <a href="{% url 'users:all_users' %}"><i class="fa-solid fa-users"></i>الموظفين</a>
                 </li>
                 <!-- <li class="{% if current_page == 'subscription_plans' %}active{% endif %}">
                     <a href="{% url 'subscription_plans' %}"><i class="fa-solid fa-file"></i>الباقات</a>
                 </li> -->
-                <li data-page="products"><a href=""><i class="fa-solid fa-file"></i>التقارير</a></li>
+                <li data-page="products"><a href=""><i class="fa-solid fa-chart-pie"></i>التقارير</a></li>
+                {% endif %}
             </ul>
         </div>
         <div class="content">
             <header> 
                 <button onclick="toggleSidebar()"><i class="fa-solid fa-bars"></i></button> 
                 <span>Dashboard</span> 
-            </header>
+            </header>i
             <div id="mainContent">
                 {% block dashboard_content %}
                   <!-- <div class="row p-4 g-4">

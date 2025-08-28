@@ -4,8 +4,10 @@ from .forms import RestaurantForm ,BranchForm
 from django.contrib.auth.models import User
 from django.contrib import messages
 from websites.models import Website
+from users.decorators import restaurant_owner_required
 
 # عرض باقات الاشتراك
+@restaurant_owner_required
 def subscription_plans_list(request):
     subscription_plans = SubscriptionPlan.objects.all()
     context = {
@@ -15,6 +17,7 @@ def subscription_plans_list(request):
     return render(request, "restaurants/Subscription_Plans.html", context)
 
 # عرض المطاعم
+@restaurant_owner_required
 def restaurants_list(request):
     # التحقق هل المطعم فعال ام لم يتم تفعيلة
     try:
@@ -35,6 +38,7 @@ def restaurants_list(request):
     return render(request, "restaurants/restaurant_list.html", context)
 
 # Add a new restaurant
+@restaurant_owner_required
 def restaurant_add(request):
     if request.method == 'POST':
         form = RestaurantForm(request.POST)
@@ -46,6 +50,7 @@ def restaurant_add(request):
     return render(request, 'restaurants/restaurant_form.html', {'form': form, 'title': 'اضافة مطعم'})
 
 # Edit a restaurant
+@restaurant_owner_required
 def restaurant_edit(request, pk):
     restaurant = get_object_or_404(Restaurant, pk=pk)
     if request.method == 'POST':
@@ -58,6 +63,7 @@ def restaurant_edit(request, pk):
     return render(request, 'restaurants/restaurant_form.html', {'form': form, 'title': 'Edit Restaurant'})
 
 # Delete a restaurant
+@restaurant_owner_required
 def restaurant_delete(request, pk):
     restaurant = get_object_or_404(Restaurant, pk=pk)
     if request.method == 'POST':
@@ -66,6 +72,7 @@ def restaurant_delete(request, pk):
     return render(request, 'restaurants/restaurant_confirm_delete.html', {'object': restaurant})
 
 # عرض الفروع
+@restaurant_owner_required
 def branches_list(request):
     branches = Branch.objects.select_related("restaurant").filter(restaurant = request.user.restaurants)
     context = {
@@ -74,7 +81,7 @@ def branches_list(request):
     }
     return render(request, "restaurants/Branches.html", context)
 
-
+@restaurant_owner_required
 def branch_create(request):
     if request.method == "POST":
         form = BranchForm(request.POST)
@@ -91,6 +98,7 @@ def branch_create(request):
     })
 
 # تعديل فرع موجود
+@restaurant_owner_required
 def branch_update(request, pk):
     branch = get_object_or_404(Branch, pk=pk)
     if request.method == "POST":
@@ -103,6 +111,7 @@ def branch_update(request, pk):
     return render(request, "restaurants/Branch_Form.html", {"form": form, "title": "تعديل فرع"})
 
 # حذف فرع
+@restaurant_owner_required
 def branch_delete(request, pk):
     branch = get_object_or_404(Branch, pk=pk)
     if request.method == "POST":

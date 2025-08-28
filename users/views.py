@@ -8,6 +8,8 @@ from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
 from restaurants.models import Restaurant, Branch
 # Create your views here.
+from users.decorators import restaurant_owner_required
+
 
 def sign_up_view(request:HttpRequest):
     if request.method == "POST":
@@ -72,6 +74,7 @@ def logout_view(request:HttpRequest):
     return redirect("home:index_view")
 
 @login_required(login_url='/users/login/')
+@restaurant_owner_required
 def all_users(request:HttpRequest):
     # تحقق ان المستخدم عنده مطعم 
     restaurant = Restaurant.objects.get(pk=request.user.restaurants.id)
@@ -95,8 +98,8 @@ def all_users(request:HttpRequest):
             messages.error(request, 'يرجى ملء جميع الحقول المطلوبة.', 'alert-danger')
             return redirect('users:all_users')
 
-        if User.objects.filter(email=email).exists():
-            messages.error(request, 'البريد الإلكتروني مستخدم بالفعل.',  'alert-danger')
+        if User.objects.filter(username=username).exists():
+            messages.error(request, 'اسم المستخدم موجود بالفعل.',  'alert-danger')
             return redirect('users:all_users')
 
         if not phone.isdigit() or len(phone) != 10:
@@ -136,9 +139,57 @@ def all_users(request:HttpRequest):
     return render(request, 'users/users_list.html', {'branchs':branchs, 'all_users_in_restaurant':all_users_in_restaurant, 'all_users_in_restaurant_count':all_users_in_restaurant_count, 'BranchManager_count':BranchManager_count, 'Cashier_count':Cashier_count})
 
 @login_required(login_url='/users/login/')
+@restaurant_owner_required
 def edit_user(request:HttpRequest, user_id):
-    if request.method == 'POST':
-        pass
-    
     user = User.objects.get(pk=user_id)
-    return render(request, 'users/edit_user.html', {'user': user})
+
+    if request.method == 'POST':
+        username = request.POST.get('username')
+        first_name = request.POST.get('first_name')
+        last_name = request.POST.get('last_name')
+        email = request.POST.get('email')
+        phone = request.POST.get('phone')
+        role = request.POST.get('role')
+        branch_id = request.POST.get('branch')
+
+        # تحقق بسيط
+        if not username or not email:
+            messages.error(request, "يجب تعبئة اسم المستخدم والبريد الإلكتروني.", 'alert-danger')
+            return redirect('users:edit_user', user_id)
+
+        # تحديث بيانات المستخدم
+        user.username = username
+        user.first_name = first_name
+        user.last_name = last_name
+        user.email = email
+        user.save()
+
+        # تحديث الملف الشخصي (Profile)
+        user.profile.phone = phone
+        user.profile.role = role
+        if Branch.objects.filter(pk=branch_id).exists():
+            user.profile.branch = Branch.objects.get(id=branch_id)
+            
+        user.profile.save()
+
+        messages.success(request, "تم تحديث المستخدم بنجاح.", 'alert-success')
+        return redirect('users:all_users')
+    
+    restaurant = Restaurant.objects.get(pk=request.user.restaurants.id)
+    branchs = restaurant.branches.all()
+    return render(request, 'users/edit_user.html', {'user': user, 'branchs':branchs})
+
+@restaurant_owner_required
+def delete_user(request):
+    if request.method == 'POST':
+        user_id = request.POST.get('user_id')
+        try:
+            user = User.objects.get(id=user_id)
+            user.delete()
+            messages.success(request, "تم حذف المستخدم بنجاح.", 'alert-success')
+            return redirect('users:all_users')
+        except:
+            messages.error(request, 'حدث خطأ أثناء الحذف', 'alert-danger')
+    else:
+        return redirect('users:all_users')
+

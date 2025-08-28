@@ -55,8 +55,12 @@ def _user_default_branch(user):
 
 # ---- views ----------------------------------------------------------------
 
-@login_required
+@login_required(login_url='/users/login/')
 def order_board_default(request):
+    
+    if request.user.profile.role == 'Cashier':
+        return redirect('orders:order_board_by_branch', request.user.profile.branch.id)
+    
     """
     /board/ → find default branch, then redirect to /board/<branch_id>/
     """
@@ -71,12 +75,15 @@ def order_board_default(request):
     except NoReverseMatch:
         return redirect("/branches/")
 
-@login_required
+@login_required(login_url='/users/login/')
 def order_board(request, branch_id: int | None = None):
     branch_from_query = request.GET.get("branch")
     if branch_from_query and (branch_id is None or str(branch_id) != str(branch_from_query)):
         return redirect("orders:order_board_by_branch", branch_id=int(branch_from_query))
 
+    if request.user.profile.role == 'Cashier' and branch_id != request.user.profile.branch.id:
+        return redirect('orders:order_board')
+    
     # allowed branches per role (your code)
     if hasattr(request.user, "role") and request.user.role in ["Cashier", "KitchenStaff"]:
         branches = Branch.objects.filter(employees__user=request.user).distinct()
@@ -106,7 +113,7 @@ def order_board(request, branch_id: int | None = None):
     }
     return render(request, "orders/board.html", context)
 
-@login_required
+@login_required(login_url='/users/login/')
 def order_detail(request, pk: int):
     order = (
         Order.objects.select_related("customer", "branch")
@@ -115,7 +122,7 @@ def order_detail(request, pk: int):
     )
     return render(request, "orders/detail.html", {"order": order})
 
-@login_required
+@login_required(login_url='/users/login/')
 def advance_status(request, pk: int):
     """
     Advance: New → Preparing → Ready → Delivered
@@ -135,7 +142,7 @@ def advance_status(request, pk: int):
     messages.success(request, f"تم نقل الطلب #{order.pk} إلى {nxt}.")
     return redirect(_rev("order_board_by_branch", branch_id=order.branch_id))
 
-@login_required
+@login_required(login_url='/users/login/')
 def cancel_order(request, pk: int):
     if request.method != "POST":
         # allow GET fallback during testing; you can enforce POST only

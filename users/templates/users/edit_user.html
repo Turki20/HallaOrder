@@ -65,17 +65,17 @@
                     <div class="col-md-6 mb-3">
                         <label class="form-label">الدور الوظيفي</label>
                         <select class="form-select" name="role">
-                            <option selected disabled>اختر دور...</option>
-                            <option value="BranchManager">مدير فرع</option>
-                            <option value="Cashier">كاشير</option>
+                            <option disabled>اختر دور...</option>
+                            <option value="BranchManager" {% if user.role == 'BranchManager' %}selected{% endif %}>مدير فرع</option>
+                            <option value="Cashier" {% if user.role == 'Cashier' %}selected{% endif %} >كاشير</option>
                         </select>
                     </div>
                     <div class="col-md-6 mb-3">
                         <label class="form-label">الفرع</label>
                         <select class="form-select" name="branch">
-                            <option selected disabled>اختر فرع...</option>
+                            <option disabled>اختر فرع...</option>
                             {% for branch in branchs %}
-                            <option value="{{branch.id}}">{{branch.name}}</option>
+                            <option value="{{branch.id}}" {% if user.branch == branch %}selected{% endif %}>{{branch.name}}</option>
                             {% endfor %}
                         </select>
                     </div>

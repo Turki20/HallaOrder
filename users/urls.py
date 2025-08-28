@@ -9,4 +9,6 @@ urlpatterns = [
     path('logout/', views.logout_view, name='logout_view'),
     path('all_users/', views.all_users, name='all_users'),
     path('edit_user/<int:user_id>/', views.edit_user, name='edit_user'),
+    path('delete/', views.delete_user, name='delete_user'),
+
 ]

@@ -3,6 +3,8 @@ from django.http import HttpResponse, JsonResponse
 from .models import Category, Product
 from restaurants.models import Restaurant
 from decimal import Decimal
+from django.contrib.auth.decorators import login_required
+from users.decorators import restaurant_owner_required
 
 def get_test_restaurant(resturant_id):
     """
@@ -14,6 +16,7 @@ def get_test_restaurant(resturant_id):
         raise Exception("DATABASE TEST ERROR: No restaurants found. Please create at least one restaurant in the Django Admin panel to proceed.")
     return restaurant
 
+@restaurant_owner_required
 def menu_view(request):
     """
     Main view to display the menu and handle ADDING new categories and products.
@@ -67,6 +70,7 @@ def menu_view(request):
     context = {'categories': categories}
     return render(request, 'menu/menu.html', context)
 
+@restaurant_owner_required
 def edit_category(request, category_id):
     """Edit category functionality"""
     try:
@@ -97,6 +101,7 @@ def edit_category(request, category_id):
     except Exception as e:
         return HttpResponse(str(e))
 
+@restaurant_owner_required
 def edit_product(request, product_id):
     """Edit product functionality"""
     try:
@@ -132,6 +137,7 @@ def edit_product(request, product_id):
     except Exception as e:
         return HttpResponse(str(e))
 
+@restaurant_owner_required
 def delete_category(request, category_id):
     """Delete category functionality"""
     try:
@@ -143,6 +149,7 @@ def delete_category(request, category_id):
         pass
     return redirect('menu:menu_view')
 
+@restaurant_owner_required
 def delete_product(request, product_id):
     """Delete product functionality"""
     try:
@@ -154,6 +161,7 @@ def delete_product(request, product_id):
         pass
     return redirect('menu:menu_view')
 
+@restaurant_owner_required
 def toggle_product_availability(request, product_id):
     """AJAX endpoint to toggle product availability"""
     if request.method == 'POST':

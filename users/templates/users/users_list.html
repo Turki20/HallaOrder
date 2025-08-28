@@ -27,17 +27,17 @@
         <div class="col"></div>
         <div class="col-10">
             <div class="w-100">
-            {% if messages %}
-            <ul>
-                {% for message in messages %}
-                <div class="alert {{message.tags}}">
-                    <i class="fa-solid fa-circle-exclamation"></i>
-                    <span>{{message}}</span>
-                </div>
-                {% endfor %}
-            </ul>
-            {% endif %}
-        </div>
+                {% if messages %}
+                <ul>
+                    {% for message in messages %}
+                    <div class="alert {{message.tags}}">
+                        <i class="fa-solid fa-circle-exclamation"></i>
+                        <span>{{message}}</span>
+                    </div>
+                    {% endfor %}
+                </ul>
+                {% endif %}
+            </div>
         </div>
         <div class="col"></div>
     </div>
@@ -103,10 +103,17 @@
                                 <td>{{profile_user.created_at}}</td>
                                 <td>
                                     <div class="d-flex gap-2">
-                                        <a class="btn btn-blue" href="{% url 'users:edit_user' profile_user.user.id %}"><i
+                                        <a class="btn btn-blue"
+                                            href="{% url 'users:edit_user' profile_user.user.id %}"><i
                                                 class="fas fa-pen"></i></a>
-                                                <button class="btn btn-outline-danger"
-                                            title="حذف"><i class="fas fa-trash"></i></button>
+                                        <!-- داخل جدول المستخدمين -->
+                                        <button class="btn btn-outline-danger" title="حذف" data-bs-toggle="modal"
+                                            data-bs-target="#confirmDeleteModal"
+                                            data-user-id="{{ profile_user.user.id }}"
+                                            data-user-name="{{ profile_user.user.first_name }} {{ profile_user.user.last_name }}">
+                                            <i class="fas fa-trash"></i>
+                                        </button>
+
                                     </div>
                                 </td>
                             </tr>
@@ -189,5 +196,42 @@
         </div>
     </div>
 </div>
+
+<!-- Confirm Delete Modal -->
+<div class="modal fade" id="confirmDeleteModal" tabindex="-1" aria-labelledby="confirmDeleteModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <form method="post" action="{% url 'users:delete_user' %}">
+        {% csrf_token %}
+        <div class="modal-header">
+          <h5 class="modal-title" id="confirmDeleteModalLabel">تأكيد الحذف</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="إغلاق"></button>
+        </div>
+        <div class="modal-body">
+          <p>هل أنت متأكد من رغبتك في حذف المستخدم: <strong id="delete-user-name"></strong>؟</p>
+          <input type="hidden" name="user_id" id="delete-user-id">
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">إلغاء</button>
+          <button type="submit" class="btn btn-danger">نعم، حذف</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    var confirmDeleteModal = document.getElementById('confirmDeleteModal');
+    confirmDeleteModal.addEventListener('show.bs.modal', function (event) {
+        var button = event.relatedTarget;
+        var userId = button.getAttribute('data-user-id');
+        var userName = button.getAttribute('data-user-name');
+
+        document.getElementById('delete-user-id').value = userId;
+        document.getElementById('delete-user-name').textContent = userName;
+    });
+});
+</script>
 
 {% endblock dashboard_content %}
