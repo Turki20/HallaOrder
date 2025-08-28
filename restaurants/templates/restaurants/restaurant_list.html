@@ -78,7 +78,11 @@
           <p>
             <strong>الشعار</strong>
           </p>
-          <img src="{{website.logo.url}}" alt="" class="w-50">
+          {% if website.logo %}
+          <img src="{{ website.logo.url }}" alt="{{ website }}" class="w-50">
+          {% else %}
+          <img src="{% static 'images/placeholders/logo-placeholder.png' %}" alt="logo" class="w-50">
+          {% endif %}
         </div>
         <p>
           <strong style="padding: 5px 15px; border: 1px solid green; border-radius: 10px;">
