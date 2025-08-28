@@ -4,126 +4,109 @@
 {% block title %}لوحة التحكم - HalaOrder{% endblock title %}
 
 {% block style %}
-{# Scoped styles to this page only #}
 <style>
-  :root {
-    --primary-teal: #00AAB0;
-    --primary-yellow: #FFC107;
-    --dark-teal: #004B59;
-    --border-color: #e9ecef;
-  }
-
-  .dashboard-analytics .card {
-    background: #fff;
-    padding: 20px;
-    border-radius: 12px;
-    box-shadow: 0 8px 30px rgba(0, 75, 89, 0.08);
-    border: 1px solid var(--border-color);
-  }
-
-  .dashboard-analytics .dashboard-filters {
-    display: grid;
-    grid-template-columns: repeat(4, 1fr);
-    gap: 16px;
-    margin-bottom: 20px;
-  }
-  .dashboard-analytics .dashboard-filters .filter-group {
-    display: flex; flex-direction: column; gap: 6px;
-  }
-  .dashboard-analytics .dashboard-filters select {
-    width: 100%; padding: 10px; border: 1px solid var(--border-color); border-radius: 8px;
-  }
-  .dashboard-analytics .filter-button {
-    align-self: end;
-    background-color: var(--primary-teal); color: #fff; border: 0; padding: 10px 16px; border-radius: 8px; font-weight: 700;
-  }
-
-  /* KPI cards */
-  .dashboard-analytics .kpi-cards {
-    display: grid;
-    grid-template-columns: 1fr;
-    gap: 16px;
-    margin-bottom: 20px;
-  }
-  @media (min-width: 992px) {
-    .dashboard-analytics .kpi-cards { grid-template-columns: repeat(4, 1fr); }
-  }
-  .dashboard-analytics .kpi-card { display: flex; align-items: center; gap: 14px; }
-  .dashboard-analytics .kpi-card .icon {
-    font-size: 22px; width: 52px; height: 52px; border-radius: 50%;
-    display:flex; align-items:center; justify-content:center; flex-shrink:0;
-  }
-  .icon-sales   { background-color: rgba(0,170,176,0.1); color: var(--primary-teal); }
-  .icon-orders  { background-color: rgba(255,193,7,0.15); color: var(--primary-yellow); }
-  .icon-avg     { background-color: rgba(0,75,89,0.1); color: var(--dark-teal); }
-  .icon-product { background-color: rgba(255,107,7,0.1); color: #ff6b07; }
-  .dashboard-analytics .kpi-card .value { font-size: 22px; font-weight: 700; }
-  .dashboard-analytics .kpi-card .title { margin: 0; font-size: 14px; color: #6c757d; }
-
-  /* chart + actions grid */
-  .dashboard-analytics .grid-2-1 {
-    display: grid; gap: 20px;
-    grid-template-columns: 1fr;
-  }
-  @media (min-width: 1200px) {
-    .dashboard-analytics .grid-2-1 { grid-template-columns: 2fr 1fr; }
-  }
-  .dashboard-analytics .chart-wrapper { position: relative; height: 360px; width: 100%; }
-  .dashboard-analytics .action-col { display: flex; flex-direction: column; gap: 20px; }
-  .dashboard-analytics .action-card {
-    text-decoration: none; color: var(--dark-teal); text-align: center; transition: transform .2s;
-  }
-  .dashboard-analytics .action-card:hover { transform: translateY(-4px); }
-  .dashboard-analytics .action-card .icon { font-size: 28px; color: var(--primary-teal); margin-bottom: 10px; }
+  :root { --primary-teal:#00AAB0; --primary-yellow:#FFC107; --dark-teal:#004B59; --border-color:#e9ecef; }
+  .dashboard-analytics .card{background:#fff;padding:20px;border-radius:12px;box-shadow:0 8px 30px rgba(0,75,89,.08);border:1px solid var(--border-color)}
+  .dashboard-analytics .dashboard-filters{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:20px}
+  .dashboard-analytics .dashboard-filters .filter-group{display:flex;flex-direction:column;gap:6px}
+  .dashboard-analytics .dashboard-filters select{width:100%;padding:10px;border:1px solid var(--border-color);border-radius:8px}
+  .dashboard-analytics .filter-button{align-self:end;background-color:var(--primary-teal);color:#fff;border:0;padding:10px 16px;border-radius:8px;font-weight:700}
+  .dashboard-analytics .kpi-cards{display:grid;grid-template-columns:1fr;gap:16px;margin-bottom:20px}
+  @media (min-width:992px){.dashboard-analytics .kpi-cards{grid-template-columns:repeat(4,1fr)}}
+  .dashboard-analytics .kpi-card{display:flex;align-items:center;gap:14px}
+  .dashboard-analytics .kpi-card .icon{font-size:22px;width:52px;height:52px;border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+  .icon-sales{background-color:rgba(0,170,176,.1);color:var(--primary-teal)}
+  .icon-orders{background-color:rgba(255,193,7,.15);color:var(--primary-yellow)}
+  .icon-avg{background-color:rgba(0,75,89,.1);color:var(--dark-teal)}
+  .icon-product{background-color:rgba(255,107,7,.1);color:#ff6b07}
+  .dashboard-analytics .kpi-card .value{font-size:22px;font-weight:700}
+  .dashboard-analytics .kpi-card .title{margin:0;font-size:14px;color:#6c757d}
+  .dashboard-analytics .grid-2-1{display:grid;gap:20px;grid-template-columns:1fr}
+  @media (min-width:1200px){.dashboard-analytics .grid-2-1{grid-template-columns:2fr 1fr}}
+  .dashboard-analytics .chart-wrapper{position:relative;height:360px;width:100%}
+  .dashboard-analytics .action-col{display:flex;flex-direction:column;gap:20px}
+  .dashboard-analytics .action-card{text-decoration:none;color:var(--dark-teal);text-align:center;transition:transform .2s}
+  .dashboard-analytics .action-card:hover{transform:translateY(-4px)}
+  .dashboard-analytics .action-card .icon{font-size:28px;color:var(--primary-teal);margin-bottom:10px}
 </style>
 {% endblock style %}
 
 {% block dashboard_content %}
 <div class="dashboard-analytics">
 
-  <!-- Filters -->
-  <section class="dashboard-filters card">
-    <div class="filter-group">
-      <label for="date-filter">التاريخ</label>
-      <select id="date-filter">
-        <option value="week">آخر 7 أيام</option>
-        <option value="month">آخر 30 يوم</option>
-      </select>
-    </div>
-    <div class="filter-group">
-      <label for="branch-filter">الفروع</label>
-      <select id="branch-filter">
-        <option value="all">كل الفروع</option>
-        <option value="all"></option>
-        <option value="all"></option>
-      </select>
-    </div>
-    <div class="filter-group">
-      <label for="order-type-filter">نوع الطلب</label>
-      <select id="order-type-filter">
-        <option value="all">كل الأنواع</option>
-      </select>
-    </div>
-    <button class="filter-button">تطبيق</button>
-  </section>
+  {% if error %}
+    <div class="alert alert-warning mb-3">{{ error }}</div>
+  {% endif %}
 
-  <!-- KPIs -->
-  <section class="kpi-cards">
+  <!-- Filters (GET) -->
+  <section class="card">
+    <form method="get" class="dashboard-filters">
+      <div class="filter-group">
+        <label for="date-filter">التاريخ</label>
+        <select id="date-filter" name="period">
+          <option value="week"  {% if selected.period == "week" %}selected{% endif %}>آخر 7 أيام</option>
+          <option value="month" {% if selected.period == "month" %}selected{% endif %}>آخر 30 يوم</option>
+        </select>
+      </div>
+
+      <div class="filter-group">
+        <label for="branch-filter">الفروع</label>
+        <select id="branch-filter" name="branch">
+          <option value="all" {% if selected.branch == "all" %}selected{% endif %}>كل الفروع</option>
+          {% for b in branches %}
+            <option value="{{ b.id }}" {% if selected.branch|stringformat:"s" == b.id|stringformat:"s" %}selected{% endif %}>
+              {{ b.name }}
+            </option>
+          {% endfor %}
+        </select>
+      </div>
+
+      <div class="filter-group">
+        <label for="order-type-filter">نوع الطلب</label>
+        <select id="order-type-filter" name="order_type">
+          {# مبدئيًا لا يؤثر لأن Order لا يحتوي order_type — مضاف للتوافق المستقبلي #}
+          <option value="all"     {% if selected.order_type == "all" %}selected{% endif %}>كل الأنواع</option>
+          <option value="dine_in" {% if selected.order_type == "dine_in" %}selected{% endif %}>داخل المطعم</option>
+          <option value="pickup"  {% if selected.order_type == "pickup" %}selected{% endif %}>استلام</option>
+          <option value="delivery"{% if selected.order_type == "delivery" %}selected{% endif %}>توصيل</option>
+        </select>
+      </div>
+
+      <div class="filter-group">
+        <label>&nbsp;</label>
+        <button class="filter-button" type="submit">تطبيق</button>
+      </div>
+    </form>
+  </section>
+  <!-- KPIs (bound to context) -->
+  <section class="kpi-cards" style="padding-top:1rem ;">
     <div class="kpi-card card">
       <div class="icon icon-sales"><i class="fas fa-wallet"></i></div>
-      <div class="info"><span class="value">1,250.50 ر.س</span><p class="title">إجمالي المبيعات</p></div>
+      <div class="info">
+        <span class="value">{{ kpi.total_sales|floatformat:2 }} ر.س</span>
+        <p class="title">إجمالي المبيعات</p>
+      </div>
     </div>
     <div class="kpi-card card">
       <div class="icon icon-orders"><i class="fas fa-shopping-bag"></i></div>
-      <div class="info"><span class="value">25</span><p class="title">إجمالي الطلبات</p></div>
+      <div class="info">
+        <span class="value">{{ kpi.total_orders }}</span>
+        <p class="title">إجمالي الطلبات</p>
+      </div>
     </div>
     <div class="kpi-card card">
       <div class="icon icon-avg"><i class="fas fa-chart-pie"></i></div>
-      <div class="info"><span class="value">50.02 ر.س</span><p class="title">متوسط المبيعات</p></div>
+      <div class="info">
+        <span class="value">{{ kpi.avg_sales|floatformat:2 }} ر.س</span>
+        <p class="title">متوسط المبيعات</p>
+      </div>
     </div>
     <div class="kpi-card card">
       <div class="icon icon-product"><i class="fas fa-star"></i></div>
-      <div class="info"><span class="value">برجر كلاسيك</span><p class="title">أكثر منتج طلبًا</p></div>
+      <div class="info">
+        <span class="value">{{ kpi.top_product }}</span>
+        <p class="title">أكثر منتج طلبًا</p>
+      </div>
     </div>
   </section>
 
@@ -137,11 +120,13 @@
     </section>
 
     <div class="action-col">
-      <a href="{% url 'websites:site_home' request.user.restaurants.id %}" class="action-card card">
-        <div class="icon"><i class="fas fa-globe"></i></div>
-        <h3>الموقع</h3>
-        <p>افتح وعاين موقعك الإلكتروني.</p>
-      </a>
+      {% if request.user.restaurants %}
+        <a href="{% url 'websites:site_home' request.user.restaurants.id %}" class="action-card card">
+          <div class="icon"><i class="fas fa-globe"></i></div>
+          <h3>الموقع</h3>
+          <p>افتح وعاين موقعك الإلكتروني.</p>
+        </a>
+      {% endif %}
       <a href="{% url 'orders:order_board' %}" class="action-card card">
         <div class="icon"><i class="fas fa-receipt"></i></div>
         <h3>حالة الطلبات</h3>
@@ -156,20 +141,24 @@
   </div>
 </div>
 
-{# Chart.js CDN (safe to include inside the block) #}
+<!-- Chart.js -->
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script>
   (function () {
     const el = document.getElementById('salesChart');
     if (!el) return;
     const ctx = el.getContext('2d');
+
+    const labels = JSON.parse('{{ chart_labels|escapejs }}');
+    const data   = JSON.parse('{{ chart_data|escapejs }}'); // [300.0, 450.0, ...]
+
     new Chart(ctx, {
       type: 'line',
       data: {
-        labels: ['السبت','الأحد','الاثنين','الثلاثاء','الأربعاء','الخميس','الجمعة'],
+        labels: labels,
         datasets: [{
           label: 'المبيعات (ر.س)',
-          data: [300, 450, 600, 520, 800, 750, 1250],
+          data: data,
           backgroundColor: 'rgba(0, 170, 176, 0.1)',
           borderColor: '#00AAB0',
           borderWidth: 3,
@@ -180,9 +169,7 @@
       options: {
         responsive: true,
         maintainAspectRatio: false,
-        scales: {
-          y: { beginAtZero: true, ticks: { callback: v => v + ' ر.س' } }
-        },
+        scales: { y: { beginAtZero: true, ticks: { callback: v => v + ' ر.س' } } },
         plugins: { legend: { display: false } }
       }
     });
