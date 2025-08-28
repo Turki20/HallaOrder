@@ -37,8 +37,8 @@
             {% endif %}
             <ul>
                 
-                <li class="{% if current_page == 'home' %}active{% endif %}">
-                    <a href="#"><i class="fa-solid fa-house"></i>الصفحة الرئيسية</a>
+                <li class="{% if current_page == 'reports:dashboard' %}active{% endif %}">
+                    <a href="{% url 'reports:dashboard' %}"><i class="fa-solid fa-house"></i>الصفحة الرئيسية</a>
                 </li>
                 <li class="{% if current_page == 'orders:order_board' %}active{% endif %}">
                   <a href="{% url 'orders:order_board' %}"><i class="fa-solid fa-file"></i>حالة الطلبات</a>
