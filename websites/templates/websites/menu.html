@@ -1,0 +1,48 @@
+{% extends "websites/base.html" %}
+{% load static %}
+
+{% block title %}القائمة – {{ website.display_name }}{% endblock %}
+
+{% block head %}
+<style>
+  .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:14px}
+  .card{background:#fff;border:1px solid #eef2f7;border-radius:12px;padding:10px;box-shadow:0 6px 14px rgba(0,0,0,.03);display:flex;flex-direction:column;gap:10px}
+  .media{width:100%;aspect-ratio:16/10;overflow:hidden;border-radius:10px;background:#f3f4f6}
+  .media img{width:100%;height:100%;object-fit:cover;display:block}
+  .name{font-weight:700}
+  .price{color:#111}
+  .buttons{display:flex;gap:8px;align-items:center}
+  .buttons form{display:inline}
+  .btn-light{padding:10px 14px;border:1px solid #e5e7eb;border-radius:12px;background:#fff;cursor:pointer;text-decoration:none}
+</style>
+{% endblock %}
+
+{% block content %}
+  {% if products %}
+    <div class="grid">
+      {% for p in products %}
+        <article class="card">
+          <div class="media">
+            {% if p.image %}
+              <img src="{{ p.image.url }}" alt="{{ p.name }}">
+            {% else %}
+              <img src="{% static 'websites/placeholder.png' %}" alt="">
+            {% endif %}
+          </div>
+          <div class="name">{{ p.name }}</div>
+          <div class="price">SAR {{ p.price|floatformat:2 }}</div>
+          <div class="buttons">
+            <a class="btn-light" href="{% url 'websites:product_detail' website.slug p.id %}">التفاصيل</a>
+            <form method="post" action="{% url 'websites:add_to_cart' website.slug p.id %}">
+              {% csrf_token %}
+              <input type="hidden" name="qty" value="1">
+              <button class="btn" type="submit">أضف للسلة</button>
+            </form>
+          </div>
+        </article>
+      {% endfor %}
+    </div>
+  {% else %}
+    <div class="muted">لا توجد منتجات لعرضها حاليًا.</div>
+  {% endif %}
+{% endblock %}

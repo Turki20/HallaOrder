@@ -1,0 +1,35 @@
+{% extends "websites/base.html" %}
+{% load static %}
+
+{% block title %}تسجيل الدخول{% endblock %}
+
+{% block content %}
+<div class="card" style="max-width:520px;margin:24px auto;padding:24px;">
+  <h3 style="margin-bottom:12px;">تسجيل الدخول</h3>
+
+  {% if form.errors %}
+    <div class="alert alert-danger">تحقق من البيانات المدخلة.</div>
+  {% endif %}
+
+  <form method="post">
+    {% csrf_token %}
+    {% if next %}<input type="hidden" name="next" value="{{ next }}">{% endif %}
+
+    <div class="mb-2">
+      <input type="text" name="username" class="form-control"
+             placeholder="الجوال أو البريد الإلكتروني" required>
+    </div>
+    <div class="mb-3">
+      <input type="password" name="password" class="form-control"
+             placeholder="كلمة المرور" required>
+    </div>
+
+    <button class="btn btn-primary w-100">دخول</button>
+  </form>
+
+  <div style="margin-top:12px;text-align:center;">
+    ليس لديك حساب؟
+    <a href="{% url 'websites:signup' %}{% if next %}?next={{ next }}{% endif %}">إنشاء حساب</a>
+  </div>
+</div>
+{% endblock %}

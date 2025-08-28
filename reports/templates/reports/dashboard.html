@@ -121,7 +121,7 @@
 
     <div class="action-col">
       {% if request.user.restaurants %}
-        <a href="{% url 'websites:site_home' request.user.restaurants.id %}" class="action-card card">
+        <a href="{% url 'websites:public' request.user.restaurants.id %}" class="action-card card">
           <div class="icon"><i class="fas fa-globe"></i></div>
           <h3>الموقع</h3>
           <p>افتح وعاين موقعك الإلكتروني.</p>

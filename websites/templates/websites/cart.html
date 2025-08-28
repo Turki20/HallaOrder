@@ -1,0 +1,59 @@
+{% extends "websites/base.html" %}
+{% block title %}السلة — {{ website.display_name|default:website.restaurant.name }}{% endblock %}
+
+{% block hero %}{% endblock %}
+
+{% block content %}
+<div class="card" style="padding:16px">
+  <h3 style="margin-top:0">سلة المشتريات</h3>
+  {% if cart %}
+    <div class="table-responsive">
+      <table class="table align-middle">
+        <thead>
+          <tr>
+            <th>المنتج</th><th>السعر</th><th>الكمية</th><th>المجموع</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for i in cart %}
+            <tr>
+              <td>
+                <div style="display:flex;gap:10px;align-items:center">
+                  {% if i.image %}<img src="{{ i.image }}" style="width:56px;height:56px;object-fit:cover;border-radius:8px">{% endif %}
+                  <div>
+                    <div style="font-weight:700">{{ i.name }}</div>
+                    {% if i.size %}<div class="muted small">الحجم: {{ i.size }}</div>{% endif %}
+                  </div>
+                </div>
+              </td>
+              <td>SAR {{ i.price }}</td>
+              <td>{{ i.qty }}</td>
+              <td>SAR {{ i.price|floatformat:2|add:"0"|floatformat:2|default:"0" | yesno:"" }}{{ i.price|floatformat:2|default:"0"|add:"0"|floatformat:2 }}</td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+    <div class="d-flex justify-content-between">
+      <div></div>
+      <div style="font-weight:700">الإجمالي: SAR {{ total }}</div>
+    </div>
+
+    {% if user.is_authenticated %}
+      <div class="d-grid mt-3">
+        <button class="btn btn-success" disabled>أكمل الطلب (لاحقًا)</button>
+      </div>
+    {% else %}
+      <div class="alert alert-warning mt-3">
+        يلزم تسجيل الدخول لإتمام الطلب.
+      </div>
+      <div class="d-flex gap-2">
+        <a class="btn btn-primary" href="/accounts/login/?next={{ request.path|urlencode }}">تسجيل الدخول</a>
+        <a class="btn btn-outline-secondary" href="/accounts/signup/?next={{ request.path|urlencode }}">إنشاء حساب</a>
+      </div>
+    {% endif %}
+  {% else %}
+    لا توجد عناصر في السلة.
+  {% endif %}
+</div>
+{% endblock %}

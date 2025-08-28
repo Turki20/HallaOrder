@@ -88,13 +88,14 @@
         <p>
           <strong>الالوان</strong>
           <br>
+        <div class="w-100">
           <span>
-            {{ website.custom_colors }}
+            <input type="color" value="{{ website.custom_colors }}" disabled>
           </span>
-          <br>
           <span>
-            {{ website.secondary_color }}
+            <input type="color" value="{{ website.secondary_color }}" disabled>
           </span>
+        </div>
         </p>
 
         {% else %}
