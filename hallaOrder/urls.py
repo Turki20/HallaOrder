@@ -14,42 +14,17 @@ Including another URLconf
     1. Import the include() function: from django.urls import include, path
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
-# hallaOrder/urls.py
 from django.contrib import admin
 from django.urls import path, include
-from django.conf import settings
 from django.conf.urls.static import static
-from django.contrib.auth import views as auth_views  # <-- جديد
+from . import settings
 
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('', include('home.urls')),
-    path('', include('restaurants.urls')),
+    path('', include ('restaurants.urls')), # edit
     path('menu/', include('menu.urls')),
     path('users/', include('users.urls')),
-    path("", include(("websites.urls", "websites"), namespace="websites")),
-    path('accounts/login/',
-         auth_views.LoginView.as_view(template_name='websites/login.html'),
-         name='login'),
-    path('accounts/logout/',
-         auth_views.LogoutView.as_view(),  
-         name='logout'),
-    path('accounts/', include('django.contrib.auth.urls')),
-    path('accounts/password_reset/',
-     auth_views.PasswordResetView.as_view(template_name='websites/password_reset_form.html'),
-     name='password_reset'),
-    path('accounts/password_reset/done/',
-     auth_views.PasswordResetDoneView.as_view(template_name='websites/password_reset_done.html'),
-     name='password_reset_done'),
-    path('accounts/reset/<uidb64>/<token>/',
-     auth_views.PasswordResetConfirmView.as_view(template_name='websites/password_reset_confirm.html'),
-     name='password_reset_confirm'),
-    path('accounts/reset/done/',
-     auth_views.PasswordResetCompleteView.as_view(template_name='websites/password_reset_complete.html'),
-     name='password_reset_complete'),
-     path("accounts/", include("django.contrib.auth.urls")),
-
+    path("", include("websites.urls")), 
+    path("", include('orders.urls')) 
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
-
-if settings.DEBUG:
-    urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

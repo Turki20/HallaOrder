@@ -1,44 +1,147 @@
 {% extends "home/base.html" %}
-{% block title %}المطاعم{% endblock %}
+{% load static %}
+
+{% block title %}{{restaurant.name}}{% endblock %}
 
 {% block dashboard_content %}
-<div class="container p-4">
-    <h2 class="mb-4">المطاعم</h2>
-    <a href="{% url 'restaurants_add' %}" class="btn btn-blue mb-3">+ إضافة مطعم</a>
-    <table class="table table-bordered table-hover">
-        <thead class="table-light">
-            <tr>
-                <th>رقم</th>
-                <th>الاسم</th>
-                <th>المالك</th>
-                <th>خطة الاشتراك</th>
-                <th>الخيارات</th>
-            </tr>
-        </thead>
-        <tbody>
-            {% for restaurant in restaurants %}
-            <tr>
-                <td>{{ restaurant.id }}</td>
-                <td>{{ restaurant.name }}</td>
-                <td>{{ restaurant.owner.username }}</td>
-                <td>
-                    {% if restaurant.subscription_plan %}
-                        {{ restaurant.subscription_plan.name }}
-                    {% else %}
-                        -
-                    {% endif %}
-                </td>
-                <td>
-                    <a href="{% url 'restaurants_edit' restaurant.pk %}" class="btn btn-sm btn-primary"> تعديل</a>
-                    <a href="{% url 'restaurants_delete' restaurant.pk %}" class="btn btn-sm btn-danger"> حذف</a>
-                </td>
-            </tr>
-            {% empty %}
-            <tr>
-                <td colspan="5" class="text-center">لا يوجد مطاعم</td>
-            </tr>
-            {% endfor %}
-        </tbody>
-    </table>
+<div class="container-fluid" dir="rtl">
+
+  <!-- العنوان + زر الإضافة -->
+  <!-- <div class="row p-4 d-flex flex-wrap justify-content-between align-items-start">
+    <div>
+      <h3 class="fw-bold mb-1">معلومات المطعم</h3>
+      <div class="text-muted">إدارة المطعم والاشتراكات</div>
+    </div>
+  </div> -->
+
+  <div class="row p-4 g-4">
+    <div class="col-md-6">
+      <div class="card h-100">
+        <div class="row">
+          <div class="col-8">
+            <h3>معلومات المطعم</h3>
+          </div>
+          <div class="col-4 text-start">
+            <a href="{% url 'restaurants_edit' restaurant.pk %}" class="btn btn-orange" title="تعديل">
+              <i class="bi bi-pencil-square"></i>
+            </a>
+          </div>
+        </div>
+        <hr>
+        <p><span>اسم المطعم: </span><strong>{{restaurant.name}}</strong></p>
+        <p><span>وصف المطعم: </span><strong>{{restaurant.description}}</strong></p>
+        <p><span>مالك المطعم: </span><strong>{{ restaurant.owner.username }}</strong></p>
+        <p><span>تاريخ البدء مع هلا اوردر: </span><strong>{{ restaurant.created_at|date:"Y-m-d" }}</strong></p>
+        <p><span>تاريخ أخر تحديث للمعلومات المطعم: </span><strong>{{ restaurant.updated_at|date:"Y-m-d" }}</strong></p>
+      </div>
+    </div>
+
+    <div class="col-md-6">
+      <div class="card h-100">
+        <h3>باقة الاشتراك</h3>
+        <hr>
+        {% if restaurant.subscription_plan %}
+        <p>
+          <strong style="padding: 5px 15px; border: 1px solid green; border-radius: 10px;">
+            {{ restaurant.subscription_plan.name }}
+          </strong>
+        </p>
+        <p>
+          <strong>لمميزات</strong>
+          <br>
+          <span>
+            {{ restaurant.subscription_plan.features }}
+          </span>
+        </p>
+        <p>
+          <strong>السعر</strong>
+          <br>
+          <span>
+            {{ restaurant.subscription_plan.price }}
+          </span>
+        </p>
+        {% else %}
+        <span class="badge bg-secondary-subtle text-secondary border border-secondary-subtle"
+          style="border-radius:.6rem;">
+          بدون
+        </span>
+        {% endif %}
+      </div>
+    </div>
+
+    <div class="col-md-6">
+      <div class="card h-100">
+        <h3>ثيم الموقع الالكتروني</h3>
+        <hr>
+        {% if website %}
+        <div class="mb-3">
+          <p>
+            <strong>الشعار</strong>
+          </p>
+          <img src="{{website.logo.url}}" alt="" class="w-50">
+        </div>
+        <p>
+          <strong style="padding: 5px 15px; border: 1px solid green; border-radius: 10px;">
+            {{ website.theme }}
+          </strong>
+        </p>
+        <p>
+          <strong>الالوان</strong>
+          <br>
+          <span>
+            {{ website.custom_colors }}
+          </span>
+          <br>
+          <span>
+            {{ website.secondary_color }}
+          </span>
+        </p>
+
+        {% else %}
+        <span class="badge bg-secondary-subtle text-secondary border border-secondary-subtle"
+          style="border-radius:.6rem;">
+          بدون
+        </span>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+
 </div>
+
+<link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
+
+<style>
+  .table> :not(caption)>*>* {
+    padding: .9rem .85rem;
+  }
+
+  .icon-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 34px;
+    height: 34px;
+    border-radius: .6rem;
+    background: #fff;
+    border: 1px solid #e9ecef;
+    color: #6b7280;
+    text-decoration: none;
+  }
+
+  .icon-btn:hover {
+    background: #f8fafc;
+    color: #111827;
+    border-color: #dfe3e6;
+  }
+
+  .card {
+    border-radius: 1rem;
+  }
+
+  .btn,
+  .form-control {
+    border-radius: .75rem;
+  }
+</style>
 {% endblock %}

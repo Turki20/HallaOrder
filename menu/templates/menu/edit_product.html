@@ -1,0 +1,185 @@
+{% extends "home/base.html" %}
+{% load static %}
+
+{% block title %}تعديل المنتج - {{ product.name }}{% endblock title %}
+
+{% block style %}
+    <link rel="stylesheet" href="{% static 'css/menu.css' %}">
+{% endblock style %}
+
+{% block dashboard_content %}
+
+<div class="row p-4">
+    <h3 class="col-8">تعديل المنتج: {{ product.name }}</h3>
+    <div class="col-4 d-flex gap-2 justify-content-end">
+        <a href="{% url 'menu:menu_view' %}" class="btn btn-secondary">
+            <i class="fas fa-arrow-right"></i> العودة للقائمة
+        </a>
+    </div>
+</div>
+
+<div class="card">
+    <div class="card-body">
+        <form method="POST" id="editProductForm" action="" enctype="multipart/form-data">
+            {% csrf_token %}
+            
+            <div class="form-grid">
+                <div class="form-group">
+                    <label for="product-name">اسم المنتج *</label>
+                    <input 
+                        type="text" 
+                        name="name" 
+                        id="product-name" 
+                        value="{{ product.name }}" 
+                        placeholder="مثال: كابتشينو مميز" 
+                        required
+                    >
+                </div>
+
+                <div class="form-group">
+                    <label for="product-price">السعر *</label>
+                    <input 
+                        type="number" 
+                        name="price" 
+                        id="product-price" 
+                        value="{{ product.price }}" 
+                        step="0.01" 
+                        min="0" 
+                        placeholder="0.00" 
+                        required
+                    >
+                    <small class="form-text text-muted">السعر بالريال السعودي</small>
+                </div>
+
+                <div class="form-group">
+                    <label for="product-category">الفئة *</label>
+                    <select name="category" id="product-category" required>
+                        <option value="">اختر الفئة</option>
+                        {% for category in categories %}
+                        <option value="{{ category.id }}" {% if category.id == product.category.id %}selected{% endif %}>
+                            {{ category.name }}
+                        </option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="product-availability">حالة التوفر</label>
+                    <select name="available" id="product-availability">
+                        <option value="1" {% if product.available %}selected{% endif %}>متاح</option>
+                        <option value="0" {% if not product.available %}selected{% endif %}>غير متاح</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="product-image">الصورة</label>
+                    <input 
+                        type="file" 
+                        name="image" 
+                        id="product-image"
+                        accept="image/*"
+                    >
+                    <small class="form-text text-muted">رابط صورة المنتج (اختياري)</small>
+                </div>
+
+                <div class="form-group">
+                    <label for="image-preview">معاينة الصورة</label>
+                    <div class="image-preview-container">
+                        {% if product.image %}
+                        <img id="imagePreview" src="{{ product.image.url }}" alt="معاينة الصورة" class="image-preview">
+                        {% else %}
+                        <div id="imagePreview" class="image-preview-placeholder">
+                            <i class="fas fa-image"></i>
+                            <span>لا توجد صورة</span>
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <div class="form-group full-width">
+                    <label for="product-description">وصف المنتج</label>
+                    <textarea 
+                        name="description" 
+                        id="product-description" 
+                        rows="4" 
+                        placeholder="وصف تفصيلي عن المنتج، مكوناته، أو ميزاته الخاصة..."
+                    >{{ product.description }}</textarea>
+                </div>
+            </div>
+
+            <div class="form-actions mt-4">
+                <button type="submit" class="btn btn-orange">
+                    <i class="fas fa-save"></i> حفظ التغييرات
+                </button>
+                <a href="{% url 'menu:menu_view' %}" class="btn btn-secondary ms-2">
+                    <i class="fas fa-times"></i> إلغاء
+                </a>
+            </div>
+        </form>
+
+        <!-- Danger Zone -->
+        <div class="danger-zone mt-4 pt-4" style="border-top: 2px solid #dc3545;">
+            <h3 style="color: #dc3545;">منطقة الخطر</h3>
+            <p class="text-muted">حذف هذا المنتج سيؤدي إلى إزالته نهائياً من القائمة.</p>
+            <form method="POST" action="{% url 'menu:delete_product' product.id %}" onsubmit="return confirmDelete();">
+                {% csrf_token %}
+                <button type="submit" class="btn btn-danger">
+                    <i class="fas fa-trash"></i> حذف المنتج نهائياً
+                </button>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script>
+// Form validation
+document.getElementById('editProductForm').addEventListener('submit', function(e) {
+    const name = document.getElementById('product-name').value.trim();
+    const price = document.getElementById('product-price').value;
+    const category = document.getElementById('product-category').value;
+    
+    if (!name || !price || !category) {
+        e.preventDefault();
+        alert('يرجى ملء جميع الحقول المطلوبة');
+        return false;
+    }
+    
+    if (parseFloat(price) < 0) {
+        e.preventDefault();
+        alert('يرجى إدخال سعر صحيح');
+        return false;
+    }
+});
+
+// Image preview
+document.getElementById('product-image').addEventListener('input', function() {
+    const imageUrl = this.value;
+    const preview = document.getElementById('imagePreview');
+    
+    if (imageUrl) {
+        preview.innerHTML = `<img src="${imageUrl}" alt="معاينة الصورة" class="image-preview" onerror="showImageError()">`;
+    } else {
+        preview.innerHTML = `
+            <div class="image-preview-placeholder">
+                <i class="fas fa-image"></i>
+                <span>لا توجد صورة</span>
+            </div>
+        `;
+    }
+});
+
+function showImageError() {
+    document.getElementById('imagePreview').innerHTML = `
+        <div class="image-preview-placeholder" style="border-color: #dc3545; color: #dc3545;">
+            <i class="fas fa-exclamation-triangle"></i>
+            <span>خطأ في تحميل الصورة</span>
+        </div>
+    `;
+}
+
+function confirmDelete() {
+    return confirm('هل أنت متأكد من حذف هذا المنتج؟ لا يمكن التراجع عن هذا الإجراء.');
+}
+</script>
+
+{% endblock dashboard_content %}

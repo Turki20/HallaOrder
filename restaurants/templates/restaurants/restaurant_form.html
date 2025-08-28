@@ -3,9 +3,9 @@
 
 {% block dashboard_content %}
 <div class="row p-4">
-    <div class="col-md-8 offset-md-2">
-        <div class="card shadow-sm p-4">
-            <h2 class="mb-4 text-center">{{ title }}</h2>
+    <div class="col-md-12">
+        <div class="card p-4">
+            <h2 class="mb-4 text-center">تعديل معلومات المطعم</h2>
             <form method="post" novalidate>
                 {% csrf_token %}
                 {% for field in form %}
@@ -18,8 +18,8 @@
                 </div>
                 {% endfor %}
                 <div class="d-flex justify-content-end gap-2">
-                    <button type="submit" class="btn btn-primary">حفظ</button>
-                    <a href="{% url 'restaurants' %}" class="btn btn-secondary">إلغاء</a>
+                    <button type="submit" class="btn btn-blue">حفظ</button>
+                    <a href="{% url 'restaurants' %}" class="btn btn-orange">إلغاء</a>
                 </div>
             </form>
         </div>

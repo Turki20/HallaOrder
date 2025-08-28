@@ -1,0 +1,340 @@
+{% extends "home/base.html" %}
+{% block title %}حالة الطلبات{% endblock %}
+
+{% block dashboard_content %}
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+<div class="container-fluid py-4" dir="rtl">
+
+<div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-3">
+  <div class="d-flex align-items-center gap-2">
+    <h3 class="fw-bold m-0">حالة الطلبات</h3>
+
+    {# شارة الفرع فقط إذا كان محدداً (بدون "جميع الفروع") #}
+    {% if active_branch %}
+      <span class="badge border"
+            style="border-radius:.75rem; background:rgba(15,93,97,.10); color:#0f5d61; border-color:rgba(15,93,97,.25);">
+        الفرع: {{ active_branch.name }}
+      </span>
+    {% endif %}
+  </div>
+
+  <div class="d-flex align-items-center gap-2">
+    {# محدد الفروع بشكل أجمل مع أيقونة متجر؛ بدون خيار "جميع الفروع" #}
+    <div class="input-group input-group-sm" style="width:260px;">
+      <span class="input-group-text bg-transparent border-end-0">
+        <i class="bi bi-shop"></i>
+      </span>
+      <select id="branch-picker"
+              class="form-select border-start-0"
+              style="border-radius:.6rem;"
+              onchange="const opt=this.options[this.selectedIndex]; if(opt.dataset.href){ window.location = opt.dataset.href; }">
+        <option value="" disabled {% if not active_branch %}selected{% endif %} hidden>اختر فرعاً…</option>
+        {% for b in branches %}
+          <option data-href="{% url 'orders:order_board_by_branch' b.id %}"
+                  value="{{ b.id }}"
+                  {% if active_branch and active_branch.id == b.id %}selected{% endif %}>
+            {{ b.name }}
+          </option>
+        {% endfor %}
+      </select>
+    </div>
+
+    <button id="refreshBtn" class="btn btn-blue d-inline-flex align-items-center"
+            style="border-radius:.75rem; padding:.45rem .8rem;">
+      <i class="bi bi-arrow-repeat" style="padding-left:4px;"></i> تحديث
+    </button>
+  </div>
+</div>
+
+
+</div>
+
+  <div class="row g-3">
+
+    <!-- طلبات جديدة -->
+    <div class="col-12 col-md-4">
+      <div class="card h-100" style="border-radius:1rem;">
+        <div class="card-header d-flex justify-content-between align-items-center"
+             style="background:#f8fafc; border-top-left-radius:1rem; border-top-right-radius:1rem;">
+          <div class="d-flex align-items-center gap-2">
+            <i class="bi bi-stars text-secondary"></i>
+            <span class="fw-semibold">طلبات جديدة</span>
+          </div>
+          <span class="badge" style="background:#e9ecef; color:#495057; border-radius:.75rem; padding:.35rem .6rem;">
+            {{ new_orders|length|default:0 }}
+          </span>
+        </div>
+
+        <div class="card-body" style="background:#f7f9fb;">
+          {% if new_orders %}
+            <div class="d-flex flex-column gap-3">
+              {% for order in new_orders %}
+                <div class="card shadow-sm position-relative"
+                     style="border-radius:1rem; overflow:hidden; border:1px solid #e9ecef;">
+                  <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-start mb-2">
+                      <div class="small text-muted">منذ {{ order.created_at|timesince }}</div>
+                      <div class="small text-muted">#{{ order.pk }}</div>
+                    </div>
+
+                    <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
+                      <div class="d-flex align-items-center gap-2">
+                        <i class="bi bi-person-fill text-secondary"></i>
+                        <span class="fw-semibold">{{ order.customer.username|default:"عميل" }}</span>
+                      </div>
+                      <div class="d-flex align-items-center gap-2 text-muted small">
+                        <i class="bi bi-credit-card-2-front"></i>
+                        <span>{% if order.payment_method == "Cash" %}نقدًا{% else %}أونلاين{% endif %}</span>
+                      </div>
+                    </div>
+
+                    <hr class="my-3" style="opacity:.1;">
+
+                    <div class="d-flex justify-content-between align-items-center gap-2 flex-wrap">
+                      <div class="d-flex gap-2">
+                      <button type="button"
+                              class="btn btn-dark btn-order-detail"
+                              data-detail-url="{% url 'orders:order_detail_fragment' order.pk %}"
+                              data-bs-toggle="modal"
+                              data-bs-target="#orderDetailModal"
+                              >
+                        التفاصيل
+                      </button>
+
+                        {% if order.status == "New" or order.status == "Preparing" or order.status == "Ready" %}
+                          <form method="post" action="{% url 'orders:order_advance' order.pk %}">
+                            {% csrf_token %}
+                            <button class="btn btn-blue h-100"
+                              type="submit">
+                              {% if order.status == "New" %}تجهيز{% elif order.status == "Preparing" %}جاهز{% else %}تسليم{% endif %}
+                            </button>
+                          </form>
+                        {% endif %}
+
+                        {% if order.status != "Cancelled" and order.status != "Delivered" %}
+                          <form method="post" action="{% url 'orders:order_cancel' order.pk %}">
+                            {% csrf_token %}
+                            <button class="btn btn-orange h-100"
+                               type="submit">
+                              إلغاء
+                            </button>
+                          </form>
+                        {% endif %}
+                      </div>
+
+                      <div class="fw-bold" style="color:#0f5d61;">
+                        ر.س {{ order.total_price|floatformat:2 }}
+                      </div>
+                    </div>
+                  </div>
+                  <div style="position:absolute; inset-inline-end:0; top:0; width:4px; height:100%; background:#ffc107;"></div>
+                </div>
+              {% endfor %}
+            </div>
+          {% else %}
+            <div class="d-flex flex-column justify-content-center align-items-center"
+                 style="height:220px; background:#f1f5f9; border-radius:.75rem;">
+              <span class="badge" style="background:#fff; border:1px dashed #cbd5e1; color:#6b7280; border-radius:.75rem; padding:.5rem .8rem;">
+                لا توجد طلبات
+              </span>
+            </div>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+
+    <!-- قيد التجهيز -->
+    <div class="col-12 col-md-4">
+      <div class="card h-100" style="border-radius:1rem;">
+        <div class="card-header d-flex justify-content-between align-items-center"
+             style="background:#f8fafc; border-top-left-radius:1rem; border-top-right-radius:1rem;">
+          <div class="d-flex align-items-center gap-2">
+            <i class="bi bi-hourglass-split text-secondary"></i>
+            <span class="fw-semibold">قيد التجهيز</span>
+          </div>
+          <span class="badge" style="background:#e9ecef; color:#495057; border-radius:.75rem; padding:.35rem .6rem;">
+            {{ preparing_orders|length|default:0 }}
+          </span>
+        </div>
+
+        <div class="card-body" style="background:#f7f9fb;">
+          {% if preparing_orders %}
+            <div class="d-flex flex-column gap-3">
+              {% for order in preparing_orders %}
+                {# نفس كارت الطلب أعلاه #}
+                <div class="card shadow-sm position-relative"
+                     style="border-radius:1rem; overflow:hidden; border:1px solid #e9ecef;">
+                  <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-start mb-2">
+                      <div class="small text-muted">منذ {{ order.created_at|timesince }}</div>
+                      <div class="small text-muted">#{{ order.pk }}</div>
+                    </div>
+                    <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
+                      <div class="d-flex align-items-center gap-2">
+                        <i class="bi bi-person-fill text-secondary"></i>
+                        <span class="fw-semibold">{{ order.customer.username|default:"عميل" }}</span>
+                      </div>
+                      <div class="d-flex align-items-center gap-2 text-muted small">
+                        <i class="bi bi-credit-card-2-front"></i>
+                        <span>{% if order.payment_method == "Cash" %}نقدًا{% else %}أونلاين{% endif %}</span>
+                      </div>
+                    </div>
+                    <hr class="my-3" style="opacity:.1;">
+                    <div class="d-flex justify-content-between align-items-center gap-2 flex-wrap">
+                      <div class="d-flex gap-2">
+                        <a href="#" class="btn btn-dark" >التفاصيل</a>
+                        {% if order.status == "New" or order.status == "Preparing" or order.status == "Ready" %}
+                          <form method="post" action="{% url 'orders:order_advance' order.pk %}">{% csrf_token %}
+                            <button class="btn btn-blue"  type="submit">
+                              {% if order.status == "New" %}بدء التجهيز{% elif order.status == "Preparing" %}جاهز{% else %}تسليم{% endif %}
+                            </button>
+                          </form>
+                        {% endif %}
+                        {% if order.status != "Cancelled" and order.status != "Delivered" %}
+                          <form method="post" action="{% url 'orders:order_cancel' order.pk %}">{% csrf_token %}
+                            <button class="btn btn-orange"  type="submit">إلغاء</button>
+                          </form>
+                        {% endif %}
+                      </div>
+                      <div class="fw-bold" style="color:#0f5d61;">ر.س {{ order.total_price|floatformat:2 }}</div>
+                    </div>
+                  </div>
+                  <div style="position:absolute; inset-inline-end:0; top:0; width:4px; height:100%; background:#0dcaf0;"></div>
+                </div>
+              {% endfor %}
+            </div>
+          {% else %}
+            <div class="d-flex flex-column justify-content-center align-items-center"
+                 style="height:220px; background:#f1f5f9; border-radius:.75rem;">
+              <span class="badge" style="background:#fff; border:1px dashed #cbd5e1; color:#6b7280; border-radius:.75rem; padding:.5rem .8rem;">
+                لا توجد طلبات
+              </span>
+            </div>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+
+    <!-- جاهز للاستلام -->
+    <div class="col-12 col-md-4">
+      <div class="card h-100" style="border-radius:1rem;">
+        <div class="card-header d-flex justify-content-between align-items-center"
+             style="background:#f8fafc; border-top-left-radius:1rem; border-top-right-radius:1rem;">
+          <div class="d-flex align-items-center gap-2">
+            <i class="bi bi-bag-check text-secondary"></i>
+            <span class="fw-semibold">جاهز للاستلام</span>
+          </div>
+          <span class="badge" style="background:#e9ecef; color:#495057; border-radius:.75rem; padding:.35rem .6rem;">
+            {{ ready_orders|length|default:0 }}
+          </span>
+        </div>
+
+        <div class="card-body" style="background:#f7f9fb;">
+          {% if ready_orders %}
+            <div class="d-flex flex-column gap-3">
+              {% for order in ready_orders %}
+                {# نفس كارت الطلب أعلاه #}
+                <div class="card shadow-sm position-relative"
+                     style="border-radius:1rem; overflow:hidden; border:1px solid #e9ecef;">
+                  <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-start mb-2">
+                      <div class="small text-muted">منذ {{ order.created_at|timesince }}</div>
+                      <div class="small text-muted">#{{ order.pk }}</div>
+                    </div>
+                    <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
+                      <div class="d-flex align-items-center gap-2">
+                        <i class="bi bi-person-fill text-secondary"></i>
+                        <span class="fw-semibold">{{ order.customer.username|default:"عميل" }}</span>
+                      </div>
+                      <div class="d-flex align-items-center gap-2 text-muted small">
+                        <i class="bi bi-credit-card-2-front"></i>
+                        <span>{% if order.payment_method == "Cash" %}نقدًا{% else %}أونلاين{% endif %}</span>
+                      </div>
+                    </div>
+                    <hr class="my-3" style="opacity:.1;">
+                    <div class="d-flex justify-content-between align-items-center gap-2 flex-wrap">
+                      <div class="d-flex gap-2">
+                        <a href="#" class="btn btn-dark" >التفاصيل</a>
+                        {% if order.status == "New" or order.status == "Preparing" or order.status == "Ready" %}
+                          <form method="post" action="{% url 'orders:order_advance' order.pk %}">{% csrf_token %}
+                            <button class="btn btn-blue"  type="submit">
+                              {% if order.status == "New" %}بدء التجهيز{% elif order.status == "Preparing" %}جاهز{% else %}تسليم{% endif %}
+                            </button>
+                          </form>
+                        {% endif %}
+                        {% if order.status != "Cancelled" and order.status != "Delivered" %}
+                          <form method="post" action="{% url 'orders:order_cancel' order.pk %}">{% csrf_token %}
+                            <button class="btn btn-orange" type="submit">إلغاء</button>
+                          </form>
+                        {% endif %}
+                      </div>
+                      <div class="fw-bold" style="color:#0f5d61;">ر.س {{ order.total_price|floatformat:2 }}</div>
+                    </div>
+                  </div>
+                  <div style="position:absolute; inset-inline-end:0; top:0; width:4px; height:100%; background:#20c997;"></div>
+                </div>
+              {% endfor %}
+            </div>
+          {% else %}
+            <div class="d-flex flex-column justify-content-center align-items-center"
+                 style="height:220px; background:#f1f5f9; border-radius:.75rem;">
+              <span class="badge" style="background:#fff; border:1px dashed #cbd5e1; color:#6b7280; border-radius:.75rem; padding:.5rem .8rem;">
+                لا توجد طلبات
+              </span>
+            </div>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+{# Bootstrap 5 modal #}
+<div class="modal fade" id="orderDetailModal" tabindex="-1" aria-labelledby="orderDetailModalLabel" aria-hidden="true" dir="rtl">
+  <div class="modal-dialog modal-lg modal-dialog-scrollable">
+    <div class="modal-content" style="border-radius:1rem;">
+      <div class="modal-header">
+        <h5 class="modal-title fw-bold" id="orderDetailModalLabel">تفاصيل الطلب</h5>
+        <button type="button" class="btn-close ms-0" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div id="orderDetailBody" class="modal-body p-0">
+        <div class="p-4 text-muted small">جارِ التحميل…</div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary" data-bs-dismiss="modal">إغلاق</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  document.addEventListener('click', function (e) {
+    const btn = e.target.closest('.btn-order-detail');
+    if (!btn) return;
+
+    const url = btn.getAttribute('data-detail-url');
+    const body = document.getElementById('orderDetailBody');
+    body.innerHTML = '<div class="p-4 text-muted small">جارِ التحميل…</div>';
+
+    fetch(url, { headers: { 'X-Requested-With': 'XMLHttpRequest' } })
+      .then(r => {
+        if (!r.ok) throw new Error('HTTP ' + r.status);
+        return r.text();
+      })
+      .then(html => body.innerHTML = html)
+      .catch(err => {
+        console.error(err);
+        body.innerHTML = '<div class="p-4 text-danger">تعذّر تحميل التفاصيل.</div>';
+      });
+  });
+</script>
+
+<script>
+  document.getElementById('refreshBtn')?.addEventListener('click', function(){
+    window.location.reload();
+  });
+</script>
+
+
+{% endblock %}

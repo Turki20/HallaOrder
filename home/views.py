@@ -17,20 +17,30 @@ def index_view(request:HttpRequest):
     return render(request, 'home/index.html')
 
 
-@login_required(login_url='/users/sign_up/')
+@login_required(login_url='/users/login/')
 def subscriptionplan_view(request:HttpRequest):
     if request.method == 'POST':
         request.session['subscriptionplan_id'] = request.POST['subscriptionplan']
+      
+    # # اذا المستخدم لديه مطعم بالفعل تم تسجيلة  
+    # try:
+    #     if request.user.restaurants:
+    #         return redirect('home:create_restaurant_identity')
+    # except:
+    #     pass
     
-    subscriptionplan_data = request.session.get('subscriptionplan_id', None)
     subscription_plan_search = Restaurant.objects.filter(owner = request.user)
-    if subscriptionplan_data is not None or len(subscription_plan_search) > 0:
+    if len(subscription_plan_search) > 0:
+        return redirect('restaurants')
+        
+    subscriptionplan_data = request.session.get('subscriptionplan_id', None)
+    if subscriptionplan_data is not None:
         return redirect('home:create_restaurant_identity')
     
     subscriptionPlan = SubscriptionPlan.objects.all()
     return render(request, 'home/subscriptionplan.html', {'subscriptionPlan':subscriptionPlan})
 
-@login_required(login_url='/users/sign_up/')
+@login_required(login_url='/users/login/')
 def create_restaurant_identity(request:HttpRequest):
     # لازم قبل يسوي انشاء للمطعم يختار الباقه
     subscriptionplan_data = request.session.get('subscriptionplan_id', None)
@@ -40,7 +50,7 @@ def create_restaurant_identity(request:HttpRequest):
     return render(request, 'home/create_restaurant_identity.html')
 
 
-@login_required(login_url='/users/sign_up/')
+@login_required(login_url='/users/login/')
 def restaurant_identity(request:HttpRequest):
     # لازم قبل يسوي انشاء للمطعم يختار الباقه
     subscriptionplan_data = request.session.get('subscriptionplan_id', None)
@@ -90,7 +100,7 @@ def restaurant_identity(request:HttpRequest):
             
     return render(request, 'home/restaurant_identity.html', {})
 
-@login_required(login_url='/users/sign_up/')
+@login_required(login_url='/users/login/')
 def add_food_plate(request:HttpRequest):
     # تحقق يجب ان ينشئ المطعم اولا
     try:
@@ -157,7 +167,7 @@ def add_food_plate(request:HttpRequest):
 
     return render(request, 'home/add_food_plate.html', {})
 
-@login_required(login_url='/users/sign_up/')
+@login_required(login_url='/users/login/')
 def add_branch_view(request:HttpRequest):
     try:
         request.user.restaurants

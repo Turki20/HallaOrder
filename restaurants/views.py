@@ -3,6 +3,7 @@ from .models import SubscriptionPlan, Restaurant, Branch
 from .forms import RestaurantForm ,BranchForm
 from django.contrib.auth.models import User
 from django.contrib import messages
+from websites.models import Website
 
 # عرض باقات الاشتراك
 def subscription_plans_list(request):
@@ -24,9 +25,11 @@ def restaurants_list(request):
             messages.error(request, "الرجاء اكمال معلومات المطعم للوصول للوحة التحكم", 'alert-danger')
             return redirect('home:create_restaurant_identity')
     
-    restaurants = Restaurant.objects.all()
+    restaurant = Restaurant.objects.get(pk = request.user.restaurants.id)
+    website = Website.objects.get(restaurant=restaurant)
     context = {
-        "restaurants": restaurants,
+        "restaurant": restaurant,
+        'website': website,
         "current_page": "restaurants",  
     }
     return render(request, "restaurants/restaurant_list.html", context)
@@ -64,7 +67,7 @@ def restaurant_delete(request, pk):
 
 # عرض الفروع
 def branches_list(request):
-    branches = Branch.objects.select_related("restaurant").all()
+    branches = Branch.objects.select_related("restaurant").filter(restaurant = request.user.restaurants)
     context = {
         "branches": branches,
         "current_page": "branches",  
@@ -76,7 +79,9 @@ def branch_create(request):
     if request.method == "POST":
         form = BranchForm(request.POST)
         if form.is_valid():
-            form.save()
+            branch = form.save(commit=False)
+            branch.restaurant = request.user.restaurants
+            branch.save()
             return redirect('branches')  
     else:
         form = BranchForm()
