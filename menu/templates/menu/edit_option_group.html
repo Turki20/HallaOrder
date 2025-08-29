@@ -1,0 +1,73 @@
+{% extends "home/base.html" %}
+{% load static %}
+{% block title %}تعديل: {{ instance.name }}{% endblock title %}
+{% block style %}
+<link rel="stylesheet" href="{% static 'menu/css/menu.css' %}">
+{% endblock style %}
+{% block dashboard_content %}
+<div class="page-header mb-3 p-4">
+    <h1>تعديل: {{ instance.name }}</h1>
+    <div class="d-flex gap-2 justify-content-end">
+        <a href="{% url 'menu:menu_view' %}" class="btn btn-secondary"><i class="fas fa-times"></i> إلغاء</a>
+        <button type="submit" form="optionGroupForm" class="btn btn-orange"><i class="fas fa-save"></i> حفظ التغييرات</button>
+    </div>
+</div>
+
+<form method="POST" id="optionGroupForm">
+    {% csrf_token %}
+    <div class="row m-0 p-2">
+        <!-- Main Group Settings -->
+        <div class="col-lg-4">
+            <div class="card"><div class="card-body">
+                <h3 class="section-title">إعدادات المجموعة</h3>
+                <div class="form-group mb-3">{{ form.name.label_tag }}{{ form.name }}</div>
+                <div class="form-group mb-3">{{ form.selection_type.label_tag }}{{ form.selection_type }}</div>
+                <div class="form-check form-switch mb-3 p-3 border rounded">{{ form.is_required }}<label class="form-check-label" for="{{ form.is_required.id_for_label }}">{{ form.is_required.label }}</label></div>
+                <div id="multi-select-rules" class="{% if form.instance.selection_type != 'MULTIPLE' %}d-none{% endif %}">
+                    <p class="text-muted small">قواعد الاختيار المتعدد:</p>
+                    <div class="form-group mb-3">{{ form.min_selection.label_tag }}{{ form.min_selection }}</div>
+                    <div class="form-group mb-3">{{ form.max_selection.label_tag }}{{ form.max_selection }}</div>
+                </div>
+            </div></div>
+        </div>
+
+        <!-- Options Formset -->
+        <div class="col-lg-8">
+            <div class="card"><div class="card-body">
+                <h3 class="section-title">الخيارات/الإضافات المتاحة</h3>
+                {{ formset.management_form }}
+                <div id="options-form-container">
+                    {% for form in formset %}
+                    <div class="option-form-row" id="option-row-{{ forloop.counter0 }}">
+                        {{ form.id }}
+                        <div class="row align-items-center">
+                            <div class="col-1 text-muted drag-handle"><i class="fas fa-grip-vertical"></i></div>
+                            <div class="col-6">{{ form.name }}</div><div class="col-4">{{ form.price_adjustment }}</div>
+                            <div class="col-1">
+                                {% if form.instance.pk and formset.can_delete %}<div class="form-check d-none">{{ form.DELETE }}</div>{% endif %}
+                                <button type="button" class="btn btn-sm btn-danger remove-form-row"><i class="fas fa-trash"></i></button>
+                            </div>
+                        </div>{{ form.position }}<hr class="my-2">
+                    </div>
+                    {% endfor %}
+                </div>
+                <button type="button" id="add-form-row" class="btn btn-light-blue"><i class="fas fa-plus"></i> إضافة خيار آخر</button>
+            </div></div>
+        </div>
+    </div>
+</form>
+
+<template id="empty-form-template">
+    <div class="option-form-row" id="option-row-__prefix__">
+        {{ formset.empty_form.id }}
+        <div class="row align-items-center">
+            <div class="col-1 text-muted drag-handle"><i class="fas fa-grip-vertical"></i></div>
+            <div class="col-6">{{ formset.empty_form.name }}</div>
+            <div class="col-4">{{ formset.empty_form.price_adjustment }}</div>
+            <div class="col-1"><button type="button" class="btn btn-sm btn-danger remove-form-row"><i class="fas fa-trash"></i></button></div>
+        </div>{{ formset.empty_form.position }}<hr class="my-2">
+    </div>
+</template>
+
+<script src="{% static 'menu/js/options.js' %}"></script>
+{% endblock dashboard_content %}

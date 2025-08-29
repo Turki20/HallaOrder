@@ -1,18 +1,22 @@
 {% extends "home/base.html" %}
 {% load static %}
-
 {% block title %}إدارة المنتجات{% endblock title %}
-
 {% block style %}
-    <link rel="stylesheet" href="{% static 'css/menu.css' %}">
+<link rel="stylesheet" href="{% static 'menu/css/menu.css' %}">
 {% endblock style %}
-
 {% block dashboard_content %}
-
 <div class="page-header mb-3 p-4">
     <h1>المنتجات</h1>
     <div class="d-flex gap-2 justify-content-end">
         <button id="manageCategoriesBtn" class="btn btn-blue"><i class="fas fa-sitemap"></i> إدارة الفئات</button>
+        <button id="manageOptionsBtn" class="btn btn-blue"><i class="fas fa-cogs"></i> إدارة الخيارات</button>
+        
+        <!-- START: NEW MEAL MANAGEMENT BUTTON -->
+        <a href="{% url 'menu:meal_management' %}" class="btn btn-blue">
+            <i class="fas fa-utensils"></i> إدارة الوجبات
+        </a>
+        <!-- END: NEW MEAL MANAGEMENT BUTTON -->
+        
         <button id="addProductBtn" class="btn btn-orange"><i class="fas fa-plus"></i> إضافة منتج جديد</button>
     </div>
 </div>
@@ -21,6 +25,8 @@
     <div class="category-tabs">
         {% for category in categories %}
         <button class="tab-btn {% if forloop.first %}active{% endif %}" data-target="category-{{ category.id }}">{{ category.name }}</button>
+        {% empty %}
+        <div class="p-4 text-muted">لم تقم بإضافة أي فئات بعد. ابدأ بإضافة فئة من زر "إدارة الفئات".</div>
         {% endfor %}
     </div>
     <div class="products-content">
@@ -30,18 +36,18 @@
             <table class="products-table">
                <thead><tr><th>المنتج</th><th>السعر</th><th>الحالة</th><th>إجراءات</th></tr></thead>
                <tbody>
-                   {% for product in category.product_set.all %}
+                   {% for product in category.products.all %}
                    <tr>
                        <td>
                            <div class="product-info">
-                               {% if product.image %}
-                               <img src="{{ product.image.url }}" alt="{{ product.name }}">
+                               {% if product.cover_image %}
+                               <img src="{{ product.cover_image.url }}" alt="{{ product.name }}">
+                               {% else %}
+                               <div class="product-image-placeholder"><i class="fas fa-image"></i></div>
                                {% endif %}
                                <div>
                                    <strong>{{ product.name }}</strong>
-                                   {% if product.description %}
-                                   <div class="text-muted small">{{ product.description|truncatewords:10 }}</div>
-                                   {% endif %}
+                                   {% if product.description %}<div class="text-muted small">{{ product.description|truncatewords:10 }}</div>{% endif %}
                                </div>
                            </div>
                        </td>
@@ -56,8 +62,7 @@
                            <div class="action-buttons">
                                <a href="{% url 'menu:edit_product' product.id %}" class="action-btn edit-btn"><i class="fas fa-pen"></i></a>
                                <form method="POST" action="{% url 'menu:delete_product' product.id %}" onsubmit="return confirm('هل أنت متأكد من حذف هذا المنتج؟');" style="display: inline;">
-                                   {% csrf_token %}
-                                   <button type="submit" class="action-btn delete-btn"><i class="fas fa-trash"></i></button>
+                                   {% csrf_token %}<button type="submit" class="action-btn delete-btn"><i class="fas fa-trash"></i></button>
                                </form>
                            </div>
                        </td>
@@ -75,26 +80,14 @@
 <!-- Manage Categories Modal -->
 <div id="manageCategoriesModal" class="modal-overlay">
     <div class="modal-content">
-        <header class="modal-header">
-            <h2>إدارة الفئات الرئيسية</h2>
-            <button class="close-btn">&times;</button>
-        </header>
-        <main class="modal-body row">
-            <div class="add-category-section col-12">
-                <form method="POST" action="{% url 'menu:menu_view' %}">
-                    {% csrf_token %}
-                    <h3>إضافة فئة جديدة</h3>
-                    <div class="form-group">
-                        <label for="new-cat-name">اسم الفئة</label>
-                        <input type="text" name="name" id="new-cat-name" placeholder="مثال: المشروبات" required>
-                    </div>
-                    <div class="modal-footer">
-                        <button type="submit" name="add_category" class="btn btn-orange">حفظ الفئة</button>
-                    </div>
-                </form>
+        <header class="modal-header"><h2>إدارة الفئات الرئيسية</h2><button class="close-btn">×</button></header>
+        <main class="modal-body">
+            <div class="modal-tabs">
+                <button class="modal-tab-btn active" data-target="categories-list-panel">الفئات الحالية</button>
+                <button class="modal-tab-btn" data-target="add-category-panel">إضافة فئة جديدة</button>
             </div>
-            <div class="categories-section col-12">
-                <h3>الفئات الحالية</h3>
+            <div id="categories-list-panel" class="modal-tab-content active">
+                <h3>قائمة الفئات</h3>
                 <div class="category-list">
                     {% for category in categories %}
                     <div class="category-item">
@@ -102,15 +95,20 @@
                         <div class="action-buttons">
                             <a href="{% url 'menu:edit_category' category.id %}" class="action-btn edit-btn"><i class="fas fa-pen"></i></a>
                             <form method="POST" action="{% url 'menu:delete_category' category.id %}" onsubmit="return confirm('هل أنت متأكد من حذف هذه الفئة؟ سيتم حذف جميع المنتجات بداخلها.');" style="display: inline;">
-                                {% csrf_token %}
-                                <button type="submit" class="action-btn delete-btn"><i class="fas fa-trash"></i></button>
+                                {% csrf_token %}<button type="submit" class="action-btn delete-btn"><i class="fas fa-trash"></i></button>
                             </form>
                         </div>
                     </div>
-                    {% empty %}
-                    <div class="empty-state">لا توجد فئات لعرضها.</div>
-                    {% endfor %}
+                    {% empty %}<div class="empty-state">لا توجد فئات لعرضها.</div>{% endfor %}
                 </div>
+            </div>
+            <div id="add-category-panel" class="modal-tab-content">
+                <h3>إضافة فئة جديدة</h3>
+                <form method="POST" action="{% url 'menu:menu_view' %}">
+                    {% csrf_token %}
+                    <div class="form-group"><label for="new-cat-name">اسم الفئة</label><input type="text" name="name" id="new-cat-name" placeholder="مثال: المشروبات" required></div>
+                    <div class="modal-footer"><button type="submit" name="add_category" class="btn btn-orange">حفظ الفئة</button></div>
+                </form>
             </div>
         </main>
     </div>
@@ -119,42 +117,86 @@
 <!-- Add Product Modal -->
 <div id="productModal" class="modal-overlay">
     <div class="modal-content">
-        <header class="modal-header"><h2>إضافة منتج جديد</h2><button class="close-btn">&times;</button></header>
+        <header class="modal-header"><h2>إضافة منتج جديد</h2><button class="close-btn">×</button></header>
         <main class="modal-body">
-            <form method="POST" action="{% url 'menu:menu_view' %}" style="width: 100%;" enctype="multipart/form-data">
+            <form method="POST" action="{% url 'menu:menu_view' %}" style="width: 100%;">
                 {% csrf_token %}
                 <div class="form-grid">
-                    <div class="form-group">
-                        <label for="product-name">اسم المنتج</label>
-                        <input type="text" name="name" id="product-name" placeholder="مثال: كابتشينو" required>
-                    </div>
-                    <div class="form-group">
-                        <label for="product-price">السعر</label>
-                        <input type="number" name="price" id="product-price" step="0.01" placeholder="0.00" required>
-                    </div>
-                    <div class="form-group">
-                        <label for="product-category">الفئة</label>
-                        <select name="category" id="product-category" required>
-                            <option value="">اختر الفئة</option>
-                            {% for category in categories %}
-                            <option value="{{ category.id }}">{{ category.name }}</option>
-                            {% endfor %}
+                    <div class="form-group"><label for="product-name-add">اسم المنتج</label><input type="text" name="name" id="product-name-add" placeholder="مثال: كابتشينو" required></div>
+                    <div class="form-group"><label for="product-price-add">السعر</label><input type="number" name="price" id="product-price-add" step="0.01" placeholder="0.00" required></div>
+                    <div class="form-group full-width"><label for="product-category-add">الفئة</label>
+                        <select name="category" id="product-category-add" required>
+                            <option value="" disabled selected>اختر الفئة</option>{% for category in categories %}<option value="{{ category.id }}">{{ category.name }}</option>{% endfor %}
                         </select>
                     </div>
-                    <div class="form-group">
-                        <label for="product-image">رابط الصورة</label>
-                        <input type="url" name="image" id="product-image" placeholder="https://...">
-                    </div>
-                    <div class="form-group full-width">
-                        <label for="product-description">الوصف</label>
-                        <textarea name="description" id="product-description" rows="3" placeholder="وصف المنتج..."></textarea>
-                    </div>
+                    <div class="form-group full-width"><label for="product-description-add">الوصف (اختياري)</label><textarea name="description" id="product-description-add" rows="3" placeholder="وصف المنتج..."></textarea></div>
                 </div>
-                <div class="modal-footer"><button type="submit" name="add_product" class="btn btn-orange">حفظ المنتج</button></div>
+                <div class="modal-footer"><button type="submit" name="add_product" class="btn btn-orange">حفظ ومتابعة لإضافة الصور</button></div>
             </form>
         </main>
     </div>
 </div>
 
-<script src="{% static 'js/menu.js' %}"></script>
+<!-- Manage Options & Add-ons Modal -->
+<div id="manageOptionsModal" class="modal-overlay">
+    <div class="modal-content modal-lg">
+        <header class="modal-header"><h2>إدارة الخيارات والإضافات</h2><button class="close-btn">×</button></header>
+        <main class="modal-body">
+            <div class="modal-tabs">
+                <button class="modal-tab-btn active" data-target="options-tab-panel">مجموعات الخيارات (الحجم، النضج)</button>
+                <button class="modal-tab-btn" data-target="addons-tab-panel">مجموعات الإضافات (الصوص، الطبقة)</button>
+            </div>
+            <div id="options-tab-panel" class="modal-tab-content active">
+                <div class="row"><div class="col-md-7 border-end">
+                        <h3>مجموعات الخيارات الحالية</h3>
+                        <div class="options-list-modal">
+                            {% for group in option_groups %}
+                            <div class="category-item">
+                                <span>{{ group.name }} {% if group.is_required %}<span class="text-danger small">(إجباري)</span>{% endif %}</span>
+                                <div class="action-buttons">
+                                    <a href="{% url 'menu:edit_option_group' group.id %}" class="action-btn edit-btn" title="تعديل الخيارات"><i class="fas fa-pen"></i></a>
+                                    <form method="POST" action="{% url 'menu:delete_option_group' group.id %}" onsubmit="return confirm('هل أنت متأكد من حذف هذه المجموعة؟');" style="display:inline;">{% csrf_token %}<button type="submit" class="action-btn delete-btn"><i class="fas fa-trash"></i></button></form>
+                                </div>
+                            </div>
+                            {% empty %}<p class="text-muted p-3">لا توجد مجموعات خيارات. أضف واحدة من اليسار.</p>{% endfor %}
+                        </div>
+                    </div><div class="col-md-5">
+                        <h3>إضافة مجموعة خيارات جديدة</h3>
+                        <form method="POST" action="{% url 'menu:menu_view' %}">{% csrf_token %}
+                            <div class="form-group">{{ option_group_create_form.name.label_tag }} {{ option_group_create_form.name }}</div>
+                            <div class="form-check mt-2">{{ option_group_create_form.is_required }} {{ option_group_create_form.is_required.label_tag }}</div>
+                            <button type="submit" name="add_option_group" class="btn btn-orange w-100 mt-3">حفظ المجموعة</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+            <div id="addons-tab-panel" class="modal-tab-content">
+                 <div class="row"><div class="col-md-7 border-end">
+                        <h3>مجموعات الإضافات الحالية</h3>
+                        <div class="options-list-modal">
+                            {% for group in addon_groups %}
+                            <div class="category-item">
+                                <span>{{ group.name }} {% if group.is_required %}<span class="text-danger small">(إجباري)</span>{% endif %}</span>
+                                <div class="action-buttons">
+                                    <a href="{% url 'menu:edit_option_group' group.id %}" class="action-btn edit-btn" title="تعديل الإضافات"><i class="fas fa-pen"></i></a>
+                                    <form method="POST" action="{% url 'menu:delete_option_group' group.id %}" onsubmit="return confirm('هل أنت متأكد من حذف هذه المجموعة؟');" style="display:inline;">{% csrf_token %}<button type="submit" class="action-btn delete-btn"><i class="fas fa-trash"></i></button></form>
+                                </div>
+                            </div>
+                            {% empty %}<p class="text-muted p-3">لا توجد مجموعات إضافات. أضف واحدة من اليسار.</p>{% endfor %}
+                        </div>
+                    </div><div class="col-md-5">
+                        <h3>إضافة مجموعة إضافات جديدة</h3>
+                        <form method="POST" action="{% url 'menu:menu_view' %}">{% csrf_token %}
+                            <div class="form-group">{{ option_group_create_form.name.label_tag }} {{ option_group_create_form.name }}</div>
+                            <div class="form-check mt-2">{{ option_group_create_form.is_required }} {{ option_group_create_form.is_required.label_tag }}</div>
+                            <button type="submit" name="add_addon_group" class="btn btn-orange w-100 mt-3">حفظ المجموعة</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+</div>
+
+<script src="{% static 'menu/js/menu.js' %}"></script>
 {% endblock dashboard_content %}
