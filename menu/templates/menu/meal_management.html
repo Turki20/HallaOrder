@@ -1,0 +1,36 @@
+{% extends "home/base.html" %}
+{% load static %}
+{% block title %}إدارة الوجبات{% endblock title %}
+{% block style %}<link rel="stylesheet" href="{% static 'menu/css/menu.css' %}">{% endblock style %}
+{% block dashboard_content %}
+<div class.page-header mb-3 p-4"><h1>الوجبات والعروض</h1><div class="d-flex gap-2 justify-content-end"><a href="{% url 'menu:create_meal' %}" class="btn btn-orange"><i class="fas fa-plus"></i> إنشاء وجبة جديدة</a></div></div>
+<div class="row m-0 p-2">
+    {% for meal in meals %}
+    <div class="col-md-6 col-lg-4 mb-4">
+        <div class="card meal-card">
+            {% if meal.image %}<img src="{{ meal.image.url }}" class="card-img-top" alt="{{ meal.name }}">{% else %}<div class="card-img-top placeholder-img"><i class="fas fa-utensils"></i></div>{% endif %}
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-start">
+                    <h5 class="card-title">{{ meal.name }}</h5>
+                    <span class="meal-price">{{ meal.price }} ر.س</span>
+                </div>
+                <p class="card-text text-muted small">{{ meal.description|truncatewords:15 }}</p>
+                <h6>مكونات الوجبة:</h6>
+                <ul class="meal-items-list">
+                    {% for item in meal.items.all %}<li>{{ item.quantity }} x {{ item.product.name }}</li>{% endfor %}
+                </ul>
+            </div>
+            <div class="card-footer d-flex justify-content-between align-items-center">
+                <span class="badge {% if meal.available %}badge-success{% else %}badge-danger{% endif %}">{% if meal.available %}متاح{% else %}غير متاح{% endif %}</span>
+                <div class="action-buttons">
+                    <a href="{% url 'menu:edit_meal' meal.id %}" class="action-btn edit-btn"><i class="fas fa-pen"></i></a>
+                    <form method="POST" action="{% url 'menu:delete_meal' meal.id %}" onsubmit="return confirm('هل أنت متأكد من حذف هذه الوجبة؟');" style="display:inline;">{% csrf_token %}<button type="submit" class="action-btn delete-btn"><i class="fas fa-trash"></i></button></form>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% empty %}
+    <div class="col-12"><div class="empty-state p-5 text-center"><i class="fas fa-box-open fa-3x text-muted mb-3"></i><h4>لا توجد وجبات لعرضها</h4><p>استخدم الوجبات لإنشاء عروض وباقات خاصة لعملائك.</p></div></div>
+    {% endfor %}
+</div>
+{% endblock dashboard_content %}

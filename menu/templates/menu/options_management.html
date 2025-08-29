@@ -1,0 +1,56 @@
+{% extends "home/base.html" %}
+{% load static %}
+{% block title %}إدارة خيارات المنتجات{% endblock title %}
+{% block style %}
+<link rel="stylesheet" href="{% static 'menu/css/menu.css' %}">
+{% endblock style %}
+{% block dashboard_content %}
+<div class="page-header mb-3 p-4">
+    <h1>خيارات المنتجات والإضافات</h1>
+    <div class="d-flex gap-2 justify-content-end">
+        <a href="{% url 'menu:create_option_group' %}" class="btn btn-orange"><i class="fas fa-plus"></i> إنشاء مجموعة جديدة</a>
+    </div>
+</div>
+
+<div class="card">
+    <div class="card-body">
+        {% if option_groups %}
+        <div class="options-list">
+            {% for group in option_groups %}
+            <div class="option-group-item">
+                <div class="option-group-header">
+                    <div class="option-group-info">
+                        <strong>{{ group.name }}</strong>
+                        <span class="badge {% if group.selection_type == 'SINGLE' %}badge-blue{% else %}badge-light-blue{% endif %}">{{ group.get_selection_type_display }}</span>
+                        {% if group.is_required %}
+                        <span class="badge badge-danger">إجباري</span>
+                        {% endif %}
+                    </div>
+                    <div class="action-buttons">
+                        <a href="{% url 'menu:edit_option_group' group.id %}" class="action-btn edit-btn"><i class="fas fa-pen"></i></a>
+                        <form method="POST" action="{% url 'menu:delete_option_group' group.id %}" onsubmit="return confirm('هل أنت متأكد من حذف هذه المجموعة؟ سيتم إزالتها من جميع المنتجات المرتبطة بها.');" style="display: inline;">
+                            {% csrf_token %}
+                            <button type="submit" class="action-btn delete-btn"><i class="fas fa-trash"></i></button>
+                        </form>
+                    </div>
+                </div>
+                <ul class="options-sublist">
+                    {% for option in group.options.all %}
+                    <li>{{ option.name }} <span class="price-adjust">(+{{ option.price_adjustment }} ر.س)</span></li>
+                    {% empty %}
+                    <li class="text-muted">لا توجد خيارات في هذه المجموعة.</li>
+                    {% endfor %}
+                </ul>
+            </div>
+            {% endfor %}
+        </div>
+        {% else %}
+        <div class="empty-state p-5 text-center">
+            <i class="fas fa-cogs fa-3x text-muted mb-3"></i>
+            <h4>لا توجد مجموعات خيارات بعد</h4>
+            <p>مجموعات الخيارات تتيح للعملاء تخصيص طلباتهم. <br>مثال: "الحجم" (صغير، وسط، كبير) أو "الإضافات" (جبنة، صوص).</p>
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock dashboard_content %}
