@@ -3,7 +3,15 @@
 {% block title %}إدارة الوجبات{% endblock title %}
 {% block style %}<link rel="stylesheet" href="{% static 'menu/css/menu.css' %}">{% endblock style %}
 {% block dashboard_content %}
-<div class.page-header mb-3 p-4"><h1>الوجبات والعروض</h1><div class="d-flex gap-2 justify-content-end"><a href="{% url 'menu:create_meal' %}" class="btn btn-orange"><i class="fas fa-plus"></i> إنشاء وجبة جديدة</a></div></div>
+<div class="page-header mb-3 p-4">
+    <h1>الوجبات والعروض</h1>
+    <div class="d-flex gap-2 justify-content-end">
+        <a href="{% url 'menu:create_meal' %}" class="btn btn-orange">
+            <i class="fas fa-plus"></i> إنشاء وجبة جديدة
+        </a>
+        <a href="{% url 'menu:menu_view' %}" class="btn btn-secondary">الرجوع للقائمة</a>
+    </div>
+</div>
 <div class="row m-0 p-2">
     {% for meal in meals %}
     <div class="col-md-6 col-lg-4 mb-4">

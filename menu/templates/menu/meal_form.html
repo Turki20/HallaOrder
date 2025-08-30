@@ -7,7 +7,27 @@
 <form method="POST" id="mealForm" enctype="multipart/form-data">
     {% csrf_token %}
     <div class="row m-0 p-2">
-        <div class="col-lg-5">
+        <div class="col-md-12 mb-4">
+            <div class="card"><div class="card-body">
+                <h3 class="section-title">مكونات الوجبة</h3>
+                {{ formset.management_form }}
+                <div id="meal-items-container">
+                    {% for form in formset %}<div class="meal-item-row" id="item-row-{{ forloop.counter0 }}">
+                        {{ form.id }}
+                        <div class="row align-items-center mb-2">
+                            <div class="col-7">{{ form.product }}</div>
+                            <div class="col-3">{{ form.quantity }}</div>
+                            <div class="col-2 text-end">
+                                {% if form.instance.pk and formset.can_delete %}<div class="d-none">{{ form.DELETE }}</div>{% endif %}
+                                <button type="button" class="btn btn-danger btn-sm remove-item-row"><i class="fas fa-trash"></i></button>
+                            </div>
+                        </div>
+                    </div>{% endfor %}
+                </div>
+                <button type="button" id="add-item-row" class="btn btn-light-blue"><i class="fas fa-plus"></i> إضافة منتج للوجبة</button>
+            </div></div>
+        </div>
+        <div class="col-md-12">
             <div class="card"><div class="card-body">
                 <h3 class="section-title">معلومات الوجبة</h3>
                 <div class="form-group mb-3"><label for="{{ form.name.id_for_label }}">اسم الوجبة</label>{{ form.name }}</div>
@@ -26,26 +46,6 @@
                         </div>{% endfor %}
                     </div>
                 </div>
-            </div></div>
-        </div>
-        <div class="col-lg-7">
-            <div class="card"><div class="card-body">
-                <h3 class="section-title">مكونات الوجبة</h3>
-                {{ formset.management_form }}
-                <div id="meal-items-container">
-                    {% for form in formset %}<div class="meal-item-row" id="item-row-{{ forloop.counter0 }}">
-                        {{ form.id }}
-                        <div class="row align-items-center mb-2">
-                            <div class="col-7">{{ form.product }}</div>
-                            <div class="col-3">{{ form.quantity }}</div>
-                            <div class="col-2 text-end">
-                                {% if form.instance.pk and formset.can_delete %}<div class="d-none">{{ form.DELETE }}</div>{% endif %}
-                                <button type="button" class="btn btn-danger btn-sm remove-item-row"><i class="fas fa-trash"></i></button>
-                            </div>
-                        </div>
-                    </div>{% endfor %}
-                </div>
-                <button type="button" id="add-item-row" class="btn btn-light-blue"><i class="fas fa-plus"></i> إضافة منتج للوجبة</button>
             </div></div>
         </div>
     </div>

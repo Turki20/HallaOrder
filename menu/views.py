@@ -66,7 +66,7 @@ def menu_view(request):
             if form.is_valid():
                 group = form.save(commit=False); group.restaurant = restaurant; group.selection_type = 'MULTIPLE'; group.save()
         return redirect('menu:menu_view')
-    categories = Category.objects.filter(restaurant=restaurant).prefetch_related('products__images')
+    categories = Category.objects.filter(restaurant=restaurant).prefetch_related('product_set__images')
     all_option_groups = OptionGroup.objects.filter(restaurant=restaurant).prefetch_related('options')
     context = {
         'categories': categories,

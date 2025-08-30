@@ -36,7 +36,7 @@
             <table class="products-table">
                <thead><tr><th>المنتج</th><th>السعر</th><th>الحالة</th><th>إجراءات</th></tr></thead>
                <tbody>
-                   {% for product in category.products.all %}
+                   {% for product in category.product_set.all %}
                    <tr>
                        <td>
                            <div class="product-info">
@@ -147,7 +147,17 @@
                 <button class="modal-tab-btn" data-target="addons-tab-panel">مجموعات الإضافات (الصوص، الطبقة)</button>
             </div>
             <div id="options-tab-panel" class="modal-tab-content active">
-                <div class="row"><div class="col-md-7 border-end">
+                <div class="row">
+                    </div><div class="col-md-12 mb-4">
+                        <h3>إضافة مجموعة خيارات جديدة</h3>
+                        <form method="POST" action="{% url 'menu:menu_view' %}">{% csrf_token %}
+                            <div class="form-group">{{ option_group_create_form.name.label_tag }} {{ option_group_create_form.name }}</div>
+                            <div class="form-check mt-2" style="width: fit-content;">{{ option_group_create_form.is_required }} {{ option_group_create_form.is_required.label_tag }}</div>
+                            <button type="submit" name="add_option_group" class="btn btn-orange w-100 mt-3">حفظ المجموعة</button>
+                        </form>
+                    </div>
+                    <hr>
+                    <div class="col-md-12">
                         <h3>مجموعات الخيارات الحالية</h3>
                         <div class="options-list-modal">
                             {% for group in option_groups %}
@@ -160,14 +170,7 @@
                             </div>
                             {% empty %}<p class="text-muted p-3">لا توجد مجموعات خيارات. أضف واحدة من اليسار.</p>{% endfor %}
                         </div>
-                    </div><div class="col-md-5">
-                        <h3>إضافة مجموعة خيارات جديدة</h3>
-                        <form method="POST" action="{% url 'menu:menu_view' %}">{% csrf_token %}
-                            <div class="form-group">{{ option_group_create_form.name.label_tag }} {{ option_group_create_form.name }}</div>
-                            <div class="form-check mt-2">{{ option_group_create_form.is_required }} {{ option_group_create_form.is_required.label_tag }}</div>
-                            <button type="submit" name="add_option_group" class="btn btn-orange w-100 mt-3">حفظ المجموعة</button>
-                        </form>
-                    </div>
+                    
                 </div>
             </div>
             <div id="addons-tab-panel" class="modal-tab-content">
