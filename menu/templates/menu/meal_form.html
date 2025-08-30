@@ -1,0 +1,63 @@
+{% extends "home/base.html" %}
+{% load static %}
+{% block title %}{% if instance %}تعديل وجبة{% else %}إنشاء وجبة جديدة{% endif %}{% endblock title %}
+{% block style %}<link rel="stylesheet" href="{% static 'menu/css/menu.css' %}">{% endblock style %}
+{% block dashboard_content %}
+<div class="page-header mb-3 p-4"><h1>{% if instance %}تعديل وجبة: {{ instance.name }}{% else %}إنشاء وجبة جديدة{% endif %}</h1><div class="d-flex gap-2 justify-content-end"><a href="{% url 'menu:meal_management' %}" class="btn btn-secondary"><i class="fas fa-times"></i> إلغاء</a><button type="submit" form="mealForm" class="btn btn-orange"><i class="fas fa-save"></i> حفظ الوجبة</button></div></div>
+<form method="POST" id="mealForm" enctype="multipart/form-data">
+    {% csrf_token %}
+    <div class="row m-0 p-2">
+        <div class="col-lg-5">
+            <div class="card"><div class="card-body">
+                <h3 class="section-title">معلومات الوجبة</h3>
+                <div class="form-group mb-3"><label for="{{ form.name.id_for_label }}">اسم الوجبة</label>{{ form.name }}</div>
+                <div class="form-group mb-3"><label for="{{ form.price.id_for_label }}">سعر الوجبة</label>{{ form.price }}</div>
+                <div class="form-group mb-3"><label for="{{ form.description.id_for_label }}">الوصف</label>{{ form.description }}</div>
+                <div class="form-group mb-3"><label for="{{ form.image.id_for_label }}">صورة الوجبة</label>{{ form.image }}</div>
+                <div class="form-check form-switch mb-3 p-3 border rounded">{{ form.available }}<label class="form-check-label" for="{{ form.available.id_for_label }}">الوجبة متاحة للطلب</label></div>
+            </div></div>
+            <div class="card mt-3"><div class="card-body">
+                <h3 class="section-title">خيارات الوجبة</h3>
+                <div class="form-group full-width"><label>ارتباط بمجموعات الخيارات</label>
+                    <div class="option-group-chooser">
+                        {% for group in available_option_groups %}<div class="option-group-choice">
+                            <input type="checkbox" name="option_groups" value="{{ group.id }}" id="group-{{ group.id }}" {% if group.id in form.option_groups.value %}checked{% endif %}>
+                            <label for="group-{{ group.id }}"><span class="group-name">{{ group.name }}</span><span class="group-type-badge">{{ group.get_selection_type_display }}</span></label>
+                        </div>{% endfor %}
+                    </div>
+                </div>
+            </div></div>
+        </div>
+        <div class="col-lg-7">
+            <div class="card"><div class="card-body">
+                <h3 class="section-title">مكونات الوجبة</h3>
+                {{ formset.management_form }}
+                <div id="meal-items-container">
+                    {% for form in formset %}<div class="meal-item-row" id="item-row-{{ forloop.counter0 }}">
+                        {{ form.id }}
+                        <div class="row align-items-center mb-2">
+                            <div class="col-7">{{ form.product }}</div>
+                            <div class="col-3">{{ form.quantity }}</div>
+                            <div class="col-2 text-end">
+                                {% if form.instance.pk and formset.can_delete %}<div class="d-none">{{ form.DELETE }}</div>{% endif %}
+                                <button type="button" class="btn btn-danger btn-sm remove-item-row"><i class="fas fa-trash"></i></button>
+                            </div>
+                        </div>
+                    </div>{% endfor %}
+                </div>
+                <button type="button" id="add-item-row" class="btn btn-light-blue"><i class="fas fa-plus"></i> إضافة منتج للوجبة</button>
+            </div></div>
+        </div>
+    </div>
+</form>
+<template id="empty-item-template">
+    <div class="meal-item-row" id="item-row-__prefix__">
+        <div class="row align-items-center mb-2">
+            <div class="col-7">{{ formset.empty_form.product }}</div>
+            <div class="col-3">{{ formset.empty_form.quantity }}</div>
+            <div class="col-2 text-end"><button type="button" class="btn btn-danger btn-sm remove-item-row"><i class="fas fa-trash"></i></button></div>
+        </div>
+    </div>
+</template>
+<script src="{% static 'menu/js/meals.js' %}"></script>
+{% endblock dashboard_content %}
