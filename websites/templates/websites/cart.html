@@ -1,59 +1,73 @@
 {% extends "websites/base.html" %}
 {% block title %}السلة — {{ website.display_name|default:website.restaurant.name }}{% endblock %}
 
-{% block hero %}{% endblock %}
+{% block head %}
+<style>
+  .checkout{display:grid;grid-template-columns:340px 1fr;gap:24px}
+  @media(max-width:900px){.checkout{grid-template-columns:1fr}}
+  .pane{background:#fff;border:1px solid #eef2f7;border-radius:16px;padding:14px}
+  .section{background:#f7f8fb;border:1px solid #eef2f7;border-radius:12px;padding:10px}
+  .muted{color:#6b7280}
+  .pay-btn{width:100%;padding:12px 14px;border:0;border-radius:12px;background:#ff7f50;color:#fff;cursor:pointer}
+  .stack{display:flex;flex-direction:column;gap:10px}
+  .summary{display:grid;grid-template-columns:1fr auto;gap:6px}
+  .item{background:#fff;border:1px solid #eef2f7;border-radius:12px;padding:12px;display:flex;justify-content:space-between;gap:10px}
+  .field{background:#f7f8fb;border:1px solid #eef2f7;border-radius:12px;padding:12px}
+  .remove-btn{border:1px solid #e5e7eb;background:#fff;border-radius:10px;padding:6px 10px;cursor:pointer}
+  .input{width:100%;border:0;background:transparent;outline:none;font-size:14px;line-height:1.2;padding:4px 0}
+  .input::placeholder{color:#9aa3ad}
+  .back-link{align-self:flex-start;padding:6px 10px;border:1px solid #e5e7eb;border-radius:10px;background:#fff;text-decoration:none}
+</style>
+{% endblock %}
 
 {% block content %}
-<div class="card" style="padding:16px">
-  <h3 style="margin-top:0">سلة المشتريات</h3>
-  {% if cart %}
-    <div class="table-responsive">
-      <table class="table align-middle">
-        <thead>
-          <tr>
-            <th>المنتج</th><th>السعر</th><th>الكمية</th><th>المجموع</th>
-          </tr>
-        </thead>
-        <tbody>
-          {% for i in cart %}
-            <tr>
-              <td>
-                <div style="display:flex;gap:10px;align-items:center">
-                  {% if i.image %}<img src="{{ i.image }}" style="width:56px;height:56px;object-fit:cover;border-radius:8px">{% endif %}
-                  <div>
-                    <div style="font-weight:700">{{ i.name }}</div>
-                    {% if i.size %}<div class="muted small">الحجم: {{ i.size }}</div>{% endif %}
-                  </div>
-                </div>
-              </td>
-              <td>SAR {{ i.price }}</td>
-              <td>{{ i.qty }}</td>
-              <td>SAR {{ i.price|floatformat:2|add:"0"|floatformat:2|default:"0" | yesno:"" }}{{ i.price|floatformat:2|default:"0"|add:"0"|floatformat:2 }}</td>
-            </tr>
-          {% endfor %}
-        </tbody>
-      </table>
-    </div>
-    <div class="d-flex justify-content-between">
-      <div></div>
-      <div style="font-weight:700">الإجمالي: SAR {{ total }}</div>
+<div class="checkout">
+  <!-- Left: payment + totals -->
+  <aside class="pane stack">
+    <button class="field" type="button">Mada</button>
+    <button class="field" type="button">Apple Pay</button>
+    <button class="field" type="button">Visa</button>
+
+    <div class="summary" style="margin-top:8px">
+      <div class="muted">الإجمالي الفرعي</div>
+      <div>SAR {{ subtotal|floatformat:2 }}</div>
+      <div class="muted">الضريبة</div>
+      <div>SAR {{ tax|floatformat:2 }}</div>
+      <div><b>الإجمالي</b></div>
+      <div><b>SAR {{ total|floatformat:2 }}</b></div>
     </div>
 
-    {% if user.is_authenticated %}
-      <div class="d-grid mt-3">
-        <button class="btn btn-success" disabled>أكمل الطلب (لاحقًا)</button>
-      </div>
+    <button class="pay-btn" type="submit" form="cart-meta-form" style="margin-top:auto">أكمل الطلب</button>
+  </aside>
+
+  <!-- Right: items + customer fields -->
+  <section class="pane stack">
+    <a class="back-link" href="{% url 'websites:menu' website.slug %}">← العودة إلى القائمة</a>
+    {% if cart %}
+      {% for i in cart %}
+        <div class="item">
+          <div style="display:flex;flex-direction:column;gap:6px">
+            <div><b>{{ i.name }}</b>{% if i.size %} • <span class="muted">{{ i.size }}</span>{% endif %}</div>
+            <div class="muted">SAR {{ i.price }} — <span>الكمية {{ i.qty }}</span></div>
+          </div>
+          <form method="post" action="{% url 'websites:remove_from_cart' website.slug forloop.counter0 %}">
+            {% csrf_token %}
+            <input type="hidden" name="next" value="{{ request.get_full_path }}">
+            <button type="submit" class="remove-btn">حذف</button>
+          </form>
+        </div>
+      {% endfor %}
     {% else %}
-      <div class="alert alert-warning mt-3">
-        يلزم تسجيل الدخول لإتمام الطلب.
-      </div>
-      <div class="d-flex gap-2">
-        <a class="btn btn-primary" href="/accounts/login/?next={{ request.path|urlencode }}">تسجيل الدخول</a>
-        <a class="btn btn-outline-secondary" href="/accounts/signup/?next={{ request.path|urlencode }}">إنشاء حساب</a>
-      </div>
+      <div class="muted">لا توجد عناصر في السلة.</div>
     {% endif %}
-  {% else %}
-    لا توجد عناصر في السلة.
-  {% endif %}
+
+    <form id="cart-meta-form" method="post" action="{% url 'websites:save_cart_meta' website.slug %}" class="stack">
+      {% csrf_token %}
+      <div class="section"><input class="input" type="text" name="name" placeholder="الاسم" value="{{ meta.name }}" required></div>
+      <div class="section"><input class="input" type="tel" name="phone" placeholder="الجوال" value="{{ meta.phone }}" inputmode="tel" pattern="[0-9]{8,15}" required></div>
+      <div class="section"><textarea class="input" name="notes" placeholder="ملاحظات (اختياري)" rows="2">{{ meta.notes }}</textarea></div>
+      <input type="hidden" name="next" value="{{ request.get_full_path }}">
+    </form>
+  </section>
 </div>
 {% endblock %}

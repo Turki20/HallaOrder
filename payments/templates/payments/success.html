@@ -1,12 +1,16 @@
 <!doctype html>
-<html lang="en">
+<html lang="ar" dir="rtl">
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Payment Success</title>
+  <title>تم الدفع بنجاح</title>
   <body style="font-family:system-ui,Arial,sans-serif;padding:24px;">
-    <h2>✅ Payment Success</h2>
+    <h2>✅ تم الدفع بنجاح</h2>
     <p>Session ID: <code>{{ session_id }}</code></p>
-    <p>Status: <strong>{{ status }}</strong></p>
-    <p><a href="{% url 'payments:checkout' %}">Make another test payment</a></p>
+    <p>الحالة: <strong>{{ status }}</strong></p>
+    {% if request.session.last_cart_slug %}
+      <p><a href="{% url 'websites:menu' request.session.last_cart_slug %}">العودة إلى القائمة</a></p>
+    {% elif request.GET.slug %}
+      <p><a href="{% url 'websites:menu' request.GET.slug %}">العودة إلى القائمة</a></p>
+    {% endif %}
   </body>
 </html>

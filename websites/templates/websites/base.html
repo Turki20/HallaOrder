@@ -7,6 +7,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="theme-color" content="#0ea5e9">
   <link rel="stylesheet" href="{% static 'css/style.css' %}">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css">
   <style>
     /* حمايات عامة */
     img{max-width:100%;height:auto;vertical-align:middle}
@@ -16,18 +17,18 @@
     /* Topbar */
     .hoa-topbar{background:#fff;border-bottom:1px solid #eef2f7;position:sticky;top:0;z-index:50}
     .hoa-container{max-width:1120px;margin:auto;padding:0 16px}
-    .hoa-topbar__inner{display:flex;align-items:center;gap:12px;padding:10px 0}
+    .hoa-topbar__inner{display:flex;align-items:center;gap:12px;padding:10px 0;position:relative}
     .hoa-logo{width:36px;height:36px;border-radius:10px;overflow:hidden;background:#eef2f7;display:inline-flex;align-items:center;justify-content:center}
     .hoa-title{font-weight:800}
-    .hoa-nav{display:flex;gap:8px;margin-inline-start:auto}
-    .hoa-pill{padding:8px 12px;border:1px solid #e5e7eb;background:#fff;border-radius:12px}
-    .hoa-pill.active,.hoa-pill:hover{background:#ffeddc;border-color:#ffd4ba}
+    .hoa-nav{display:flex;gap:16px;background:#f0f2f6;border-radius:24px;padding:8px 12px;position:absolute;left:50%;transform:translateX(-50%)}
+    .hoa-pill{padding:10px 22px;border:0;background:#fff;border-radius:18px;font-weight:500}
+    .hoa-pill.active,.hoa-pill:hover{background:#ff7f50;color:#fff;box-shadow:0 4px 10px rgba(255,127,80,.35)}
     .hoa-btn{display:inline-flex;align-items:center;gap:6px;padding:8px 12px;border-radius:12px;border:1px solid #e5e7eb;background:#fff;cursor:pointer}
     .hoa-badge{min-width:20px;height:20px;display:inline-flex;align-items:center;justify-content:center;background:#ff7a45;color:#fff;border-radius:8px;font-size:12px;padding:0 6px}
 
     /* شريط الأدوات */
     .hoa-toolbar{display:flex;gap:8px;align-items:center;margin:12px 0}
-    .hoa-input{flex:1;padding:10px 12px;border:1px solid #e5e7eb;border-radius:12px;background:#fff}
+    .hoa-input{flex:1;padding:12px 14px;border:1px solid #eef1f5;border-radius:12px;background:#f6f7fb;color:#9aa3ad}
 
     /* Drawer (سلة) — أسماء مُسمّاة لمنع التعارض */
     .hoa-drawer{position:fixed;inset:0;display:none}
@@ -50,15 +51,10 @@
     .hoa-footer-bottom{margin-top:12px;border-top:1px solid #eef2f7;padding-top:12px;text-align:center;color:#6b7280;font-size:13px}
     @media(max-width:720px){.hoa-footer-grid{grid-template-columns:1fr}}
 
-    /*
-    .btn {
-      background-color: {{ website.secondary_color }};
-    }
-
-    .hoa-topbar, hoa-footer {
-      background-color: {{ website.custom_colors }};
-    }
-      */
+    /* زر السلة كقرص مع شارة */
+    #hoa-open-cart{position:relative;display:inline-flex;align-items:center;justify-content:center;width:40px;height:40px;border-radius:12px;background:#fff4ef;color:#ff7f50;border:1px solid #ffe1d6;margin-inline-start:auto}
+    #hoa-open-cart .hoa-badge{position:absolute;top:-6px;inset-inline-start:-6px;background:#e74c3c;color:#fff;border-radius:999px}
+    #hoa-open-cart span:last-child{display:none}
   </style>
   {% block head %}{% endblock %}
 </head>
@@ -85,18 +81,19 @@
         <a class="hoa-pill {% if current_tab == 'home' %}active{% endif %}" href="{% url 'websites:menu' website.slug %}">داخل المطعم</a>
         <a class="hoa-pill {% if current_tab == 'pickup' %}active{% endif %}" href="#">استلام</a>
         <a class="hoa-pill {% if current_tab == 'delivery' %}active{% endif %}" href="#">توصيل</a>
-        <a class="hoa-pill {% if current_tab == 'menu' %}active{% endif %}" href="{% url 'websites:menu' website.slug %}">القائمة</a>
-
-        {% if request.user.is_authenticated %}
-          {% if logout_url %}<a class="hoa-btn" href="{{ logout_url }}?next={{ request.path }}">خروج</a>{% endif %}
-        {% else %}
-          {% if login_url %}<a class="hoa-btn" href="{{ login_url }}?next={{ request.path }}">دخول</a>{% endif %}
-        {% endif %}
-
-        <button class="hoa-btn" id="hoa-open-cart" type="button" aria-haspopup="dialog" aria-controls="hoa-cart-drawer">
-          <span class="hoa-badge">{{ cart_count|default:0 }}</span><span>السلة</span>
-        </button>
       </nav>
+
+      <button class="hoa-btn" id="hoa-open-cart" type="button" aria-haspopup="dialog" aria-controls="hoa-cart-drawer">
+        <span class="hoa-badge">{{ cart_count|default:0 }}</span>
+        <i class="bi bi-basket2"></i>
+        <span>السلة</span>
+      </button>
+
+      {% if request.user.is_authenticated %}
+        {% if logout_url %}<a class="hoa-btn" href="{{ logout_url }}?next={{ request.path }}">خروج</a>{% endif %}
+      {% else %}
+        {% if login_url %}<a class="hoa-btn" href="{{ login_url }}?next={{ request.path }}">دخول</a>{% endif %}
+      {% endif %}
     </div>
   </header>
 
@@ -158,10 +155,15 @@
         {% for i in cart %}
         <div class="hoa-item">
           {% if i.image %}<img class="hoa-item-img" src="{{ i.image }}" alt="">{% endif %}
-          <div>
+          <div style="flex:1">
             <div><b>{{ i.name }}</b> <span class="muted">× {{ i.qty }}</span></div>
             <div class="muted">{% if i.size %}الحجم: {{ i.size }} — {% endif %}السعر: SAR {{ i.price }}</div>
           </div>
+          <form method="post" action="{% url 'websites:remove_from_cart' website.slug forloop.counter0 %}">
+            {% csrf_token %}
+            <input type="hidden" name="next" value="{{ request.get_full_path }}">
+            <button class="hoa-btn-ghost" type="submit" title="حذف"><i class="bi bi-x-lg"></i></button>
+          </form>
         </div>
         {% endfor %}
       {% else %}
