@@ -1,11 +1,17 @@
 <!doctype html>
-<html lang="en">
+<html lang="ar" dir="rtl">
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Payment Canceled</title>
+  <title>تم إلغاء الدفع</title>
   <body style="font-family:system-ui,Arial,sans-serif;padding:24px;">
-    <h2>❌ Payment Canceled</h2>
-    <p>Your payment was canceled. You can try again.</p>
-    <p><a href="{% url 'payments:checkout' %}">Back to checkout</a></p>
+    <h2>❌ تم إلغاء الدفع</h2>
+    <p>تم إلغاء العملية. يمكنك العودة للسلة والمحاولة مرة أخرى.</p>
+    {% if request.session.last_cart_slug %}
+      <p><a href="{% url 'websites:cart' request.session.last_cart_slug %}">العودة إلى السلة</a></p>
+    {% elif request.GET.slug %}
+      <p><a href="{% url 'websites:cart' request.GET.slug %}">العودة إلى السلة</a></p>
+    {% else %}
+      <p><a href="/">الرجوع للصفحة الرئيسية</a></p>
+    {% endif %}
   </body>
 </html>

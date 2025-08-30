@@ -7,12 +7,12 @@
 <style>
   .detail{max-width:960px;margin:0 auto;display:grid;grid-template-columns:1.2fr 1fr;gap:24px}
   @media (max-width:900px){.detail{grid-template-columns:1fr}}
-  .media{background:#fff;border:1px solid #eef2f7;border-radius:12px;overflow:hidden}
+  .media{background:#fff;border:1px solid #edf0f4;border-radius:14px;overflow:hidden}
   .media img{width:100%;display:block;object-fit:cover}
-  .info{background:#fff;border:1px solid #eef2f7;border-radius:12px;padding:16px;display:flex;flex-direction:column;gap:14px}
+  .info{background:#fff;border:1px solid #edf0f4;border-radius:14px;padding:16px;display:flex;flex-direction:column;gap:14px}
   .h{font-weight:800;font-size:20px}
-  .muted{color:#6b7280}
-  .price{font-weight:700}
+  .muted{color:#7d8996}
+  .price{font-weight:700;color:#2f3237}
   .group{display:flex;flex-wrap:wrap;gap:8px}
   .pill{border:1px solid #e5e7eb;background:#fff;border-radius:12px;padding:8px 12px}
   .qty{display:inline-flex;align-items:center;border:1px solid #e5e7eb;border-radius:12px;overflow:hidden}
@@ -20,10 +20,13 @@
   .qty button{all:unset;cursor:pointer;padding:10px 12px}
   .actions{display:flex;gap:10px;align-items:center}
   .btn-light{padding:10px 14px;border:1px solid #e5e7eb;border-radius:12px;background:#fff;cursor:pointer;text-decoration:none}
+  .btn{background:#ff7f50}
+  .back-link{display:inline-block;margin:10px 0;padding:6px 10px;border:1px solid #e5e7eb;border-radius:10px;background:#fff;text-decoration:none}
 </style>
 {% endblock %}
 
 {% block content %}
+<a class="back-link" href="{% url 'websites:menu' website.slug %}">← العودة إلى القائمة</a>
 <div class="detail">
 
   <div class="media">
