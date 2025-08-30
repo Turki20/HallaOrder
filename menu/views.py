@@ -84,8 +84,8 @@ def edit_category(request, category_id):
         category.description = request.POST.get('description', '').strip()
         category.save()
         return redirect('menu:menu_view')
-    total_products = category.products.count()
-    available_products = category.products.filter(available=True).count()
+    total_products = category.product_set.count()
+    available_products = category.product_set.filter(available=True).count()
     context = {'category': category, 'total_products': total_products, 'available_products': available_products, 'unavailable_products': total_products - available_products,}
     return render(request, 'menu/edit_category.html', context)
 

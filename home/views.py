@@ -2,11 +2,14 @@ from django.shortcuts import render, redirect
 from django.http import HttpRequest
 from django.contrib.auth.decorators import login_required
 from restaurants.models import SubscriptionPlan, Restaurant, Branch
-from menu.models import Product, Category
+from menu.models import Product, Category, ProductImage
 from django.contrib import messages
 from django.db import transaction
 from websites.models import Website
 from django.contrib.auth.models import User
+from dotenv import load_dotenv
+import os
+load_dotenv()  
 
 # Create your views here.
 
@@ -154,8 +157,13 @@ def add_food_plate(request:HttpRequest):
                 name=dish_name,
                 description=dish_desc,
                 price=float(dish_price),
-                image=dish_image,
                 category=category,
+            )
+            
+            product_image = ProductImage.objects.create(
+                product = dish,
+                image = dish_image,
+                is_cover = True
             )
 
         messages.success(request, f"تم إضافة الطبق '{dish.name}' بنجاح", 'alert-success')
@@ -204,5 +212,6 @@ def add_branch_view(request:HttpRequest):
             user.profile.restaurant = restaurant
             user.profile.save()
             return redirect('restaurants')
-        
-    return render(request, 'home/add_branch.html', {})
+    
+    google_map_key = os.getenv('google_map_key', "")
+    return render(request, 'home/add_branch.html', {'google_map_key':google_map_key})

@@ -22,6 +22,10 @@
                     {% endfor %}
                 </div>
                 {% endfor %}
+                <div class="w-100">
+                        <div id="map"></div>
+                        <small class="text-muted">يمكنك البحث أو تحديد الموقع من الخريطة.</small>
+                    </div>
 
                 <div class="d-flex justify-content-end gap-2">
                     <button type="submit" class="btn btn-blue">حفظ</button>
@@ -31,5 +35,51 @@
         </div>
     </div>
 </div>
+<!-- Google Maps API -->
+    <script src="https://maps.googleapis.com/maps/api/js?key={{google_map_key}}&libraries=places"></script>
+<script>
+    let map, marker, autocomplete;
+
+    function initMap() {
+        const defaultLocation = { lat: 21.543333, lng: 39.172778 }; // جدة كموقع افتراضي
+        map = new google.maps.Map(document.getElementById("map"), {
+            center: defaultLocation,
+            zoom: 12,
+        });
+
+        marker = new google.maps.Marker({
+            map,
+            position: defaultLocation,
+            draggable: true,
+        });
+
+        // تحديث العنوان عند سحب المؤشر
+        google.maps.event.addListener(marker, 'dragend', function () {
+            const geocoder = new google.maps.Geocoder();
+            geocoder.geocode({ location: marker.getPosition() }, function (results, status) {
+                if (status === 'OK' && results[0]) {
+                    document.getElementById("branch_address").value = results[0].formatted_address;
+                }
+            });
+        });
+
+        // Autocomplete للعنوان
+        const input = document.getElementById("branch_address");
+        autocomplete = new google.maps.places.Autocomplete(input);
+        autocomplete.bindTo("bounds", map);
+
+        autocomplete.addListener("place_changed", () => {
+            const place = autocomplete.getPlace();
+            if (!place.geometry || !place.geometry.location) return;
+
+            map.setCenter(place.geometry.location);
+            map.setZoom(16);
+
+            marker.setPosition(place.geometry.location);
+        });
+    }
+
+    window.onload = initMap;
+</script>
 {% endblock dashboard_content %}
 

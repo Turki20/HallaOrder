@@ -5,6 +5,9 @@ from django.contrib.auth.models import User
 from django.contrib import messages
 from websites.models import Website
 from users.decorators import restaurant_owner_required
+from dotenv import load_dotenv
+import os
+load_dotenv()  
 
 # عرض باقات الاشتراك
 @restaurant_owner_required
@@ -92,9 +95,12 @@ def branch_create(request):
             return redirect('branches')  
     else:
         form = BranchForm()
+        google_map_key = os.getenv('google_map_key', "")
+
     return render(request, "restaurants/Branch_Form.html", {
         "form": form, 
-        "title": "إضافة فرع"
+        "title": "إضافة فرع",
+        'google_map_key':google_map_key
     })
 
 # تعديل فرع موجود
