@@ -10,7 +10,6 @@ from restaurants.models import Restaurant, Branch
 # Create your views here.
 from users.decorators import restaurant_owner_required
 
-
 def sign_up_view(request:HttpRequest):
     if request.method == "POST":
         username = request.POST.get("username")
@@ -61,7 +60,19 @@ def log_in_view(request:HttpRequest):
         if user is not None:
             login(request, user)
             # messages.success(request, f"مرحباً {user.username}", 'alert-success')
-            return redirect("home:index_view") 
+            
+            print(user.profile.role)
+            try:
+                if user.profile.role == 'Cashier':
+                    return redirect('orders:order_board')
+                
+                if user.restaurants:
+                    return redirect('reports:dashboard')
+                else:
+                    return redirect("home:index_view")
+                
+            except Exception as e:
+                return redirect("home:index_view") 
         else:
             messages.error(request, "اسم المستخدم أو كلمة المرور غير صحيحة", 'alert-danger')
             return redirect("users:log_in_view")

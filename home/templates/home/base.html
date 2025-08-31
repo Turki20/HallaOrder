@@ -36,10 +36,11 @@
             {% endif %}
             {% endif %}
             <ul>
-                
+                {% if request.user.profile.role == 'RestaurantOwner' %}                
                 <li class="{% if current_page == 'reports:dashboard' %}active{% endif %}">
                     <a href="{% url 'reports:dashboard' %}"><i class="fa-solid fa-house"></i>الصفحة الرئيسية</a>
                 </li>
+                {% endif %}
                 <li class="{% if current_page == 'orders:order_board' %}active{% endif %}">
                   <a href="{% url 'orders:order_board' %}"><i class="fa-solid fa-cart-shopping"></i>حالة الطلبات</a>
                 </li>

@@ -5,7 +5,7 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.urls import reverse, NoReverseMatch
 from .models import Order, OrderStatus ,OrderItem
 from restaurants.models import Branch, Restaurant
-from django.http import HttpResponseForbidden
+from django.http import HttpResponseForbidden, Http404
 
 
 # ---- helpers ---------------------------------------------------------------
@@ -85,16 +85,20 @@ def order_board(request, branch_id: int | None = None):
         return redirect('orders:order_board')
     
     # allowed branches per role (your code)
-    if hasattr(request.user, "role") and request.user.role in ["Cashier", "KitchenStaff"]:
+    if hasattr(request.user, "role") and request.user.role in ["Cashier", "KitchenStaff"]: # مهو شغال الشرط لازم توصل للدور من البروفايل
         branches = Branch.objects.filter(employees__user=request.user).distinct()
-    elif hasattr(request.user, "role") and request.user.role == "RestaurantOwner":
+    elif hasattr(request.user.profile, "role") and request.user.profile.role == "RestaurantOwner":
         branches = Branch.objects.filter(restaurant__owner=request.user)
     else:
         branches = Branch.objects.all()
 
     active_branch = None
     if branch_id is not None:
-        active_branch = get_object_or_404(branches, pk=branch_id)
+        try:
+            active_branch = get_object_or_404(branches, pk=branch_id)
+        except Http404:
+            messages.error(request, 'الفرع غير موجود الرجاء اختيار الفرع المناسب', 'alert-danger')
+            return redirect('orders:order_board')
 
     qs = (Order.objects.select_related("customer", "branch")
                      .filter(branch__in=branches)

@@ -1,5 +1,3 @@
-# menu/views.py
-
 from django.shortcuts import render, redirect, get_object_or_404
 from django.http import JsonResponse, HttpResponseForbidden, HttpResponseBadRequest
 from django.contrib.auth.decorators import login_required
@@ -8,45 +6,19 @@ from restaurants.models import Restaurant
 from .models import Category, Product, ProductImage, OptionGroup, Option, Meal, MealItem
 from .forms import OptionGroupCreateForm, OptionGroupEditForm, OptionFormSet, MealForm, MealItemFormSet
 from decimal import Decimal
+from users.decorators import restaurant_owner_required
+from django.contrib import messages
 
-def restaurant_owner_required(view_func):
-    @login_required
-    def _wrapped_view(request, *args, **kwargs):
-        try:
-            restaurant = Restaurant.objects.get(owner=request.user)
-            request.restaurant = restaurant
-        except Restaurant.DoesNotExist:
-            return HttpResponseForbidden("You are not associated with any restaurant.")
-        except Restaurant.MultipleObjectsReturned:
-            return HttpResponseBadRequest("Error: Multiple restaurants are associated with your account.")
-        
-        # Data isolation checks
-        if 'category_id' in kwargs:
-            obj = get_object_or_404(Category, pk=kwargs['category_id'])
-            if obj.restaurant != request.restaurant: return HttpResponseForbidden("Access Denied")
-        if 'product_id' in kwargs:
-            obj = get_object_or_404(Product, pk=kwargs['product_id'])
-            if obj.category.restaurant != request.restaurant: return HttpResponseForbidden("Access Denied")
-        if 'image_id' in kwargs:
-            obj = get_object_or_404(ProductImage, pk=kwargs['image_id'])
-            if obj.product.category.restaurant != request.restaurant: return HttpResponseForbidden("Access Denied")
-        if 'group_id' in kwargs:
-            obj = get_object_or_404(OptionGroup, pk=kwargs['group_id'])
-            if obj.restaurant != request.restaurant: return HttpResponseForbidden("Access Denied")
-        if 'meal_id' in kwargs:
-            obj = get_object_or_404(Meal, pk=kwargs['meal_id'])
-            if obj.restaurant != request.restaurant: return HttpResponseForbidden("Access Denied")
-            
-        return view_func(request, *args, **kwargs)
-    return _wrapped_view
 
 @restaurant_owner_required
+@login_required(login_url='/users/login/')
 def menu_view(request):
-    restaurant = request.restaurant
+    restaurant = request.user.restaurants
     if request.method == 'POST':
         if 'add_category' in request.POST:
             name = request.POST.get('name', '').strip()
             if name: Category.objects.create(restaurant=restaurant, name=name)
+            messages.success(request, 'تمت اضافة الفئة بنجاح', 'alert-success')
         elif 'add_product' in request.POST:
             name = request.POST.get('name', '').strip()
             price = request.POST.get('price')
@@ -61,6 +33,8 @@ def menu_view(request):
             form = OptionGroupCreateForm(request.POST)
             if form.is_valid():
                 group = form.save(commit=False); group.restaurant = restaurant; group.selection_type = 'SINGLE'; group.save()
+                return redirect('menu:edit_option_group', group.id)
+            
         elif 'add_addon_group' in request.POST:
             form = OptionGroupCreateForm(request.POST)
             if form.is_valid():
@@ -78,7 +52,7 @@ def menu_view(request):
 
 @restaurant_owner_required
 def edit_category(request, category_id):
-    category = get_object_or_404(Category, id=category_id, restaurant=request.restaurant)
+    category = get_object_or_404(Category, id=category_id, restaurant=request.user.restaurants)
     if request.method == 'POST':
         category.name = request.POST.get('name', '').strip()
         category.description = request.POST.get('description', '').strip()
@@ -91,13 +65,15 @@ def edit_category(request, category_id):
 
 @restaurant_owner_required
 def delete_category(request, category_id):
-    category = get_object_or_404(Category, id=category_id, restaurant=request.restaurant)
+    category = get_object_or_404(Category, id=category_id, restaurant=request.user.restaurants)
     if request.method == 'POST': category.delete()
+    messages.success(request,'تم حذف الفئة بنجاح', 'alert-success')
     return redirect('menu:menu_view')
 
 @restaurant_owner_required
+@login_required(login_url='/users/login/')
 def edit_product(request, product_id):
-    restaurant = request.restaurant
+    restaurant = request.user.restaurants
     product = get_object_or_404(Product, id=product_id, category__restaurant=restaurant)
     categories = Category.objects.filter(restaurant=restaurant)
     available_option_groups = OptionGroup.objects.filter(restaurant=restaurant)
@@ -116,21 +92,24 @@ def edit_product(request, product_id):
     return render(request, 'menu/edit_product.html', context)
 
 @restaurant_owner_required
+@login_required(login_url='/users/login/')
 def delete_product(request, product_id):
-    product = get_object_or_404(Product, id=product_id, category__restaurant=request.restaurant)
+    product = get_object_or_404(Product, id=product_id, category__restaurant=request.user.restaurants)
     if request.method == 'POST': product.delete()
     return redirect('menu:menu_view')
 
 @require_POST
 @restaurant_owner_required
+@login_required(login_url='/users/login/')
 def toggle_product_availability(request, product_id):
-    product = get_object_or_404(Product, id=product_id, category__restaurant=request.restaurant)
+    product = get_object_or_404(Product, id=product_id, category__restaurant=request.user.restaurants)
     product.available = not product.available
     product.save()
     return JsonResponse({'success': True, 'available': product.available})
 
 @require_POST
 @restaurant_owner_required
+@login_required(login_url='/users/login/')
 def set_cover_image(request, image_id):
     image = get_object_or_404(ProductImage, pk=image_id)
     image.is_cover = True
@@ -139,14 +118,16 @@ def set_cover_image(request, image_id):
 
 @require_POST
 @restaurant_owner_required
+@login_required(login_url='/users/login/')
 def delete_product_image(request, image_id):
     image = get_object_or_404(ProductImage, pk=image_id)
     image.delete()
     return JsonResponse({'success': True})
 
 @restaurant_owner_required
+@login_required(login_url='/users/login/')
 def edit_option_group(request, group_id=None):
-    restaurant = request.restaurant
+    restaurant = request.user.restaurants
     instance = get_object_or_404(OptionGroup, pk=group_id, restaurant=restaurant)
     form = OptionGroupEditForm(request.POST or None, instance=instance)
     formset = OptionFormSet(request.POST or None, instance=instance, prefix='options')
@@ -159,14 +140,16 @@ def edit_option_group(request, group_id=None):
 
 @require_POST
 @restaurant_owner_required
+@login_required(login_url='/users/login/')
 def delete_option_group(request, group_id):
-    group = get_object_or_404(OptionGroup, pk=group_id, restaurant=request.restaurant)
+    group = get_object_or_404(OptionGroup, pk=group_id, restaurant=request.user.restaurants)
     group.delete()
     return redirect('menu:menu_view')
 
 @restaurant_owner_required
+@login_required(login_url='/users/login/')
 def meal_management(request):
-    restaurant = request.restaurant
+    restaurant = request.user.restaurants
     # --- THIS IS THE CORRECTED LINE ---
     # We prefetch the actual 'images' relationship on the product,
     # which allows the 'cover_image' property to work efficiently without extra queries.
@@ -175,8 +158,9 @@ def meal_management(request):
     return render(request, 'menu/meal_management.html', context)
 
 @restaurant_owner_required
+@login_required(login_url='/users/login/')
 def create_or_edit_meal(request, meal_id=None):
-    restaurant = request.restaurant
+    restaurant = request.user.restaurants
     instance = None
     if meal_id:
         instance = get_object_or_404(Meal, pk=meal_id, restaurant=restaurant)
@@ -201,7 +185,8 @@ def create_or_edit_meal(request, meal_id=None):
 
 @require_POST
 @restaurant_owner_required
+@login_required(login_url='/users/login/')
 def delete_meal(request, meal_id):
-    meal = get_object_or_404(Meal, pk=meal_id, restaurant=request.restaurant)
+    meal = get_object_or_404(Meal, pk=meal_id, restaurant=request.user.restaurants)
     meal.delete()
     return redirect('menu:meal_management')

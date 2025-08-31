@@ -10,6 +10,7 @@ from django.utils import timezone
 
 from restaurants.models import Branch, Restaurant
 from orders.models import Order, OrderItem, OrderStatus
+from users.decorators import restaurant_owner_required
 
 # نعدّد الحالات التي نعتبرها "إيراد" فعلاً
 REVENUE_STATUSES = (OrderStatus.DELIVERED,)
@@ -29,6 +30,7 @@ def get_user_restaurant(user):
 
 
 @login_required
+@restaurant_owner_required
 def dashboard_view(request):
     # 1) نجيب المطعم حق المستخدم
     restaurant = get_user_restaurant(request.user)

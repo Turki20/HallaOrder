@@ -7,6 +7,7 @@ from django.contrib import messages
 from django.db import transaction
 from websites.models import Website
 from django.contrib.auth.models import User
+from users.decorators import restaurant_owner_required
 from dotenv import load_dotenv
 import os
 load_dotenv()  
@@ -14,13 +15,12 @@ load_dotenv()
 # Create your views here.
 
 # سوي ديكوريتر ان المستخدم يكون صاحب مطعم
-
 def index_view(request:HttpRequest):
     
     return render(request, 'home/index.html')
 
-
 @login_required(login_url='/users/login/')
+@restaurant_owner_required
 def subscriptionplan_view(request:HttpRequest):
     if request.method == 'POST':
         request.session['subscriptionplan_id'] = request.POST['subscriptionplan']
@@ -44,6 +44,7 @@ def subscriptionplan_view(request:HttpRequest):
     return render(request, 'home/subscriptionplan.html', {'subscriptionPlan':subscriptionPlan})
 
 @login_required(login_url='/users/login/')
+@restaurant_owner_required
 def create_restaurant_identity(request:HttpRequest):
     # لازم قبل يسوي انشاء للمطعم يختار الباقه
     subscriptionplan_data = request.session.get('subscriptionplan_id', None)
@@ -54,6 +55,7 @@ def create_restaurant_identity(request:HttpRequest):
 
 
 @login_required(login_url='/users/login/')
+@restaurant_owner_required
 def restaurant_identity(request:HttpRequest):
     # لازم قبل يسوي انشاء للمطعم يختار الباقه
     subscriptionplan_data = request.session.get('subscriptionplan_id', None)
@@ -104,6 +106,7 @@ def restaurant_identity(request:HttpRequest):
     return render(request, 'home/restaurant_identity.html', {})
 
 @login_required(login_url='/users/login/')
+@restaurant_owner_required
 def add_food_plate(request:HttpRequest):
     # تحقق يجب ان ينشئ المطعم اولا
     try:
@@ -176,6 +179,7 @@ def add_food_plate(request:HttpRequest):
     return render(request, 'home/add_food_plate.html', {})
 
 @login_required(login_url='/users/login/')
+@restaurant_owner_required
 def add_branch_view(request:HttpRequest):
     try:
         request.user.restaurants

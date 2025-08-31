@@ -5,6 +5,28 @@
 <link rel="stylesheet" href="{% static 'menu/css/menu.css' %}">
 {% endblock style %}
 {% block dashboard_content %}
+
+
+<div class="row p-4">
+        <div class="col"></div>
+        <div class="col-10">
+            <div class="w-100">
+                {% if messages %}
+                <ul>
+                    {% for message in messages %}
+                    <div class="alert {{message.tags}}">
+                        <i class="fa-solid fa-circle-exclamation"></i>
+                        <span>{{message}}</span>
+                    </div>
+                    {% endfor %}
+                </ul>
+                {% endif %}
+            </div>
+        </div>
+        <div class="col"></div>
+    </div>
+
+
 <div class="page-header mb-3 p-4">
     <h1>المنتجات</h1>
     <div class="d-flex gap-2 justify-content-end">
