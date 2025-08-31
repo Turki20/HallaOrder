@@ -55,14 +55,14 @@ def menu_view(request, slug):
     website = get_object_or_404(Website.objects.select_related("restaurant"), slug=slug)
     categories = website.restaurant.category_set.all()
     products = []
-    for category in categories:
-        for p in category.product_set.all():
-            products.append(p)
+    # for category in categories:
+    #     for p in category.product_set.all():
+    #         products.append(p)
 
     return render(
         request,
         "websites/menu.html",
-        _base_ctx(request, website, products=products, current_tab="menu"),
+        _base_ctx(request, website, products=products, current_tab="menu", categories=categories),
     )
 
 

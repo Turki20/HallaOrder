@@ -149,9 +149,13 @@
 {% endblock %}
 
 {% block content %}
-{% if products %}
+{% if categories %}
+{% for category in categories %}
+{% if category.product_set.count > 0 %}
+  <h3>{{category.name}}</h3>
+{% endif %}
 <div class="grid">
-  {% for p in products %}
+  {% for p in category.product_set.all %}
   <article class="product-card">
     <div class="product-media">
       {% for image in p.images.all %}
@@ -172,7 +176,7 @@
   </article>
   {% endfor %}
 </div>
-{% else %}
-<div class="muted">لا توجد منتجات لعرضها حاليًا.</div>
+{% endfor %}
 {% endif %}
+
 {% endblock %}

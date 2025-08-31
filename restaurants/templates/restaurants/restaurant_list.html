@@ -106,6 +106,59 @@
         {% endif %}
       </div>
     </div>
+
+    <div class="col-md 6">
+      <div class="card svg_custom_style">
+        <div class="svg_header">
+          <div class="svg_logo">
+          </div>
+          <div class="svg_button">
+          </div>
+        </div>
+
+        <div class="svg_content">
+          <div class="svg_h1">
+          </div>
+          <div class="svg_flex">
+            <div class="svg_card">
+              <div class="svg_button">
+              </div>
+            </div>
+            <div class="svg_card">
+              <div class="svg_button">
+              </div>
+            </div>
+            <div class="svg_card">
+              <div class="svg_button">
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="svg_content">
+          <div class="svg_h1">
+          </div>
+          <div class="svg_flex">
+            <div class="svg_card">
+              <div class="svg_button">
+              </div>
+            </div>
+            <div class="svg_card">
+              <div class="svg_button">
+              </div>
+            </div>
+            <div class="svg_card">
+              <div class="svg_button">
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="svg_footer">
+
+        </div>
+      </div>
+    </div>
   </div>
 
 </div>
@@ -143,6 +196,83 @@
   .btn,
   .form-control {
     border-radius: .75rem;
+  }
+
+
+  .svg_custom_style {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    padding: 0;
+    background-color: whitesmoke;
+    border-radius: 15px !important;
+    overflow: hidden;
+    border: 10px solid black;
+    box-shadow: 0 8px 30px rgba(0, 75, 89, 0.08);
+  }
+
+  .svg_header {
+    width: 100%;
+    height: 30px;
+    background-color: red;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 20px;
+  }
+
+  .svg_header .svg_logo {
+    width: 20px;
+    height: 20px;
+    background-color: white;
+    border-radius: 50%;
+  }
+
+  .svg_button {
+    width: 20px;
+    height: 20px;
+    background-color: yellow;
+    border-radius: 5px;
+  }
+
+  .svg_content {
+    width: 100%;
+    padding: 30px 50px;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .svg_content .svg_h1 {
+    width: 30%;
+    height: 20px;
+    background-color: gray;
+  }
+
+  .svg_content .svg_flex {
+    display: flex;
+    width: 100%;
+    padding: 30px;
+    gap: 20px;
+  }
+
+  .svg_flex .svg_card {
+    width: 100%;
+    height: 100px;
+    background-color: white;
+    border-radius: 5px;
+    display: flex;
+    align-items: end;
+    justify-content: end;
+    padding: 5px;
+    box-shadow: 1px 1px 5px lightgray;
+  }
+
+
+  .svg_footer {
+    width: 100%;
+    height: 50px;
+    background-color: red;
   }
 </style>
 {% endblock %}

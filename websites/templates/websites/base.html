@@ -18,9 +18,9 @@
     .hoa-topbar{background:#fff;border-bottom:1px solid #eef2f7;position:sticky;top:0;z-index:50}
     .hoa-container{max-width:1120px;margin:auto;padding:0 16px}
     .hoa-topbar__inner{display:flex;align-items:center;gap:12px;padding:10px 0;position:relative}
-    .hoa-logo{width:36px;height:36px;border-radius:10px;overflow:hidden;background:#eef2f7;display:inline-flex;align-items:center;justify-content:center}
+    .hoa-logo{width:36px;height:36px;border-radius:10px;overflow:hidden;display:inline-flex;align-items:center;justify-content:center}
     .hoa-title{font-weight:800}
-    .hoa-nav{display:flex;gap:16px;background:#f0f2f6;border-radius:24px;padding:8px 12px;position:absolute;left:50%;transform:translateX(-50%)}
+    .hoa-nav{display:flex;gap:16px;background:#f0f2f68a;border-radius:24px;padding:8px 12px;position:absolute;left:50%;transform:translateX(-50%)}
     .hoa-pill{padding:10px 22px;border:0;background:#fff;border-radius:18px;font-weight:500}
     .hoa-pill.active,.hoa-pill:hover{background:#ff7f50;color:#fff;box-shadow:0 4px 10px rgba(255,127,80,.35)}
     .hoa-btn{display:inline-flex;align-items:center;gap:6px;padding:8px 12px;border-radius:12px;border:1px solid #e5e7eb;background:#fff;cursor:pointer}
@@ -77,7 +77,7 @@
       {% url 'logout' as logout_url %}{% if not logout_url %}{% url 'users:logout' as logout_url %}{% endif %}{% if not logout_url %}{% url 'account_logout' as logout_url %}{% endif %}
       {% url 'login'  as login_url  %}{% if not login_url  %}{% url 'users:login'  as login_url  %}{% endif %}{% if not login_url  %}{% url 'account_login'  as login_url  %}{% endif %}
 
-      <nav class="hoa-nav">
+      <nav class="hoa-nav" style="background-color: #f0f2f691;">
         <a class="hoa-pill {% if current_tab == 'home' %}active{% endif %}" href="{% url 'websites:menu' website.slug %}">داخل المطعم</a>
         <a class="hoa-pill {% if current_tab == 'pickup' %}active{% endif %}" href="#">استلام</a>
         <a class="hoa-pill {% if current_tab == 'delivery' %}active{% endif %}" href="#">توصيل</a>
@@ -180,7 +180,7 @@
       <a class="hoa-btn-primary" href="{% url 'websites:cart' website.slug %}">إتمام الطلب</a>
       <span class="muted">العناصر: {{ cart_count|default:0 }}</span>
     </footer>
-  </aside>
+  </aside> 
 </div>
 
 <script>
@@ -197,6 +197,47 @@
       drawer.setAttribute('aria-hidden', drawer.classList.contains('is-open') ? 'false' : 'true');
     });
   });
+
+ // دالة لتحويل HEX إلى RGB
+  function hexToRgb(hex) {
+    hex = hex.replace("#", "");
+    let bigint = parseInt(hex, 16);
+    let r = (bigint >> 16) & 255;
+    let g = (bigint >> 8) & 255;
+    let b = bigint & 255;
+    return [r, g, b];
+  }
+
+  // دالة لحساب السطوع (luminance)
+  function isDark(hex) {
+    let [r, g, b] = hexToRgb(hex);
+    // معادلة حساب السطوع (0 = أسود، 255 = أبيض)
+    let brightness = (r * 299 + g * 587 + b * 114) / 1000;
+    return brightness < 128; // أقل من 128 يعني اللون غامق
+  }
+
+  // ألوان من Django template
+  let mainColor = "{{website.custom_colors}}";
+  let secondaryColor = "{{website.secondary_color}}";
+
+  // تطبيق الألوان مع النصوص
+  function applyColor(el, color) {
+    el.style.backgroundColor = color;
+    el.style.color = isDark(color) ? "#fff" : "#000";
+  }
+
+  // تطبيق على العناصر
+  applyColor(document.querySelector('.hoa-topbar'), mainColor);
+  applyColor(document.querySelector('.hoa-footer'), mainColor);
+
+  document.querySelectorAll('.add-btn').forEach(el => applyColor(el, secondaryColor));
+  document.querySelectorAll('.hoa-btn-primary').forEach(el => applyColor(el, secondaryColor));
+  document.querySelectorAll('.pay-btn').forEach(el => applyColor(el, secondaryColor));
+  document.querySelectorAll('.hoa-pill').forEach(el => applyColor(el, mainColor));
+
+  
+  
+  
 </script>
 
 {% block extra_js %}{% endblock %}
