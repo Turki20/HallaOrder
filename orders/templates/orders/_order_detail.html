@@ -26,14 +26,38 @@
   <div class="row g-3">
     <div class="col-12 col-md-6">
       <div class="border rounded p-3 h-100">
-        <div class="fw-semibold mb-2">العميل</div>
+        <div class="fw-semibold mb-2">
+          {% with inv=order.invoices.first %}
+            {% if inv and inv.customer_name %}
+              {{ inv.customer_name }}
+            {% elif order.customer %}
+              {% if order.customer.get_full_name %}
+                {{ order.customer.get_full_name }}
+              {% else %}
+                {{ order.customer.username|default:"عميل" }}
+              {% endif %}
+            {% else %}
+              عميل
+            {% endif %}
+          {% endwith %}
+        </div>
         <div class="small">
           {% if order.customer %}
-            <div><i class="bi bi-person me-1"></i> {{ order.customer.username|default:"عميل" }}</div>
+            <div><i class="bi bi-person me-1"></i> {% with inv=order.invoices.first %}{{ inv.customer_name|default:order.customer.username|default:"عميل" }}{% endwith %}</div>
             {% if order.customer.email %}<div class="text-muted">{{ order.customer.email }}</div>{% endif %}
           {% else %}
             <div class="text-muted">—</div>
           {% endif %}
+          {% with invoice=order.invoices.first %}
+            {% if invoice %}
+              <hr class="my-2">
+              <div class="fw-semibold mb-1">الفاتورة</div>
+              {% if invoice.customer_name %}<div>الاسم: {{ invoice.customer_name }}</div>{% endif %}
+              {% if invoice.customer_phone %}<div>الجوال: {{ invoice.customer_phone }}</div>{% endif %}
+              {% if invoice.customer_email %}<div>البريد: {{ invoice.customer_email }}</div>{% endif %}
+              <div class="text-muted">أنشئت: {{ invoice.created_at|date:"Y-m-d H:i" }}</div>
+            {% endif %}
+          {% endwith %}
         </div>
       </div>
     </div>

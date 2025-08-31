@@ -106,7 +106,21 @@
                     <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
                       <div class="d-flex align-items-center gap-2">
                         <i class="bi bi-person-fill text-secondary"></i>
-                        <span class="fw-semibold">{{ order.customer.username|default:"عميل" }}</span>
+                        <span class="fw-semibold">
+                          {% with inv=order.invoices.first %}
+                            {% if inv and inv.customer_name %}
+                              {{ inv.customer_name }}
+                            {% elif order.customer %}
+                              {% if order.customer.get_full_name %}
+                                {{ order.customer.get_full_name }}
+                              {% else %}
+                                {{ order.customer.username|default:"عميل" }}
+                              {% endif %}
+                            {% else %}
+                              عميل
+                            {% endif %}
+                          {% endwith %}
+                        </span>
                       </div>
                       <div class="d-flex align-items-center gap-2 text-muted small">
                         <i class="bi bi-credit-card-2-front"></i>
@@ -198,7 +212,21 @@
                     <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
                       <div class="d-flex align-items-center gap-2">
                         <i class="bi bi-person-fill text-secondary"></i>
-                        <span class="fw-semibold">{{ order.customer.username|default:"عميل" }}</span>
+                        <span class="fw-semibold">
+                          {% with inv=order.invoices.first %}
+                            {% if inv and inv.customer_name %}
+                              {{ inv.customer_name }}
+                            {% elif order.customer %}
+                              {% if order.customer.get_full_name %}
+                                {{ order.customer.get_full_name }}
+                              {% else %}
+                                {{ order.customer.username|default:"عميل" }}
+                              {% endif %}
+                            {% else %}
+                              عميل
+                            {% endif %}
+                          {% endwith %}
+                        </span>
                       </div>
                       <div class="d-flex align-items-center gap-2 text-muted small">
                         <i class="bi bi-credit-card-2-front"></i>
@@ -270,7 +298,21 @@
                     <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
                       <div class="d-flex align-items-center gap-2">
                         <i class="bi bi-person-fill text-secondary"></i>
-                        <span class="fw-semibold">{{ order.customer.username|default:"عميل" }}</span>
+                        <span class="fw-semibold">
+                          {% with inv=order.invoices.first %}
+                            {% if inv and inv.customer_name %}
+                              {{ inv.customer_name }}
+                            {% elif order.customer %}
+                              {% if order.customer.get_full_name %}
+                                {{ order.customer.get_full_name }}
+                              {% else %}
+                                {{ order.customer.username|default:"عميل" }}
+                              {% endif %}
+                            {% else %}
+                              عميل
+                            {% endif %}
+                          {% endwith %}
+                        </span>
                       </div>
                       <div class="d-flex align-items-center gap-2 text-muted small">
                         <i class="bi bi-credit-card-2-front"></i>
