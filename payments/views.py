@@ -9,7 +9,7 @@ from django.urls import reverse
 from django.views.decorators.csrf import csrf_exempt
 from django.middleware.csrf import get_token
 
-from .models import Payment
+from .models import Payment, Invoice
 # نماذج الطلبات والفروع والمنتجات
 from websites.models import Website
 from restaurants.models import Branch
@@ -206,6 +206,41 @@ def success(request):
                     request.session[f"cart_{website.id}"] = []
                     request.session["last_order_id"] = created_order.id
                     request.session.modified = True
+
+                    # إنشاء الفاتورة باستخدام بيانات الاسم والجوال المحفوظة من صفحة السلة
+                    meta = request.session.get(f"cart_meta_{website.id}", {"name": "", "phone": "", "notes": ""})
+                    try:
+                        # احصل على الفاتورة إن كانت الإشارة قد أنشأتها مسبقًا، أو أنشئ واحدة جديدة
+                        invoice, inv_created = Invoice.objects.get_or_create(
+                            order=created_order,
+                            defaults={
+                                "customer_name": (meta.get("name") or "").strip(),
+                                "customer_phone": (meta.get("phone") or "").strip(),
+                                "customer_email": (request.user.email if request.user.is_authenticated else ""),
+                                "total_amount": created_order.total_price,
+                                "compliance_status": False,
+                                "sent_via": "Email",
+                            }
+                        )
+                        if not inv_created:
+                            # حدث موجود: حدّث البيانات القادمة من النموذج لتظهر في التفاصيل
+                            changed = False
+                            name = (meta.get("name") or "").strip()
+                            phone = (meta.get("phone") or "").strip()
+                            email = (request.user.email if request.user.is_authenticated else "")
+                            if name and invoice.customer_name != name:
+                                invoice.customer_name = name; changed = True
+                            if phone and invoice.customer_phone != phone:
+                                invoice.customer_phone = phone; changed = True
+                            if email and invoice.customer_email != email:
+                                invoice.customer_email = email; changed = True
+                            if invoice.total_amount != created_order.total_price:
+                                invoice.total_amount = created_order.total_price; changed = True
+                            if changed:
+                                invoice.save()
+                    except Exception:
+                        # لا نمنع إكمال العملية إذا فشلت الفاتورة لأي سبب
+                        pass
                     order_for_invoice = created_order
 
     if order_for_invoice:
