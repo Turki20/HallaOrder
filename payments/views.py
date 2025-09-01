@@ -8,11 +8,13 @@ from django.shortcuts import render, get_object_or_404, redirect
 from django.urls import reverse
 from django.views.decorators.csrf import csrf_exempt
 from django.middleware.csrf import get_token
+from django.db import models
 
-from .models import Payment, Invoice
+from .models import Payment, Invoice, WalletTransaction, WalletKind
 # نماذج الطلبات والفروع والمنتجات
 from websites.models import Website
 from restaurants.models import Branch
+from restaurants.models import Restaurant
 from menu.models import Product
 from orders.models import Order, OrderStatus, OrderItem, PaymentMethod
 from .models import Invoice
@@ -168,6 +170,20 @@ def success(request):
                         pass
                     order_for_invoice = created_order
 
+                    # إنشاء معاملة محفظة (رصيد) بقيمة إجمالي الطلب بالهللة
+                    try:
+                        r = website.restaurant if hasattr(website, "restaurant") else None
+                        if r and created_order and created_order.total_price is not None:
+                            amount_h = int((created_order.total_price or 0) * 100)
+                            WalletTransaction.objects.create(
+                                restaurant=r,
+                                order=created_order,
+                                kind=WalletKind.CREDIT,
+                                amount_halalah=amount_h,
+                            )
+                    except Exception:
+                        pass
+
     if order_for_invoice:
         return render(request, "payments/invoice.html", {"order": order_for_invoice, "slug": slug})
 
@@ -240,6 +256,22 @@ def stripe_webhook(request):
                 p.order.status = OrderStatus.DELIVERED
                 p.order.save(update_fields=["status"])
 
+            # سجل رصيد في المحفظة عند اكتمال الدفع عبر الويب هوك
+            try:
+                order = getattr(p, "order", None)
+                if order and order.branch and order.total_price is not None:
+                    restaurant = getattr(order.branch, "restaurant", None)
+                    if restaurant:
+                        amount_h = int((order.total_price or 0) * 100)
+                        WalletTransaction.objects.create(
+                            restaurant=restaurant,
+                            order=order,
+                            kind=WalletKind.CREDIT,
+                            amount_halalah=amount_h,
+                        )
+            except Exception:
+                pass
+
     elif event["type"] == "checkout.session.expired":
         session = event["data"]["object"]
         Payment.objects.filter(transaction_id=session.get("id")).update(status="Failed")
@@ -247,6 +279,7 @@ def stripe_webhook(request):
     elif event["type"] == "payment_intent.payment_failed":
         obj = event["data"]["object"]
         Payment.objects.filter(transaction_id=obj.get("id")).update(status="Failed")
+        # في حال الفشل/الاسترداد، يمكن تعديل ذلك لاحقًا لإضافة refund
 
     return HttpResponse(status=200)
 
@@ -332,3 +365,82 @@ def invoices_dashboard(request:HttpRequest):
         "compliance_filter": compliance_filter,
     }
     return render(request, 'payments/invoices_dashboard.html', context)
+
+
+# ============ Wallet ============
+from django.contrib.auth.decorators import login_required
+from users.decorators import restaurant_owner_required
+from django.contrib import messages
+
+@login_required(login_url='/users/login/')
+@restaurant_owner_required
+def wallet_view(request):
+    # استخرج مطعم المستخدم
+    restaurant = getattr(request.user, 'restaurants', None)
+    if not restaurant:
+        return render(request, 'payments/wallet.html', {"balance": 0, "transactions": []})
+
+    qs = WalletTransaction.objects.filter(restaurant=restaurant).order_by('-created_at')
+    last100 = list(qs[:100])
+    transactions_fmt = [(t, (t.amount_halalah or 0) / 100.0) for t in last100]
+    credits = sum(t.amount_halalah for t in last100 if t.kind == WalletKind.CREDIT)
+    refunds = sum(t.amount_halalah for t in last100 if t.kind == WalletKind.REFUND)
+    # للحساب الصحيح، استخدم كل السجل إن أردت. هنا لسرعة العرض نستخدم التجميعة الكاملة.
+    total_credits = WalletTransaction.objects.filter(restaurant=restaurant, kind=WalletKind.CREDIT).aggregate(s=models.Sum('amount_halalah'))['s'] or 0
+    total_refunds = WalletTransaction.objects.filter(restaurant=restaurant, kind=WalletKind.REFUND).aggregate(s=models.Sum('amount_halalah'))['s'] or 0
+    balance_halalah = int(total_credits) - int(total_refunds)
+    balance_sar = balance_halalah / 100.0
+    credit_total_sar = (int(total_credits) / 100.0)
+    refund_total_sar = (int(total_refunds) / 100.0)
+
+    ctx = {
+        "balance": balance_sar,
+        "credit_total": credit_total_sar,
+        "refund_total": refund_total_sar,
+        "transactions_fmt": transactions_fmt,
+        "tx_count": len(last100),
+        "current_page": "payments:wallet",
+    }
+    return render(request, 'payments/wallet.html', ctx)
+
+
+@login_required(login_url='/users/login/')
+@restaurant_owner_required
+def wallet_withdraw(request):
+    if request.method != 'POST':
+        return redirect('payments:wallet')
+
+    restaurant = getattr(request.user, 'restaurants', None)
+    if not restaurant:
+        messages.error(request, 'لا يوجد مطعم مرتبط بالحساب.', 'alert-danger')
+        return redirect('payments:wallet')
+
+    # احسب الرصيد المتاح
+    total_credits = WalletTransaction.objects.filter(restaurant=restaurant, kind=WalletKind.CREDIT).aggregate(s=models.Sum('amount_halalah'))['s'] or 0
+    total_refunds = WalletTransaction.objects.filter(restaurant=restaurant, kind=WalletKind.REFUND).aggregate(s=models.Sum('amount_halalah'))['s'] or 0
+    balance_halalah = int(total_credits) - int(total_refunds)
+
+    # قراءة المبلغ من الطلب (بالريال)
+    amount_str = request.POST.get('amount', '0').strip()
+    try:
+        amount_sar = float(amount_str)
+    except Exception:
+        amount_sar = 0.0
+    amount_halalah = int(round(amount_sar * 100))
+
+    if amount_halalah <= 0:
+        messages.error(request, 'الرجاء إدخال مبلغ صالح.', 'alert-danger')
+        return redirect('payments:wallet')
+    if amount_halalah > balance_halalah:
+        messages.error(request, 'المبلغ أكبر من الرصيد المتاح.', 'alert-danger')
+        return redirect('payments:wallet')
+
+    # إنشاء عملية سحب كرَدّ محفظة (بدون ربط بطلب)
+    WalletTransaction.objects.create(
+        restaurant=restaurant,
+        order=None,
+        kind=WalletKind.REFUND,
+        amount_halalah=amount_halalah,
+    )
+    messages.success(request, 'تم إنشاء طلب سحب الرصيد بنجاح.', 'alert-success')
+    return redirect('payments:wallet')

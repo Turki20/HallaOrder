@@ -61,6 +61,9 @@
                 <li class="{% if request.path == '/invoices_dashboard/' %}active{% endif %}">
                     <a href="{% url 'payments:invoices_dashboard' %}"><i class="fa-solid fa-users"></i>الفواتير</a>
                 </li>
+                <li class="{% if current_page == 'payments:wallet' %}active{% endif %}">
+                    <a href="{% url 'payments:wallet' %}"><i class="fa-solid fa-wallet"></i>المحفظة</a>
+                </li>
 
                 <!-- <li class="{% if current_page == 'subscription_plans' %}active{% endif %}">
                     <a href="{% url 'subscription_plans' %}"><i class="fa-solid fa-file"></i>الباقات</a>

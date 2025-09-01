@@ -1,0 +1,97 @@
+{% extends "home/base.html" %}
+{% block title %}المحفظة{% endblock title %}
+
+{% block dashboard_content %}
+<div class="row p-4 g-4">
+  <!-- Top summary cards -->
+  <div class="col-12 col-lg-6">
+    <div class="card" style="border-radius:1rem;">
+      <div class="card-body d-flex justify-content-between align-items-center">
+        <div>
+          <div class="text-muted">الرصيد الحالي</div>
+          <div class="display-6 mb-0">SAR {{ balance|floatformat:2 }}</div>
+          <div class="small text-muted mt-1">آخر 100 عملية: {{ tx_count }}</div>
+        </div>
+        <div class="rounded-circle d-inline-flex align-items-center justify-content-center" style="width:60px;height:60px;background:#f0f5ff;color:#0d6efd">
+          <i class="fa-solid fa-wallet fs-3"></i>
+        </div>
+      </div>
+      <div class="card-footer bg-white">
+        <form class="d-flex gap-2" method="post" action="{% url 'payments:wallet_withdraw' %}">
+          {% csrf_token %}
+          <input type="number" name="amount" min="1" step="0.01" class="form-control" placeholder="مبلغ السحب (SAR)">
+          <button type="submit" class="btn btn-blue">سحب الرصيد</button>
+        </form>
+        <div class="form-text">سيتم خصم المبلغ من المحفظة كعملية استرجاع.</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="col-12 col-lg-6">
+    <div class="card" style="border-radius:1rem;">
+      <div class="card-body">
+        <div class="d-flex justify-content-between">
+          <div>
+            <div class="text-muted">إجمالي الإيداعات</div>
+            <div class="h5 text-success mb-0">+ SAR {{ credit_total|floatformat:2 }}</div>
+          </div>
+          <div class="text-end">
+            <div class="text-muted">إجمالي الاسترجاعات</div>
+            <div class="h5 text-danger mb-0">- SAR {{ refund_total|floatformat:2 }}</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Transactions below -->
+  <div class="col-12">
+    <div class="card" style="border-radius:1rem;">
+      <div class="card-body">
+        <div class="d-flex justify-content-between align-items-center mb-3">
+          <h5 class="mb-0">آخر 100 عملية</h5>
+          <span class="badge bg-light text-muted">محدث الآن</span>
+        </div>
+        <div class="table-responsive">
+          <table class="table align-middle" style="margin:0">
+            <thead>
+              <tr>
+                <th>التاريخ</th>
+                <th>النوع</th>
+                <th>رقم الطلب</th>
+                <th class="text-end">المبلغ</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for t, amount_sar in transactions_fmt %}
+              <tr>
+                <td class="text-muted">{{ t.created_at|date:"Y-m-d H:i" }}</td>
+                <td>
+                  {% if t.kind == 'credit' %}
+                    <span class="badge" style="background:#e8f7ef;color:#198754;border-radius:.75rem">إيداع</span>
+                  {% else %}
+                    <span class="badge" style="background:#fdecea;color:#dc3545;border-radius:.75rem">استرجاع</span>
+                  {% endif %}
+                </td>
+                <td>{% if t.order_id %}#{{ t.order_id }}{% else %}—{% endif %}</td>
+                <td class="text-end">
+                  {% if t.kind == 'credit' %}
+                    <span class="text-success">+ SAR {{ amount_sar|floatformat:2 }}</span>
+                  {% else %}
+                    <span class="text-danger">- SAR {{ amount_sar|floatformat:2 }}</span>
+                  {% endif %}
+                </td>
+              </tr>
+              {% empty %}
+              <tr><td colspan="4" class="text-muted">لا توجد عمليات بعد.</td></tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock dashboard_content %}
+
+
