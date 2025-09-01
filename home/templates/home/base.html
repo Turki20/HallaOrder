@@ -28,25 +28,27 @@
 
     <main id="dashbaord">
         <div class="sidebar" id="sidebar">
-            <button id="close_menu" class="toggle-btn" onclick="toggleSidebar()"><i class="fa-solid fa-xmark"></i></button>
+            <button id="close_menu" class="toggle-btn" onclick="toggleSidebar()"><i
+                    class="fa-solid fa-xmark"></i></button>
             <h3>HellaOrder</h3>
             {% if request.user.is_authenticated %}
             {% if request.user.restaurants %}
-            <p class="w-100 text-center"><a href="{% url 'websites:public' request.user.restaurants.id %}" class="btn btn-orange"><i class="fa-solid fa-eye"></i><span>معاينة الموقع</span></a></p>
+            <p class="w-100 text-center"><a href="{% url 'websites:public' request.user.restaurants.id %}"
+                    class="btn btn-orange"><i class="fa-solid fa-eye"></i><span>معاينة الموقع</span></a></p>
             {% endif %}
             {% endif %}
             <ul>
-                {% if request.user.profile.role == 'RestaurantOwner' %}                
+                {% if request.user.profile.role == 'RestaurantOwner' %}
                 <li class="{% if current_page == 'reports:dashboard' %}active{% endif %}">
                     <a href="{% url 'reports:dashboard' %}"><i class="fa-solid fa-house"></i>الصفحة الرئيسية</a>
                 </li>
                 {% endif %}
                 <li class="{% if current_page == 'orders:order_board' %}active{% endif %}">
-                  <a href="{% url 'orders:order_board' %}"><i class="fa-solid fa-cart-shopping"></i>حالة الطلبات</a>
+                    <a href="{% url 'orders:order_board' %}"><i class="fa-solid fa-cart-shopping"></i>حالة الطلبات</a>
                 </li>
-                  {% if request.user.profile.role == 'RestaurantOwner' %}                
+                {% if request.user.profile.role == 'RestaurantOwner' %}
                 <li class="{% if request.path == '/menu/' %}active{% endif %}">
-                  <a href="{% url 'menu:menu_view' %}"><i class="fa-solid fa-burger"></i>المنتجات</a>
+                    <a href="{% url 'menu:menu_view' %}"><i class="fa-solid fa-burger"></i>المنتجات</a>
                 </li>
                 <li class="{% if current_page == 'restaurants' %}active{% endif %}">
                     <a href="{% url 'restaurants' %}"><i class="fa-solid fa-store"></i>المطعم</a>
@@ -54,24 +56,36 @@
                 <li class="{% if current_page == 'branches' %}active{% endif %}">
                     <a href="{% url 'branches' %}"><i class="fa-solid fa-building"></i>الفروع</a>
                 </li>
+                <li data-page="customers">
+                    <a href="{% url 'reports:customers' %}">
+                        <i class="fa-solid fa-users"></i>العملاء
+                    </a>
+                </li>
                 <li class="{% if request.path == '/users/all_users/' %}active{% endif %}">
                     <a href="{% url 'users:all_users' %}"><i class="fa-solid fa-users"></i>الموظفين</a>
                 </li>
                 <!-- <li class="{% if current_page == 'subscription_plans' %}active{% endif %}">
                     <a href="{% url 'subscription_plans' %}"><i class="fa-solid fa-file"></i>الباقات</a>
                 </li> -->
-                <li data-page="products"><a href=""><i class="fa-solid fa-chart-pie"></i>التقارير</a></li>
+                <!-- <li data-page="products"><a href=""><i class="fa-solid fa-chart-pie"></i>التقارير</a></li>
                 {% endif %}
-            </ul>
+            </ul> -->
+                <li class="{% if current_page == 'reports:ai' or '/reports/ai/' in request.path %}active{% endif %}">
+                    <a href="{% url 'reports:ai' %}">
+                        <i class="fa-solid fa-wand-magic-sparkles"></i> التقارير الذكية
+                    </a>
+                </li>
+                <
+
         </div>
         <div class="content">
-            <header> 
-                <button onclick="toggleSidebar()"><i class="fa-solid fa-bars"></i></button> 
-                <span>Dashboard</span> 
+            <header>
+                <button onclick="toggleSidebar()"><i class="fa-solid fa-bars"></i></button>
+                <span>Dashboard</span>
             </header>
             <div id="mainContent">
                 {% block dashboard_content %}
-                  <!-- <div class="row p-4 g-4">
+                <!-- <div class="row p-4 g-4">
                     <div class="col-12 col-md-6">
                         <div class="card">
                             <h1>card</h1>
@@ -95,7 +109,7 @@
     {% block content %}
 
     {% endblock content %}
-   
+
     <script src="{% static 'js/slidebar.js' %}"></script>
 </body>
 

@@ -1,0 +1,327 @@
+{% extends "home/base.html" %}
+{% load static %}
+
+{% block title %}التقارير الذكية{% endblock %}
+
+{% block style %}
+<style>
+:root{--teal:#00AAB0;--dark:#004B59;--muted:#6c757d;--border:#e9ecef}
+.ai .grid{display:grid;gap:16px}
+.ai .row-4{grid-template-columns:repeat(4,1fr)}
+.ai .row-2{grid-template-columns:repeat(2,1fr)}
+.ai .row-3{grid-template-columns:repeat(3,1fr)}
+@media(max-width:1200px){.ai .row-4{grid-template-columns:repeat(2,1fr)}}
+@media(max-width:768px){.ai .row-4,.ai .row-3,.ai .row-2{grid-template-columns:1fr}}
+.card{background:#fff;border:1px solid var(--border);border-radius:14px;padding:18px;box-shadow:0 8px 30px rgba(0,75,89,.06)}
+.hdr{display:flex;gap:10px;align-items:center;justify-content:space-between;margin-bottom:8px}
+.hdr h3{margin:0;font-size:18px;color:var(--dark)}
+.badge{display:inline-block;padding:4px 8px;border-radius:999px;background:#f5f5f5;color:#444;font-size:12px}
+.btn{background:var(--teal);color:#fff;border:0;border-radius:10px;padding:8px 14px;font-weight:700}
+.btn-ghost{background:#fff;border:1px solid var(--border);color:#333}
+.input{border:1px solid var(--border);border-radius:10px;padding:8px 10px}
+.kpis{display:grid;gap:12px;grid-template-columns:repeat(4,1fr)}
+.kpi{background:#fff;border:1px solid var(--border);border-radius:12px;padding:14px;text-align:center}
+.kpi .v{font-size:22px;font-weight:800}
+.kpi .t{font-size:12px;color:var(--muted)}
+.list{display:flex;flex-wrap:wrap;gap:8px}
+.chip{background:rgba(0,170,176,.08);color:var(--dark);border:1px solid rgba(0,170,176,.25);padding:6px 10px;border-radius:999px;font-size:13px}
+.table{width:100%;border-collapse:separate;border-spacing:0 8px}
+.table th,.table td{padding:10px 12px;border-top:1px solid var(--border);border-bottom:1px solid var(--border);background:#fff}
+.table th{font-weight:700;color:#394957}
+.table tr td:first-child,.table tr th:first-child{border-radius:10px 0 0 10px}
+.table tr td:last-child,.table tr th:last-child{border-radius:0 10px 10px 0}
+.empty{color:#9aa4ad;font-size:14px}
+.hm{display:grid;grid-template-columns:48px 1fr;gap:12px}
+.hm-legend{display:flex;gap:6px;align-items:center;justify-content:flex-end;margin-bottom:6px}
+.hm-legend span{width:14px;height:14px;display:inline-block;border-radius:3px}
+.hm-grid{display:grid;grid-template-columns:repeat(24,26px);gap:6px;align-items:center}
+.hm-hour{font-size:12px;color:#64748b;transform:translateY(-2px)}
+.hm-cell{width:26px;height:20px;border-radius:6px;background:#f1f5f9;border:1px solid #e2e8f0}
+.hm-cell[data-v="0"]{background:#f8fafc}
+.hm-cell[data-v="1"]{background:#fee2e2}
+.hm-cell[data-v="2"]{background:#fecaca}
+.hm-cell[data-v="3"]{background:#fca5a5}
+.hm-cell[data-v="4"]{background:#ef4444}
+.tip{position:absolute;background:#111;color:#fff;padding:6px 8px;border-radius:6px;font-size:12px;display:none}
+.footer-tools{display:flex;gap:10px;justify-content:flex-start}
+</style>
+{% endblock %}
+
+{% block dashboard_content %}
+<div class="ai grid">
+  <div class="card">
+    <div class="hdr">
+      <div class="list">
+        <span class="badge">المدى</span>
+        <select id="period" class="input">
+          <option value="week" {% if selected.period == "week" %}selected{% endif %}>آخر 7 أيام</option>
+          <option value="month" {% if selected.period == "month" %}selected{% endif %}>آخر 30 يوم</option>
+        </select>
+      </div>
+      <button id="btn-refresh" class="btn">تحديث</button>
+    </div>
+    <div class="kpis" id="kpis">
+      <div class="kpi"><div class="v" id="kpi-revenue">–</div><div class="t">إجمالي الإيراد</div></div>
+      <div class="kpi"><div class="v" id="kpi-orders">–</div><div class="t">عدد الطلبات</div></div>
+      <div class="kpi"><div class="v" id="kpi-aov">–</div><div class="t">متوسط الطلب</div></div>
+      <div class="kpi"><div class="v" id="kpi-top">–</div><div class="t">أفضل منتج</div></div>
+    </div>
+  </div>
+
+  <div class="grid row-2">
+    <div class="card">
+      <div class="hdr"><h3>المنتجات الرائجة</h3></div>
+      <div id="trending" class="list"></div>
+      <div class="empty" id="trending-empty" style="display:none">لا توجد بيانات كافية للفترة.</div>
+    </div>
+
+    <div class="card">
+      <div class="hdr"><h3>الناس يشترون أيضًا</h3></div>
+      <div style="display:flex;gap:8px;margin-bottom:8px">
+        <input id="also-input" class="input" placeholder="ابحث عن منتج..." list="also-datalist">
+        <datalist id="also-datalist"></datalist>
+        <button id="also-add" class="btn-ghost">أضف للسلة</button>
+        <button id="also-run" class="btn">اعرض الاقتراحات</button>
+      </div>
+      <div class="list" id="also-basket"></div>
+      <div id="also-out" class="list" style="margin-top:8px"></div>
+      <div class="empty" id="also-empty" style="display:none">اختر منتجًا ثم اعرض الاقتراحات.</div>
+    </div>
+  </div>
+
+  <div class="grid row-2">
+    <div class="card">
+      <div class="hdr"><h3>مقارنة الفروع</h3></div>
+      <table class="table" id="branches-table">
+        <thead><tr><th>الفرع</th><th>الطلبات</th><th>الإيراد</th><th>AOV</th></tr></thead>
+        <tbody></tbody>
+      </table>
+      <div class="empty" id="branches-empty" style="display:none">لا يوجد بيانات للفروع في هذا المدى.</div>
+    </div>
+
+    <div class="card">
+      <div class="hdr"><h3>أفضل أوقات البيع (أيام × ساعات)</h3>
+        <div class="hm-legend">
+          <span style="background:#f8fafc"></span> أدنى
+          <span style="background:#fecaca"></span>
+          <span style="background:#fca5a5"></span>
+          <span style="background:#ef4444"></span> أعلى
+        </div>
+      </div>
+      <div id="heatmap-wrap" class="hm">
+        <div></div>
+        <div class="hm-grid" id="hm-hours"></div>
+      </div>
+      <div class="empty" id="heatmap-empty" style="display:none">لا توجد حركة بيع كافية لإظهار الخريطة.</div>
+    </div>
+  </div>
+
+  <div class="grid row-2">
+    <div class="card">
+      <div class="hdr"><h3>تصنيف المنتجات ABC</h3></div>
+      <table class="table" id="abc-table">
+        <thead><tr><th>المنتج</th><th>الإيراد</th><th>الكمية</th><th>التصنيف</th><th>% تراكمي</th></tr></thead>
+        <tbody></tbody>
+      </table>
+      <div class="empty" id="abc-empty" style="display:none">لا توجد بيانات.</div>
+    </div>
+
+    <div class="card">
+      <div class="hdr"><h3>محاكي الخصم</h3></div>
+      <div style="display:flex;gap:8px;align-items:center;margin-bottom:10px">
+        <input id="disc-input" class="input" placeholder="اختر المنتج" list="disc-datalist" style="flex:1">
+        <datalist id="disc-datalist"></datalist>
+        <input id="disc-pct" class="input" type="number" value="10" min="0" max="90" style="width:110px">
+        <button id="disc-run" class="btn">محاكاة</button>
+      </div>
+      <div id="disc-result" class="grid row-2" style="gap:10px"></div>
+      <div class="empty" id="disc-empty">اختر منتجًا وحدد نسبة الخصم.</div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="footer-tools">
+      <button id="btn-export" class="btn-ghost">تصدير الجداول CSV</button>
+    </div>
+  </div>
+</div>
+
+<script>
+const money = v => (v||0).toLocaleString('ar-SA',{minimumFractionDigits:2,maximumFractionDigits:2})+' ر.س';
+const api = async (url)=>{const r=await fetch(url,{headers:{'X-Requested-With':'XMLHttpRequest'}});return r.json();}
+const qs = p => {const period=document.getElementById('period').value; const now=new Date(); const end=now.toISOString().slice(0,10); const start=new Date(now); start.setDate(now.getDate()-(period==='month'?29:6)); return `?start=${start.toISOString().slice(0,10)}&end=${end}`}
+
+async function loadKPIs(){
+  const d = await api("{% url 'reports:api_insights_summary' %}"+qs());
+  const k = d.kpi||{};
+  document.getElementById('kpi-revenue').textContent = money(k.revenue);
+  document.getElementById('kpi-orders').textContent  = (k.orders||0).toString();
+  document.getElementById('kpi-aov').textContent     = money(k.aov);
+  document.getElementById('kpi-top').textContent     = d.top_product || '–';
+}
+
+async function loadTrending(){
+  const d = await api("{% url 'reports:api_reco_trending' %}"+qs());
+  const box = document.getElementById('trending');
+  const empty = document.getElementById('trending-empty');
+  box.innerHTML='';
+  if(!d.items || !d.items.length){ empty.style.display='block'; return }
+  empty.style.display='none';
+  d.items.forEach(p=>{
+    const el = document.createElement('span'); el.className='chip'; el.textContent = `${p.name} • ${p.qty}`;
+    box.appendChild(el);
+  });
+  // feed product lists
+  const list = document.getElementById('also-datalist');
+  const list2= document.getElementById('disc-datalist');
+  list.innerHTML=''; list2.innerHTML='';
+  d.items.forEach(p=>{
+    const o1=document.createElement('option'); o1.value=p.name; o1.dataset.pid=p.id; list.appendChild(o1);
+    const o2=document.createElement('option'); o2.value=p.name; o2.dataset.pid=p.id; list2.appendChild(o2);
+  });
+}
+
+const basket = [];
+function guessProductId(name){
+  const datalist = document.getElementById('also-datalist');
+  const opt = Array.from(datalist.options).find(o=>o.value===name);
+  return opt? parseInt(opt.dataset.pid): null;
+}
+
+document.getElementById('also-add').addEventListener('click', async ()=>{
+  const v = document.getElementById('also-input').value.trim();
+  if(!v) return;
+  let pid = guessProductId(v);
+  if(!pid){
+    const s = await api("{% url 'reports:api_products_search' %}?q="+encodeURIComponent(v));
+    if(s.results && s.results[0]) pid = s.results[0].id;
+  }
+  if(!pid) return;
+  if(!basket.includes(pid)) basket.push(pid);
+  renderBasket();
+});
+
+function renderBasket(){
+  const box = document.getElementById('also-basket');
+  box.innerHTML='';
+  basket.forEach(id=>{
+    const li=document.createElement('span'); li.className='chip'; li.textContent='ID#'+id; box.appendChild(li);
+  });
+}
+
+document.getElementById('also-run').addEventListener('click', async ()=>{
+  const out = document.getElementById('also-out');
+  const empty = document.getElementById('also-empty');
+  out.innerHTML='';
+  if(!basket.length){ empty.style.display='block'; return }
+  empty.style.display='none';
+  const d = await api("{% url 'reports:api_reco_also_bought' %}"+qs()+`&product_ids=${basket.join(',')}`);
+  (d.items||[]).forEach(p=>{
+    const el=document.createElement('span'); el.className='chip'; el.textContent=`${p.name} • ${p.score}`;
+    out.appendChild(el);
+  });
+});
+
+async function loadBranches(){
+  const d = await api("{% url 'reports:api_branches_compare' %}"+qs());
+  const tb = document.querySelector('#branches-table tbody');
+  const empty = document.getElementById('branches-empty');
+  tb.innerHTML='';
+  if(!d.rows || !d.rows.length){ empty.style.display='block'; return }
+  empty.style.display='none';
+  d.rows.forEach(r=>{
+    const tr=document.createElement('tr');
+    tr.innerHTML=`<td>${r.name||'-'}</td><td>${r.orders||0}</td><td>${money(r.revenue)}</td><td>${money(r.aov)}</td>`;
+    tb.appendChild(tr);
+  });
+}
+
+async function loadHeatmap(){
+  const d = await api("{% url 'reports:api_heatmap_time' %}"+qs());
+  const grid=d.grid||[]; const hours=d.hours||[]; const days=d.weekdays||[];
+  const wrap = document.getElementById('heatmap-wrap');
+  const hh = document.getElementById('hm-hours');
+  const empty = document.getElementById('heatmap-empty');
+  hh.innerHTML='';
+  if(!grid.length){ empty.style.display='block'; return }
+  empty.style.display='none';
+  hours.forEach(h=>{
+    const label=document.createElement('div'); label.className='hm-hour'; label.textContent=h; hh.appendChild(label);
+  });
+  const max = Math.max(...grid.flat());
+  const levels = v => v<=0?0 : v/max>=0.75?4 : v/max>=0.5?3 : v/max>=0.25?2 : 1;
+  for(let r=0;r<7;r++){
+    const row=document.createElement('div'); row.style.gridColumn="1 / -1"; row.style.display='contents';
+    for(let c=0;c<24;c++){
+      const cell=document.createElement('div'); cell.className='hm-cell'; cell.dataset.v=levels(grid[r][c]);
+      cell.title = `${days[r]} • ${hours[c]} — ${money(grid[r][c])}`;
+      hh.appendChild(cell);
+    }
+  }
+}
+
+async function loadABC(){
+  const d = await api("{% url 'reports:api_products_abc' %}"+qs());
+  const tb = document.querySelector('#abc-table tbody');
+  const empty = document.getElementById('abc-empty');
+  tb.innerHTML='';
+  if(!d.items || !d.items.length){ empty.style.display='block'; return }
+  empty.style.display='none';
+  d.items.slice(0,20).forEach(i=>{
+    const tr=document.createElement('tr');
+    tr.innerHTML=`<td>${i.name}</td><td>${money(i.revenue)}</td><td>${i.qty}</td><td>${i.bucket}</td><td>${i.cum_pct}%</td>`;
+    tb.appendChild(tr);
+  });
+}
+
+function getProductIdFromDatalist(inputId, datalistId){
+  const v=document.getElementById(inputId).value.trim();
+  const opt=[...document.getElementById(datalistId).options].find(o=>o.value===v);
+  return opt? parseInt(opt.dataset.pid): null;
+}
+
+document.getElementById('disc-run').addEventListener('click', async ()=>{
+  const pid = getProductIdFromDatalist('disc-input','disc-datalist');
+  const pct = parseFloat(document.getElementById('disc-pct').value||0);
+  const box=document.getElementById('disc-result');
+  const empty=document.getElementById('disc-empty');
+  box.innerHTML='';
+  if(!pid){ empty.style.display='block'; return }
+  empty.style.display='none';
+  const d = await api("{% url 'reports:api_simulate_discount' %}"+qs()+`&product_id=${pid}&discount=${pct}`);
+  if(!d.result){ empty.style.display='block'; return }
+  const r=d.result;
+  box.innerHTML=`
+    <div class="kpi"><div class="v">${money(r.baseline_rev)}</div><div class="t">الإيراد الحالي</div></div>
+    <div class="kpi"><div class="v">${money(r.new_price)}</div><div class="t">السعر بعد الخصم</div></div>
+    <div class="kpi"><div class="v">${r.projected_qty}</div><div class="t">الكمية المتوقعة</div></div>
+    <div class="kpi"><div class="v">${money(r.projected_rev)}</div><div class="t">الإيراد المتوقع</div></div>
+    <div class="kpi" style="grid-column:1/-1"><div class="v" style="color:${r.delta_rev_pct>=0?'#16a34a':'#dc2626'}">${r.delta_rev_pct}%</div><div class="t">التغيّر بالإيراد</div></div>
+  `;
+});
+
+document.getElementById('btn-refresh').addEventListener('click', refreshAll);
+async function refreshAll(){
+  document.getElementById('btn-refresh').disabled=true;
+  await Promise.all([loadKPIs(), loadTrending(), loadBranches(), loadHeatmap(), loadABC()]);
+  document.getElementById('btn-refresh').disabled=false;
+}
+refreshAll();
+
+document.getElementById('btn-export').addEventListener('click', ()=>{
+  const rows=[];
+  rows.push(['Branch','Orders','Revenue','AOV']);
+  document.querySelectorAll('#branches-table tbody tr').forEach(tr=>{
+    const t=[...tr.querySelectorAll('td')].map(td=>td.innerText); rows.push(t);
+  });
+  rows.push([]);
+  rows.push(['Product','Revenue','Qty','Bucket','Cum%']);
+  document.querySelectorAll('#abc-table tbody tr').forEach(tr=>{
+    const t=[...tr.querySelectorAll('td')].map(td=>td.innerText); rows.push(t);
+  });
+  const csv=rows.map(r=>r.map(x=>`"${(x||'').toString().replace(/"/g,'""')}"`).join(',')).join('\n');
+  const blob=new Blob([csv],{type:'text/csv;charset=utf-8;'});
+  const a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download='reports.csv'; a.click();
+});
+</script>
+{% endblock %}

@@ -1,0 +1,162 @@
+{% extends "home/base.html" %}
+{% load static %}
+
+{% block title %}العملاء{% endblock %}
+
+{% block style %}
+<style>
+  :root{--c1:#00aab0;--c2:#004b59;--bd:#e9ecef}
+  .crm{padding:8px}
+  .crm .bar{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-bottom:12px}
+  .crm .bar input, .crm .bar select{padding:8px 10px;border:1px solid var(--bd);border-radius:8px}
+  .crm .btn{background:var(--c1);color:#fff;border:0;border-radius:10px;padding:10px 14px;font-weight:700}
+  .crm .btn.sub{background:#f1f3f5;color:#222}
+  .crm .btn.warn{background:#f44336}
+  .crm .table{width:100%;border:1px solid var(--bd);border-radius:12px;overflow:hidden}
+  .crm table{width:100%}
+  .crm thead th{background:#f8f9fa;font-weight:700;padding:10px;border-bottom:1px solid var(--bd)}
+  .crm tbody td{padding:10px;border-bottom:1px solid var(--bd);vertical-align:middle}
+  .crm .tags{font-size:12px;color:#666}
+  .crm .pill{display:inline-block;background:#e6f7f8;color:#04646b;border-radius:999px;padding:2px 8px;margin-inline:3px}
+  .crm .count{color:#666;margin-inline-start:auto}
+  .crm .empty{padding:20px;color:#777;text-align:center}
+</style>
+{% endblock %}
+
+{% block dashboard_content %}
+<div class="crm">
+  <div class="bar">
+    <strong>العملاء</strong>
+    <select id="period">
+      <option value="7">آخر 7 أيام</option>
+      <option value="30" selected>آخر 30 يوم</option>
+      <option value="90">آخر 90 يوم</option>
+    </select>
+    <input id="search" placeholder="ابحث بالاسم/الهاتف/الإيميل/ID">
+    <select id="min_orders">
+      <option value="">كلّ الطلبات</option>
+      <option value="1">+1 طلب</option>
+      <option value="3">+3 طلبات</option>
+      <option value="5">+5 طلبات</option>
+    </select>
+    <button class="btn" id="refresh">تحديث</button>
+
+    <span class="count"><span id="selCount">0</span> محدد</span>
+    <button class="btn sub" id="selectAll">تحديد الكل</button>
+    <button class="btn sub" id="clearSel">إلغاء التحديد</button>
+    <input id="tagInput" placeholder="أضف وسمًا" style="width:140px">
+    <button class="btn" id="bulkTag">تطبيق الوسم</button>
+    <button class="btn warn" id="bulkBlock">حظر</button>
+    <button class="btn sub" id="bulkUnblock">إلغاء الحظر</button>
+    <a class="btn sub" id="exportCsv" href="#">تصدير CSV</a>
+  </div>
+
+  <div class="table">
+    <table>
+      <thead>
+        <tr>
+          <th style="width:42px"></th>
+          <th>العميل</th>
+          <th>الطلبات</th>
+          <th>الإجمالي</th>
+          <th>آخر طلب</th>
+          <th>الوسوم</th>
+          <th>الحالة</th>
+        </tr>
+      </thead>
+      <tbody id="rows"></tbody>
+    </table>
+  </div>
+
+  <div id="empty" class="empty" style="display:none">لا يوجد عملاء ضمن المعايير.</div>
+</div>
+
+<script>
+(function(){
+  const rowsEl = document.getElementById('rows');
+  const emptyEl = document.getElementById('empty');
+  const selCount = document.getElementById('selCount');
+  const qs = (sel)=>document.querySelector(sel);
+  const period = qs('#period');
+  const search = qs('#search');
+  const minOrders = qs('#min_orders');
+
+  let data = [];
+  let selected = new Set();
+
+  function fmtMoney(v){ return Intl.NumberFormat('ar-SA',{style:'currency',currency:'SAR'}).format(v||0) }
+  function fmtDate(iso){ if(!iso) return "-"; const d=new Date(iso); return d.toLocaleDateString('ar-SA', {year:'numeric',month:'2-digit',day:'2-digit'}); }
+
+  function updateSelectedCount(){ selCount.textContent = selected.size; }
+
+  function render(){
+    if(!data.length){ rowsEl.innerHTML=""; emptyEl.style.display="block"; return; }
+    emptyEl.style.display="none";
+    rowsEl.innerHTML = data.map(r=>`
+      <tr>
+        <td><input type="checkbox" data-id="${r.id}" ${selected.has(r.id)?'checked':''}></td>
+        <td>
+          <div><strong>${r.name}</strong> <small class="pill">#${r.external_id}</small></div>
+          <div style="color:#777">${r.phone||''} ${r.email?('· '+r.email):''}</div>
+        </td>
+        <td>${r.orders}</td>
+        <td>${fmtMoney(r.amount)}</td>
+        <td>${fmtDate(r.last)}</td>
+        <td class="tags">${(r.tags||'').split(',').filter(Boolean).map(t=>`<span class="pill">${t}</span>`).join('')}</td>
+        <td>${r.blocked?'<span class="pill" style="background:#ffe7e7;color:#b30000">محظور</span>':'<span class="pill" style="background:#e8ffe8;color:#0b7">نشط</span>'}</td>
+      </tr>
+    `).join('');
+    rowsEl.querySelectorAll('input[type="checkbox"]').forEach(cb=>{
+      cb.addEventListener('change', ()=>{ const id=parseInt(cb.dataset.id); cb.checked?selected.add(id):selected.delete(id); updateSelectedCount(); });
+    });
+    updateSelectedCount();
+  }
+
+  function rangeDates(days){
+    const end = new Date(); const start = new Date(); start.setDate(end.getDate() - (parseInt(days)-1));
+    const iso = d => d.toISOString().slice(0,10);
+    return {start: iso(start), end: iso(end)};
+  }
+
+  async function load(){
+    const {start,end} = rangeDates(period.value||30);
+    const url = `{% url 'reports:api_customers_list' %}?start=${start}&end=${end}&q=${encodeURIComponent(search.value||'')}&min_orders=${encodeURIComponent(minOrders.value||'')}`;
+    const r = await fetch(url, {headers:{'X-Requested-With':'XMLHttpRequest'}});
+    const j = await r.json();
+    data = j.rows||[];
+    if (selected.size) {
+      const ids = new Set(data.map(x=>x.id));
+      selected = new Set([...selected].filter(x=>ids.has(x)));
+    }
+    render();
+  }
+
+  async function bulkTag(block=null){
+    if(!selected.size) return alert("اختر عملاء أولًا");
+    const ids = [...selected].join(',');
+    if(block===true || block===false){
+      const url = `{% url 'reports:api_customers_bulk_block' %}?ids=${ids}&block=${block?1:0}`;
+      await fetch(url); await load(); return;
+    }
+    const tag = (qs('#tagInput').value||'').trim();
+    if(!tag) return alert("أدخل وسمًا");
+    const url = `{% url 'reports:api_customers_bulk_tag' %}?ids=${ids}&tag=${encodeURIComponent(tag)}`;
+    await fetch(url); await load();
+  }
+
+  qs('#refresh').addEventListener('click', load);
+  period.addEventListener('change', load);
+  minOrders.addEventListener('change', load);
+  search.addEventListener('input', ()=>{ clearTimeout(search._t); search._t=setTimeout(load, 300); });
+
+  qs('#selectAll').addEventListener('click', ()=>{ data.forEach(r=>selected.add(r.id)); render(); });
+  qs('#clearSel').addEventListener('click', ()=>{ selected.clear(); render(); });
+  qs('#bulkTag').addEventListener('click', ()=>bulkTag());
+  qs('#bulkBlock').addEventListener('click', ()=>bulkTag(true));
+  qs('#bulkUnblock').addEventListener('click', ()=>bulkTag(false));
+  qs('#exportCsv').addEventListener('click', (e)=>{ e.preventDefault(); window.location = `{% url 'reports:api_customers_export' %}`; });
+
+  document.addEventListener('DOMContentLoaded', load);
+})();
+</script>
+{% endblock %}
