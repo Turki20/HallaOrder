@@ -11,4 +11,7 @@ urlpatterns = [
     path("cancel/", views.cancel, name="cancel"),
     path("order-status/<int:order_id>/", views.public_order_status, name="public_order_status"),
     path("webhook/", views.stripe_webhook, name="stripe_webhook"),
+    
+    
+    path("invoices_dashboard/", views.invoices_dashboard, name="invoices_dashboard"),
 ]

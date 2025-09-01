@@ -1,0 +1,99 @@
+{% extends "home/base.html" %}
+{% block title %}الفواتير{% endblock %}
+
+{% block dashboard_content %}
+
+
+
+
+<div class="row p-4">
+    <h2 class="">لوحة التحكم - الفواتير</h2>
+</div>
+
+<div class="row p-4 g-4">
+    <div class="col-12">
+        <div class="card">
+            <form method="POST" class="row g-3 mb-4">
+                {% csrf_token %}
+
+                <div class="col-md-4">
+                    <input type="text" name="q" placeholder="بحث بالاسم أو البريد" class="form-control" value="{{ query }}">
+                </div>
+
+                <div class="col-md-3">
+                    <select name="sent_via" class="form-select">
+                        <option value="">-- طريقة الإرسال --</option>
+                        <option value="Email" {% if sent_via_filter == "Email" %}selected{% endif %}>Email</option>
+                        <option value="SMS" {% if sent_via_filter == "SMS" %}selected{% endif %}>SMS</option>
+                    </select>
+                </div>
+
+                <div class="col-md-3">
+                    <select name="compliance_status" class="form-select">
+                        <option value="">-- حالة الالتزام --</option>
+                        <option value="true" {% if compliance_filter == "true" %}selected{% endif %}>ملتزم</option>
+                        <option value="false" {% if compliance_filter == "false" %}selected{% endif %}>غير ملتزم</option>
+                    </select>
+                </div>
+
+                <div class="col-md-2 d-grid">
+                    <button type="submit" class="btn btn-orange">بحث</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div class="col-12">
+        <div class="card">
+            <!-- 📋 جدول الفواتير -->
+            <div class="table-responsive">
+                <table class="table table-bordered table-hover bg-white">
+                    <thead class="table-light">
+                        <tr>
+                            <th>#</th>
+                            <th>العميل</th>
+                            <th>الهاتف</th>
+                            <th>البريد</th>
+                            <th>المبلغ</th>
+                            <th>الإرسال</th>
+                            <th>الالتزام</th>
+                            <th>التاريخ</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for invoice in invoices %}
+                        <tr>
+                            <td>{{ invoice.id }}</td>
+                            <td>{{ invoice.customer_name }}</td>
+                            <td>{{ invoice.customer_phone }}</td>
+                            <td>{{ invoice.customer_email }}</td>
+                            <td>{{ invoice.total_amount }} ريال</td>
+                            <td>
+                                {% if invoice.sent_via == "Email" %}
+                                📧 Email
+                                {% elif invoice.sent_via == "SMS" %}
+                                📱 SMS
+                                {% endif %}
+                            </td>
+                            <td>
+                                {% if invoice.compliance_status %}
+                                ✅ ملتزم
+                                {% else %}
+                                ❌ غير ملتزم
+                                {% endif %}
+                            </td>
+                            <td>{{ invoice.created_at|date:"Y-m-d H:i" }}</td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="8" class="text-center text-muted">لا توجد فواتير مطابقة.</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}

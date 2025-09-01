@@ -3,7 +3,7 @@ from decimal import Decimal
 
 import stripe
 from django.conf import settings
-from django.http import JsonResponse, HttpResponse, HttpResponseBadRequest
+from django.http import JsonResponse, HttpResponse, HttpResponseBadRequest, HttpRequest
 from django.shortcuts import render, get_object_or_404, redirect
 from django.urls import reverse
 from django.views.decorators.csrf import csrf_exempt
@@ -15,6 +15,8 @@ from websites.models import Website
 from restaurants.models import Branch
 from menu.models import Product
 from orders.models import Order, OrderStatus, OrderItem, PaymentMethod
+from .models import Invoice
+from django.db.models import Q
 
 # إعداد مفتاح Stripe السري
 stripe.api_key = settings.STRIPE_SECRET_KEY
@@ -350,3 +352,37 @@ def public_order_status(request, order_id: int):
         "status_display": order.get_status_display(),
         "updated_at": order.updated_at.isoformat(),
     })
+
+
+
+def invoices_dashboard(request:HttpRequest):
+    invoices = Invoice.objects.all().order_by("-created_at") # عدلها عشان يصير الواتير الخاصه بكل مطعم
+
+    query = None
+    sent_via_filter = None
+    compliance_filter = None
+
+    if request.method == "POST":
+        query = request.POST.get("q")
+        sent_via_filter = request.POST.get("sent_via")
+        compliance_filter = request.POST.get("compliance_status")
+
+        if query:
+            invoices = invoices.filter(
+                Q(customer_name__icontains=query) |
+                Q(customer_email__icontains=query)
+            )
+
+        if sent_via_filter:
+            invoices = invoices.filter(sent_via=sent_via_filter)
+
+        if compliance_filter in ["true", "false"]:
+            invoices = invoices.filter(compliance_status=(compliance_filter == "true"))
+
+    context = {
+        "invoices": invoices,
+        "query": query,
+        "sent_via_filter": sent_via_filter,
+        "compliance_filter": compliance_filter,
+    }
+    return render(request, 'payments/invoices_dashboard.html', context)

@@ -32,13 +32,24 @@ def menu_view(request):
         elif 'add_option_group' in request.POST:
             form = OptionGroupCreateForm(request.POST)
             if form.is_valid():
-                group = form.save(commit=False); group.restaurant = restaurant; group.selection_type = 'SINGLE'; group.save()
+                group = form.save(commit=False)
+                group.restaurant = restaurant
+                group.selection_type = 'SINGLE'
+                print(group.name)
+                if OptionGroup.objects.filter(name = group.name).exists():
+                    messages.error(request, 'اسم المجموعة موجود الرجاء اختيار اسم فئة فريد', 'alert-danger')
+                    return redirect('menu:menu_view')
+                group.save()
                 return redirect('menu:edit_option_group', group.id)
             
         elif 'add_addon_group' in request.POST:
             form = OptionGroupCreateForm(request.POST)
             if form.is_valid():
-                group = form.save(commit=False); group.restaurant = restaurant; group.selection_type = 'MULTIPLE'; group.save()
+                group = form.save(commit=False); group.restaurant = restaurant; group.selection_type = 'MULTIPLE'; 
+                if OptionGroup.objects.filter(name = group.name).exists():
+                    messages.error(request, 'اسم المجموعة موجود الرجاء اختيار اسم فئة فريد', 'alert-danger')
+                    return redirect('menu:menu_view')
+                group.save()
         return redirect('menu:menu_view')
     categories = Category.objects.filter(restaurant=restaurant).prefetch_related('product_set__images')
     all_option_groups = OptionGroup.objects.filter(restaurant=restaurant).prefetch_related('options')
@@ -56,6 +67,7 @@ def edit_category(request, category_id):
     if request.method == 'POST':
         category.name = request.POST.get('name', '').strip()
         category.description = request.POST.get('description', '').strip()
+        messages.success(request, 'تم تعديل الفئة بنجاح', 'alert-success')
         category.save()
         return redirect('menu:menu_view')
     total_products = category.product_set.count()
@@ -83,6 +95,7 @@ def edit_product(request, product_id):
         product.category = get_object_or_404(Category, id=request.POST.get('category'), restaurant=restaurant)
         product.description = request.POST.get('description', '').strip()
         product.available = request.POST.get('available', '1') == '1'
+        messages.success(request, 'تم حفظ المنتج بنجاح', 'alert-success')
         product.save()
         product.option_groups.set(request.POST.getlist('option_groups'))
         for image_file in request.FILES.getlist('images'):
@@ -96,6 +109,7 @@ def edit_product(request, product_id):
 def delete_product(request, product_id):
     product = get_object_or_404(Product, id=product_id, category__restaurant=request.user.restaurants)
     if request.method == 'POST': product.delete()
+    messages.success(request, 'تم حذف المنتج بنجاح', 'alert-success')
     return redirect('menu:menu_view')
 
 @require_POST
@@ -134,6 +148,7 @@ def edit_option_group(request, group_id=None):
     if request.method == 'POST' and form.is_valid() and formset.is_valid():
         form.save()
         formset.save()
+        messages.success(request, 'تم حفظ المجموعة بنجاح', 'alert-success')
         return redirect('menu:menu_view')
     context = {'form': form, 'formset': formset, 'instance': instance}
     return render(request, 'menu/edit_option_group.html', context)
@@ -144,6 +159,7 @@ def edit_option_group(request, group_id=None):
 def delete_option_group(request, group_id):
     group = get_object_or_404(OptionGroup, pk=group_id, restaurant=request.user.restaurants)
     group.delete()
+    messages.success(request, 'تم حذف المجموعة بنجاح', 'alert-success')
     return redirect('menu:menu_view')
 
 @restaurant_owner_required

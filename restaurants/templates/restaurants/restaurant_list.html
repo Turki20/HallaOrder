@@ -70,42 +70,78 @@
     </div>
 
     <div class="col-md-6">
-      <div class="card h-100">
-        <h3>ثيم الموقع الالكتروني</h3>
-        <hr>
-        {% if website %}
-        <div class="mb-3">
-          <p>
-            <strong>الشعار</strong>
-          </p>
-          <img src="{{website.logo.url}}" alt="" class="w-50">
-        </div>
-        <p>
-          <strong style="padding: 5px 15px; border: 1px solid green; border-radius: 10px;">
-            {{ website.theme }}
-          </strong>
-        </p>
-        <p>
-          <strong>الالوان</strong>
-          <br>
-        <div class="w-100">
-          <span>
-            <input type="color" value="{{ website.custom_colors }}" disabled>
-          </span>
-          <span>
-            <input type="color" value="{{ website.secondary_color }}" disabled>
-          </span>
-        </div>
-        </p>
-
-        {% else %}
-        <span class="badge bg-secondary-subtle text-secondary border border-secondary-subtle"
-          style="border-radius:.6rem;">
-          بدون
-        </span>
-        {% endif %}
-      </div>
+  <div class="card h-100">
+    <div class="w-100 d-flex" style="justify-content: space-between; align-items: center;">
+      <h3>ثيم الموقع الالكتروني</h3>
+      <button class="btn btn-orange" onclick="toggleEdit()">
+        <i class="bi bi-pencil-square"></i>
+      </button>
     </div>
+    <hr>
+
+    {% if website %}
+    <!-- عرض البيانات -->
+    <div id="themeDisplay">
+      <div class="mb-3">
+        <strong>الشعار</strong><br>
+        <img src="{{ website.logo.url }}" alt="logo" class="w-50">
+      </div>
+
+      <p><strong style="padding: 5px 15px; border: 1px solid green; border-radius: 10px;">{{ website.theme }}</strong></p>
+
+      <p><strong>الألوان:</strong></p>
+      <input type="color" value="{{ website.custom_colors }}" disabled>
+      <input type="color" value="{{ website.secondary_color }}" disabled>
+
+    </div>
+
+    <!-- نموذج التعديل -->
+    <div id="themeForm" style="display: none;">
+      <form method="POST" enctype="multipart/form-data" class="p-3">
+        {% csrf_token %}
+        {{ form.non_field_errors }}
+
+        <div class="mb-3">
+          <label for="id_logo" class="form-label fw-bold">الشعار:</label>
+          <input type="file" name="logo" id="id_logo" class="form-control">
+        </div>
+
+        <div class="mb-3">
+          <label for="id_theme" class="form-label fw-bold">اسم الثيم:</label>
+          <input type="text" name="theme" id="id_theme" class="form-control" value="{{ form.theme.value|default:'' }}">
+        </div>
+
+        <div class="row">
+          <div class="col-md-6 mb-3">
+            <label for="id_custom_colors" class="form-label fw-bold">اللون الأساسي:</label>
+            <input type="color" name="custom_colors" id="id_custom_colors"
+                  class="form-control form-control-color w-100"
+                  value="{{ form.custom_colors.value|default:'#000000' }}">
+          </div>
+
+          <div class="col-md-6 mb-3">
+            <label for="id_secondary_color" class="form-label fw-bold">اللون الثانوي:</label>
+            <input type="color" name="secondary_color" id="id_secondary_color"
+                  class="form-control form-control-color w-100"
+                  value="{{ form.secondary_color.value|default:'#000000' }}">
+          </div>
+        </div>
+
+        <div class="d-flex justify-content-between mt-4">
+          <button type="submit" class="btn btn-blue ">حفظ</button>
+          <button type="button" class="btn btn-dark " onclick="cancelEdit()">إلغاء</button>
+        </div>
+      </form>
+    </div>
+
+    {% else %}
+    <span class="badge bg-secondary-subtle text-secondary border border-secondary-subtle" style="border-radius:.6rem;">
+      بدون
+    </span>
+    {% endif %}
+  </div>
+</div>
+
 
     <div class="col-md 6">
       <div class="card svg_custom_style">
@@ -160,6 +196,8 @@
       </div>
     </div>
   </div>
+
+  
 
 </div>
 
@@ -275,4 +313,47 @@
     background-color: red;
   }
 </style>
+
+<script>
+
+  document.querySelector('.svg_header').style.backgroundColor = '{{website.custom_colors}}';
+  document.querySelector('.svg_footer').style.backgroundColor = '{{website.custom_colors}}';
+  document.querySelectorAll('.svg_button').forEach(el => {
+    el.style.backgroundColor = '{{website.secondary_color}}'
+  })
+
+  function toggleEdit() {
+    document.getElementById("themeDisplay").style.display = "none";
+    document.getElementById("themeForm").style.display = "block";
+  }
+
+  function cancelEdit() {
+    document.getElementById("themeDisplay").style.display = "block";
+    document.getElementById("themeForm").style.display = "none";
+  }
+
+  // تحديث ألوان المعاينة
+  document.addEventListener('DOMContentLoaded', function () {
+    const primaryColorInput = document.querySelector('input[name="custom_colors"]');
+    const secondaryColorInput = document.querySelector('input[name="secondary_color"]');
+
+    function updateThemeColors() {
+      const primary = primaryColorInput.value;
+      const secondary = secondaryColorInput.value;
+
+      document.querySelector('.svg_header').style.backgroundColor = primary;
+      document.querySelector('.svg_footer').style.backgroundColor = primary;
+
+      document.querySelectorAll('.svg_button').forEach(btn => {
+        btn.style.backgroundColor = secondary;
+      });
+    }
+
+    if (primaryColorInput && secondaryColorInput) {
+      primaryColorInput.addEventListener('input', updateThemeColors);
+      secondaryColorInput.addEventListener('input', updateThemeColors);
+    }
+  });
+</script>
+
 {% endblock %}

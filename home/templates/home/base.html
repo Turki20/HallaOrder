@@ -55,8 +55,13 @@
                     <a href="{% url 'branches' %}"><i class="fa-solid fa-building"></i>الفروع</a>
                 </li>
                 <li class="{% if request.path == '/users/all_users/' %}active{% endif %}">
-                    <a href="{% url 'users:all_users' %}"><i class="fa-solid fa-users"></i>الموظفين</a>
+                    <a href="{% url 'users:all_users' %}"><i class="fa-solid fa-receipt"></i>الموظفين</a>
                 </li>
+
+                <li class="{% if request.path == '/invoices_dashboard/' %}active{% endif %}">
+                    <a href="{% url 'payments:invoices_dashboard' %}"><i class="fa-solid fa-users"></i>الفواتير</a>
+                </li>
+
                 <!-- <li class="{% if current_page == 'subscription_plans' %}active{% endif %}">
                     <a href="{% url 'subscription_plans' %}"><i class="fa-solid fa-file"></i>الباقات</a>
                 </li> -->
