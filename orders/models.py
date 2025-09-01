@@ -20,16 +20,26 @@ class PaymentMethod(models.TextChoices):
     ONLINE = "Online", "Online"
 
 # -------- core models --------
-class Order(models.Model):
+class Order(models.Model): 
+    DELIVERY = 'delivery'
+    PICKUP = 'pickup'
+    DINE_IN = 'dine_in'
 
-        
-        
+    ORDER_METHOD_CHOICES = [
+        (DELIVERY, 'Delivery'),
+        (PICKUP, 'Pickup'),
+        (DINE_IN, 'Dine-in'),
+    ]
+    
     customer = models.ForeignKey(
         User,
         on_delete=models.SET_NULL,
         null=True, blank=True,
         related_name="orders"
     )
+    
+    guest_name = models.CharField(max_length=100, null=True, blank=True)
+    guest_phone = models.CharField(max_length=15, null=True, blank=True)
     # Branch lives in the restaurants app
     branch = models.ForeignKey(
         Branch,
@@ -43,6 +53,9 @@ class Order(models.Model):
     payment_method = models.CharField(
         max_length=10, choices=PaymentMethod.choices, default=PaymentMethod.CASH
     )
+    
+    order_method = models.CharField(max_length=20, choices=ORDER_METHOD_CHOICES, null=True, blank=True)
+    
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
@@ -74,3 +87,33 @@ class OrderItem(models.Model):
 
     def __str__(self):
         return f"{self.order} / {self.product} × {self.quantity}"
+
+
+class DeliveryDetails(models.Model):
+    order = models.OneToOneField(Order, on_delete=models.CASCADE, related_name='delivery_details')
+    address = models.TextField()
+    city = models.CharField(max_length=100)
+    delivery_time = models.DateTimeField()
+
+    def __str__(self):
+        return f"Delivery to {self.address}"
+
+
+class PickupDetails(models.Model):
+    order = models.OneToOneField(Order, on_delete=models.CASCADE, related_name='pickup_details')
+    branch = models.ForeignKey(Branch, on_delete=models.SET_NULL, null=True, blank=True)
+    pickup_time = models.DateTimeField()
+
+    def __str__(self):
+        return f"Pickup from {self.branch}"
+
+
+class DineInDetails(models.Model):
+    order = models.OneToOneField(Order, on_delete=models.CASCADE, related_name='dinein_details')
+    branch = models.ForeignKey(Branch, on_delete=models.SET_NULL, null=True, blank=True)
+    number_of_people = models.IntegerField()
+    reservation_time = models.DateTimeField()
+    special_requests = models.TextField(blank=True)
+
+    def __str__(self):
+        return f"Dine-in for {self.number_of_people} people"

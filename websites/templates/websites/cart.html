@@ -63,8 +63,9 @@
 
     <form id="cart-meta-form" method="post" action="{% url 'websites:save_cart_meta' website.slug %}" class="stack">
       {% csrf_token %}
-      <div class="section"><input class="input" type="text" name="name" placeholder="الاسم" value="{{ meta.name }}" required></div>
-      <div class="section"><input class="input" type="tel" name="phone" placeholder="الجوال" value="{{ meta.phone }}" inputmode="tel" pattern="[0-9]{8,15}" required></div>
+      <div class="section"><input class="input" type="text" name="name" placeholder="الاسم" value="{{ request.user.first_name  }} {{request.user.last_name}}" required></div>
+      <div class="section"><input class="input" type="tel" name="phone" placeholder="الجوال" value="{{  request.user.profile.phone }}" inputmode="tel" pattern="[0-9]{8,15}" required></div>
+      <div class="section"><input class="input" type="email" name="email" placeholder="الايميل" value="{{  request.user.email }}" required></div>
       <div class="section"><textarea class="input" name="notes" placeholder="ملاحظات (اختياري)" rows="2">{{ meta.notes }}</textarea></div>
       <input type="hidden" name="next" value="{{ request.get_full_path }}">
     </form>
