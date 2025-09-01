@@ -2,7 +2,7 @@
 <html lang="ar" dir="rtl">
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>فاتورة الطلب</title>
+  <title>فاتورة الطلب #{{ order.id }}</title>
   <style>
     body{margin:0;background:#f6f7fb;color:#111;font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial}
     .container{max-width:1120px;margin:auto;padding:20px 16px}
@@ -32,7 +32,15 @@
   </style>
   <body>
     <div class="container">
-      <div class="alert card">طلب #{{ order.id }} • <span class="muted">الوقت المتوقع 15 دقيقة</span></div>
+      <div class="alert card" style="display:flex;justify-content:space-between;align-items:center">
+        <div>طلب #{{ order.id }} • <span class="muted">الوقت المتوقع 15 دقيقة</span></div>
+        <div style="display:flex;gap:8px">
+          <a class="btn" href="#" onclick="window.print()">طباعة</a>
+          {% if order.branch and order.branch.address %}
+            <a class="btn btn-primary" target="_blank" href="https://www.google.com/maps/dir/?api=1&destination={{ order.branch.address|urlencode }}">الاتجاهات</a>
+          {% endif %}
+        </div>
+      </div>
 
       <!-- Progress -->
       <div class="progress">
@@ -51,27 +59,60 @@
       </div>
 
       <div class="grid">
-        <div class="panel card"></div>
+        <div class="panel card">
+          <div class="section" style="border:0;background:transparent">
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+              <b>ملخص الطلب</b>
+              <span class="muted">{{ order.created_at|date:"Y-m-d H:i" }}</span>
+            </div>
+            <div class="muted">العناصر:</div>
+            <ul style="margin:6px 0 0 0;padding:0;list-style:none">
+              {% for it in order.items.all %}
+                <li style="padding:8px 0;border-bottom:1px dashed #eee;display:flex;justify-content:space-between;gap:8px">
+                  <span>{{ it.product.name }} <span class="muted">× {{ it.quantity }}</span></span>
+                  <span>SAR {{ it.product.price|floatformat:2 }}</span>
+                </li>
+              {% empty %}
+                <li class="muted">لا توجد عناصر</li>
+              {% endfor %}
+            </ul>
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-top:12px">
+              <span class="muted">الإجمالي</span>
+              <span><b>SAR {{ order.total_price }}</b></span>
+            </div>
+          </div>
+        </div>
         <aside class="side">
           <div class="section">
             <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
               <b>تفاصيل الطلب</b>
               <span class="muted">الحالة: {{ order.get_status_display }}</span>
             </div>
-            <div class="muted">العناصر:</div>
-            <ul style="margin:6px 0 0 0;padding:0;list-style:none">
-              {% for it in order.items.all %}
-                <li style="padding:4px 0;border-bottom:1px dashed #eee">{{ it.product.name }} <span class="muted">× {{ it.quantity }}</span></li>
-              {% empty %}
-                <li class="muted">لا توجد عناصر</li>
-              {% endfor %}
-            </ul>
-            <div style="margin-top:10px"><b>الإجمالي:</b> SAR {{ order.total_price }}</div>
+            <div class="muted">الفرع</div>
+            <div style="margin-bottom:8px">{{ order.branch }}</div>
+            <div class="muted">الدفع</div>
+            <div>{{ order.get_payment_method_display|default:order.payment_method }}</div>
           </div>
           <div class="section summary">
             <div class="muted">الفرع</div><div>{{ order.branch }}</div>
             <div class="muted">وقت الطلب</div><div>{{ order.created_at|date:"H:i" }}</div>
           </div>
+          {% if order.branch and order.branch.address %}
+          <div class="section">
+            <div class="muted">موقع الفرع</div>
+            <div style="margin-top:8px;border-radius:12px;overflow:hidden">
+              <iframe
+                title="خريطة الفرع"
+                width="100%"
+                height="200"
+                style="border:0"
+                loading="lazy"
+                referrerpolicy="no-referrer-when-downgrade"
+                src="https://www.google.com/maps?q={{ order.branch.address|urlencode }}&output=embed">
+              </iframe>
+            </div>
+          </div>
+          {% endif %}
         </aside>
       </div>
 

@@ -81,6 +81,9 @@
         <a class="hoa-pill {% if current_tab == 'home' %}active{% endif %}" href="{% url 'websites:menu' website.slug %}">داخل المطعم</a>
         <a class="hoa-pill {% if current_tab == 'pickup' %}active{% endif %}" href="#">استلام</a>
         <a class="hoa-pill {% if current_tab == 'delivery' %}active{% endif %}" href="#">توصيل</a>
+        {% if last_order_id %}
+          <a class="hoa-pill" href="{% url 'payments:last_invoice' %}?slug={{ website.slug }}">عرض فاتورتي</a>
+        {% endif %}
       </nav>
 
       <button class="hoa-btn" id="hoa-open-cart" type="button" aria-haspopup="dialog" aria-controls="hoa-cart-drawer">

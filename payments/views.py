@@ -17,6 +17,7 @@ from menu.models import Product
 from orders.models import Order, OrderStatus, OrderItem, PaymentMethod
 from .models import Invoice
 from django.db.models import Q
+from django.utils.http import urlencode
 
 # إعداد مفتاح Stripe السري
 stripe.api_key = settings.STRIPE_SECRET_KEY
@@ -172,6 +173,29 @@ def success(request):
 
     # في حال لم يتم الدفع أو حدث خطأ نعرض صفحة نجاح بسيطة
     return render(request, "payments/success.html", {"session_id": session_id, "status": status, "slug": slug})
+
+
+def last_invoice(request: HttpRequest):
+    """اعرض آخر فاتورة للعميل بناءً على رقم الطلب المخزن في الـ Session.
+    إذا توفّر slug نعيد استخدامه لتقديم روابط الرجوع الصحيحة.
+    """
+    last_order_id = request.session.get("last_order_id")
+    slug = request.GET.get("slug") or request.session.get("last_cart_slug")
+    if not last_order_id:
+        # لا توجد فاتورة حديثة
+        if slug:
+            return redirect("websites:menu", slug=slug)
+        return HttpResponse("لا توجد فاتورة حديثة.", status=404)
+
+    order = (
+        Order.objects.select_related("branch").prefetch_related("items__product").filter(pk=last_order_id).first()
+    )
+    if not order:
+        if slug:
+            return redirect("websites:menu", slug=slug)
+        return HttpResponse("الطلب غير موجود.", status=404)
+
+    return render(request, "payments/invoice.html", {"order": order, "slug": slug})
 
 
 # الإلغاء: الرجوع إلى سلة الموقع الصحيح

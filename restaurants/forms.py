@@ -16,10 +16,10 @@ class BranchForm(forms.ModelForm):
                 'class': 'form-control',
                 'placeholder': 'أدخل اسم الفرع'
             }),
-            'address': forms.Textarea(attrs={
+            'address': forms.TextInput(attrs={
                 'class': 'form-control',
-                'rows': 3,
-                'placeholder': 'أدخل عنوان الفرع'
+                'id': 'branch_address',
+                'placeholder': 'ابحث أو أدخل عنوان الفرع'
             }),
             'qr_code': forms.ClearableFileInput(attrs={
                 'class': 'form-control'
