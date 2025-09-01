@@ -1,7 +1,5 @@
 from django.shortcuts import render, get_object_or_404, redirect
-from django.http import HttpResponse, Http404
-from django.apps import apps
-from django.core.exceptions import FieldError
+from django.http import HttpResponse
 from django.contrib.auth.decorators import login_required
 from django.views.decorators.http import require_POST
 from menu.models import Product
@@ -39,11 +37,6 @@ def _base_ctx(request, website, **extra):
     }
     ctx.update(extra)
     return ctx
-
-
-# صفحة تحويل سريعة إلى القائمة الافتراضية للموقع
-def site_home(request, slug):
-    return redirect("websites:menu", slug=slug)
 
 
 # =============================

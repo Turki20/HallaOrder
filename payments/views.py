@@ -52,91 +52,13 @@ def _order_total(order: Order) -> Decimal:
         s += price * qty
     return s
 
-# =============================
-# صفحات وتجارب الدفع
-# =============================
-
-def checkout(request):
-    """صفحة اختبارية لعرض الدفع التقليدي (غير مستخدمة في المسار السريع)."""
-    get_token(request)
-    currency = (request.GET.get("currency") or getattr(settings, "STRIPE_DEFAULT_CURRENCY", "sar")).lower()
-    order_id = request.GET.get("order_id")
-
-    amount_smallest = 1000   # قيمة افتراضية للعرض
-    display_total = Decimal(amount_smallest) / 100
-
-    if order_id:
-        order = get_object_or_404(Order, pk=order_id)
-        total = _order_total(order)
-        amount_smallest = _smallest_unit(total, currency)
-        display_total = total
-
-    return render(
-        request,
-        "payments/checkout.html",
-        {
-            "amount": amount_smallest,
-            "display_total": display_total,
-            "currency": currency,
-            "order_id": order_id or "",
-            "STRIPE_PUBLISHABLE_KEY": settings.STRIPE_PUBLISHABLE_KEY,
-        },
-    )
-
-
-def create_checkout_session(request):
-    """إنشاء جلسة دفع Stripe لطلب موجود في قاعدة البيانات (سيناريو بديل)."""
-    if request.method != "POST":
-        return HttpResponseBadRequest("POST required")
-
-    try:
-        data = json.loads(request.body.decode()) if request.body else {}
-    except Exception:
-        data = {}
-
-    order_id = data.get("order_id")
-    currency = data.get("currency", "usd")
-    if not order_id:
-        return HttpResponseBadRequest("order_id is required")
-
-    order = get_object_or_404(Order, pk=order_id)
-    total = _order_total(order)
-    amount_smallest = _smallest_unit(total, currency)
-
-    product_name = f"Order #{order.id}"
-    if hasattr(order, "branch") and getattr(order.branch, "restaurant", None):
-        rest = getattr(order.branch.restaurant, "name", None)
-        if rest:
-            product_name = f"{rest} – Order #{order.id}"
-
-    success_url = request.build_absolute_uri(reverse("payments:success")) + "?session_id={CHECKOUT_SESSION_ID}"
-    cancel_url  = request.build_absolute_uri(reverse("payments:cancel"))
-
-    session = stripe.checkout.Session.create(
-        mode="payment",
-        payment_method_types=["card"],
-        line_items=[{
-            "price_data": {
-                "currency": currency,
-                "product_data": {"name": product_name},
-                "unit_amount": amount_smallest,
-            },
-            "quantity": 1,
-        }],
-        success_url=success_url,
-        cancel_url=cancel_url,
-        metadata={"order_id": str(order.id)},
-    )
-
-    # حفظ سجل دفع محلي (اختياري)
-    Payment.objects.create(
-        order=order,
-        method="Visa",
-        status="Pending",
-        transaction_id=session.id,
-    )
-
-    return JsonResponse({"id": session.id})
+"""
+مسارات الدفع المستخدمة فعليًا:
+ - quick_checkout: إنشاء جلسة Stripe مباشرة من إجمالي معروف
+ - success/cancel: الرجوع من Stripe وإنشاء الطلب/الفاتورة
+ - stripe_webhook: تأكيد الحالة من Stripe
+تمت إزالة مسارات تجريبية غير مستخدمة (checkout/create_checkout_session) لتبسيط التطبيق.
+"""
 
 
 # نجاح الدفع: إنشاء طلب من السلة (إن لم يكن موجودًا) ثم عرض الفاتورة
