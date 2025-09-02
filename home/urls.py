@@ -5,6 +5,10 @@ app_name = 'home'
 
 urlpatterns = [
     path('', home.index_view, name='index_view'),
+    path('about/', home.about_view, name='about'),
+    path('services/', home.services_view, name='services'),
+    path('clients/', home.clients_view, name='clients'),
+    path('faq/', home.faq_view, name='faq'),
     path('create_restaurant_identity/', home.create_restaurant_identity, name='create_restaurant_identity'),
     path('subscriptionplan/', home.subscriptionplan_view, name='subscriptionplan_view'),
     path('restaurant_identity/', home.restaurant_identity, name='restaurant_identity'),

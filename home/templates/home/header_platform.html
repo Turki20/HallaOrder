@@ -4,10 +4,10 @@
     <div>
         <img src="{% static 'images/hallaorder_logo.png' %}" alt="">
         <a href="{% url 'home:index_view' %}">الصفحة الرئيسية</a>
-        <a href="">الاسئلة الشائعة</a>
-        <a href="">من نحن</a>
-        <a href="">عملائنا</a>
-        <a href="">خدماتنا</a>
+        <a href="{% url 'home:faq' %}">الاسئلة الشائعة</a>
+        <a href="{% url 'home:about' %}">من نحن</a>
+        <a href="{% url 'home:clients' %}">عملائنا</a>
+        <a href="{% url 'home:services' %}">خدماتنا</a>
         {% if request.user.is_authenticated %}
             {% if request.user.profile.role == 'RestaurantOwner' %}
                 <a href="{% url 'restaurants' %}">لوحة التحكم</a>

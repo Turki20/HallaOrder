@@ -1,0 +1,88 @@
+{% extends "home/base.html" %}
+{% load static %}
+
+{% block style %}
+<style>
+  #dashbaord { display: none; }
+  .about-hero {
+    background: #ffffff;
+    border-radius: 1rem;
+    border: 1px solid #e9ecef;
+  }
+  .about-card {
+    border-radius: 1rem;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+    overflow: hidden;
+  }
+  .lead { color: #3a3a3a; }
+  .brand { color: #00AAB0; }
+  .accent { color: #004B59; }
+  .about-section h2 { font-weight: 800; }
+  .about-section p { font-size: 1.05rem; line-height: 1.9; }
+  .icon-pill {
+    width: 56px; height: 56px; border-radius: 50%;
+    background: #e6f6f7; color: #00AAB0;
+    display: inline-flex; align-items: center; justify-content: center;
+  }
+  .about-badge { background:#fff1d6; color:#8a5a00; border-radius:.75rem; }
+  .about-container { max-width: 1100px; margin: 0 auto; }
+  .about-title { color: #004B59; }
+  .about-image-card { display: flex; align-items: center; justify-content: center; padding: 0; min-height: 320px; }
+  .about-img { max-width: 100%; max-height: 100%; height: auto; width: auto; display: block; object-fit: contain; }
+  .feature-card { border: 1px solid #e9ecef; border-radius: 1rem; padding: 18px; height: 100%; }
+  .feature-card h5 { color: #004B59; }
+  .feature-card p { color: #3a3a3a; margin: 0; }
+  /* hero banner styles removed in favor of card-based layout */
+</style>
+{% endblock style %}
+
+{% block title %}من نحن{% endblock title %}
+
+{% block content %}
+{% include "home/header_platform.html" %}
+
+<div class="about-container p-4">
+  <div class="row w-100 g-4 align-items-stretch">
+    <div class="col-12 col-md-6 order-md-2">
+      <div class="card about-card about-image-card h-100">
+        <img src="{% static 'images/HalaOrder_poster.png' %}" alt="HalaOrder" class="about-img" loading="lazy">
+      </div>
+    </div>
+    <div class="col-12 col-md-6 order-md-1">
+      <div class="card about-card mb-3">
+        <div class="card-body p-4 about-section">
+          <div class="d-flex align-items-center gap-2 mb-3">
+            <span class="icon-pill"><i class="fa-solid fa-users"></i></span>
+            <h2 class="mb-0">من نحن</h2>
+          </div>
+          <p class="mb-0">
+            في <span class="brand fw-bold">HalaOrder</span> نؤمن أن المطاعم تستحق حلولًا رقمية ذكية تساعدها على النمو والتوسع.
+            منصتنا تمكّن أصحاب المطاعم من إنشاء متجر إلكتروني متكامل لإدارة القوائم والطلبات والمدفوعات، مع واجهة سلسة وبسيطة لعملائهم.
+          </p>
+        </div>
+      </div>
+      <div class="card about-card">
+        <div class="card-body p-4 about-section">
+          <div class="d-flex align-items-center gap-2 mb-3">
+            <span class="icon-pill"><i class="fa-solid fa-bullseye"></i></span>
+            <h2 class="mb-0">رسالتنا</h2>
+          </div>
+          <p class="mb-0">
+            نوفر لوحات تحكم مخصصة للإدارة والموظفين، تجعل متابعة الأداء والعمليات اليومية أكثر سهولة وفعالية.
+            هدفنا أن نكون الشريك التقني الموثوق لكل مطعم يسعى إلى زيادة المبيعات وتقديم تجربة عصرية لعملائه.
+          </p>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-12 order-md-3">
+      <div class="d-flex justify-content-center">
+        <a href="{% url 'home:subscriptionplan_view' %}" class="btn btn-blue px-4">ابدأ الآن</a>
+      </div>
+    </div>
+  </div>
+</div>
+
+{% endblock content %}
+
+
