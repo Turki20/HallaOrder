@@ -1,162 +1,296 @@
 {% extends "home/base.html" %}
 {% load static %}
 
-{% block title %}العملاء{% endblock %}
+{% block title %}إدارة العملاء الذكية – HalaOrder{% endblock %}
 
 {% block style %}
 <style>
-  :root{--c1:#00aab0;--c2:#004b59;--bd:#e9ecef}
-  .crm{padding:8px}
-  .crm .bar{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-bottom:12px}
-  .crm .bar input, .crm .bar select{padding:8px 10px;border:1px solid var(--bd);border-radius:8px}
-  .crm .btn{background:var(--c1);color:#fff;border:0;border-radius:10px;padding:10px 14px;font-weight:700}
-  .crm .btn.sub{background:#f1f3f5;color:#222}
-  .crm .btn.warn{background:#f44336}
-  .crm .table{width:100%;border:1px solid var(--bd);border-radius:12px;overflow:hidden}
-  .crm table{width:100%}
-  .crm thead th{background:#f8f9fa;font-weight:700;padding:10px;border-bottom:1px solid var(--bd)}
-  .crm tbody td{padding:10px;border-bottom:1px solid var(--bd);vertical-align:middle}
-  .crm .tags{font-size:12px;color:#666}
-  .crm .pill{display:inline-block;background:#e6f7f8;color:#04646b;border-radius:999px;padding:2px 8px;margin-inline:3px}
-  .crm .count{color:#666;margin-inline-start:auto}
-  .crm .empty{padding:20px;color:#777;text-align:center}
+:root{--brand:#00AAB0;--brand-600:#008991;--ink:#0f172a;--muted:#64748b;--card:#ffffff;--soft:#f7fafb;--border:#e5e7eb;--good:#10b981;--warn:#f59e0b}
+.page{display:flex;flex-direction:column;gap:14px}
+.topbar{display:flex;align-items:center;justify-content:space-between}
+.brandline{display:flex;align-items:center;gap:10px}
+.brandline .avatar{width:40px;height:40px;border-radius:999px;background:#e6fffb;display:flex;align-items:center;justify-content:center}
+.brandline h2{margin:0;font-size:18px;color:var(--ink)}
+.actions{display:flex;gap:8px;flex-wrap:wrap}
+.btn{border:0;border-radius:10px;padding:8px 12px;font-weight:700;cursor:pointer}
+.btn-primary{background:var(--brand);color:#fff}
+.btn-ghost{background:#fff;border:1px solid var(--border);color:#111}
+.card{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:16px}
+.kpis{display:grid;gap:12px;grid-template-columns:repeat(4,1fr)}
+.kpi{background:#fff;border:1px solid var(--border);border-radius:12px;padding:14px}
+.kpi .t{font-size:12px;color:var(--muted)}
+.kpi .v{font-size:22px;font-weight:800}
+.filters{display:grid;gap:8px;grid-template-columns:140px 140px 1fr 150px 120px 120px 110px 1fr 120px 120px}
+.input,.select{border:1px solid var(--border);border-radius:10px;padding:8px 10px;width:100%}
+.table{width:100%;border-collapse:separate;border-spacing:0 8px}
+.table th,.table td{background:#fff;border-top:1px solid var(--border);border-bottom:1px solid var(--border);padding:10px 12px}
+.table th{color:#334155;font-weight:700}
+.table tr th:first-child,.table tr td:first-child{border-radius:10px 0 0 10px}
+.table tr th:last-child,.table tr td:last-child{border-radius:0 10px 10px 0}
+.row-head{display:flex;flex-direction:column}
+.row-head .name{font-weight:800}
+.row-head .sub{font-size:12px;color:var(--muted)}
+.chips{display:flex;flex-wrap:wrap;gap:6px}
+.chip{background:#f1f5f9;border:1px solid #e2e8f0;border-radius:999px;padding:4px 8px;font-size:12px;color:#334155}
+.loyal{display:flex;align-items:center;gap:10px}
+.ring{width:34px;height:34px;border-radius:999px;background:conic-gradient(var(--brand) calc(var(--p)*1%),#e5e7eb 0);display:grid;place-items:center;font-size:11px;color:#0f172a}
+.tag{font-size:12px;padding:4px 8px;border-radius:999px;background:#ecfeff;color:#065f46;border:1px solid #cffafe}
+.badge-muted{font-size:11px;color:var(--muted)}
+.tools{display:flex;gap:8px}
+.iconbtn{width:34px;height:34px;border:1px solid var(--border);border-radius:8px;background:#fff;display:grid;place-items:center}
+.empty{color:#94a3b8;text-align:center;padding:16px}
+.grid-2{display:grid;gap:12px;grid-template-columns:1fr 1fr}
+@media(max-width:1200px){.filters{grid-template-columns:1fr 1fr 1fr}.kpis{grid-template-columns:repeat(2,1fr)}.grid-2{grid-template-columns:1fr}}
+@media(max-width:700px){.filters{grid-template-columns:1fr 1fr}.kpis{grid-template-columns:1fr}}
 </style>
 {% endblock %}
 
 {% block dashboard_content %}
-<div class="crm">
-  <div class="bar">
-    <strong>العملاء</strong>
-    <select id="period">
-      <option value="7">آخر 7 أيام</option>
-      <option value="30" selected>آخر 30 يوم</option>
-      <option value="90">آخر 90 يوم</option>
-    </select>
-    <input id="search" placeholder="ابحث بالاسم/الهاتف/الإيميل/ID">
-    <select id="min_orders">
-      <option value="">كلّ الطلبات</option>
-      <option value="1">+1 طلب</option>
-      <option value="3">+3 طلبات</option>
-      <option value="5">+5 طلبات</option>
-    </select>
-    <button class="btn" id="refresh">تحديث</button>
-
-    <span class="count"><span id="selCount">0</span> محدد</span>
-    <button class="btn sub" id="selectAll">تحديد الكل</button>
-    <button class="btn sub" id="clearSel">إلغاء التحديد</button>
-    <input id="tagInput" placeholder="أضف وسمًا" style="width:140px">
-    <button class="btn" id="bulkTag">تطبيق الوسم</button>
-    <button class="btn warn" id="bulkBlock">حظر</button>
-    <button class="btn sub" id="bulkUnblock">إلغاء الحظر</button>
-    <a class="btn sub" id="exportCsv" href="#">تصدير CSV</a>
+<div class="page">
+  <div class="topbar">
+    <div class="brandline">
+      <div class="avatar"><i class="fas fa-users" style="color:var(--brand)"></i></div>
+      <div>
+        <div class="badge-muted">{{ restaurant.name|default:"مطعمك" }}</div>
+        <h2>إدارة العملاء الذكية</h2>
+      </div>
+    </div>
+    <div class="actions">
+      <button id="btn-export" class="btn btn-ghost"><i class="fas fa-file-export"></i> تصدير CSV</button>
+      <button id="btn-refresh" class="btn btn-primary"><i class="fas fa-sync"></i> تحديث</button>
+    </div>
   </div>
 
-  <div class="table">
-    <table>
+  <div class="kpis">
+    <div class="kpi"><div class="t">إجمالي العملاء</div><div class="v" id="kpi-customers">–</div></div>
+    <div class="kpi"><div class="t">متوسط الطلبات/عميل</div><div class="v" id="kpi-avg">–</div></div>
+    <div class="kpi"><div class="t">العملاء المميزون (VIP)</div><div class="v" id="kpi-vip">–</div></div>
+    <div class="kpi"><div class="t">معدل الولاء</div><div class="v" id="kpi-loyalty">–</div></div>
+  </div>
+
+  <div class="card filters">
+    <input id="from" type="date" class="input">
+    <input id="to" type="date" class="input">
+    <input id="q" class="input" placeholder="ابحث بالاسم/الجوال/الإيميل…">
+    <select id="tier" class="select">
+      <option value="">كل مستويات الولاء</option>
+      <option value="new">جديد</option>
+      <option value="reg">منتظم</option>
+      <option value="vip">VIP</option>
+    </select>
+    <input id="min_amount" type="number" class="input" placeholder="حد أدنى للإنفاق">
+    <input id="max_amount" type="number" class="input" placeholder="حد أقصى للإنفاق">
+    <input id="last_days" type="number" class="input" placeholder="آخر X يوم">
+    <input id="tag" class="input" placeholder="وسم (tag)">
+    <label style="display:flex;align-items:center;gap:6px"><input type="checkbox" id="has_phone"> لديه واتساب</label>
+    <label style="display:flex;align-items:center;gap:6px"><input type="checkbox" id="has_email"> لديه إيميل</label>
+    <button id="apply" class="btn btn-ghost">تطبيق</button>
+  </div>
+
+  <div class="card">
+    <table class="table" id="tbl">
       <thead>
         <tr>
-          <th style="width:42px"></th>
           <th>العميل</th>
-          <th>الطلبات</th>
-          <th>الإجمالي</th>
+          <th>الذكاء الاصطناعي</th>
+          <th>الإنفاق</th>
+          <th>الولاء</th>
           <th>آخر طلب</th>
-          <th>الوسوم</th>
-          <th>الحالة</th>
+          <th>إجراءات</th>
         </tr>
       </thead>
-      <tbody id="rows"></tbody>
+      <tbody></tbody>
     </table>
+    <div id="empty" class="empty" style="display:none">لا يوجد عملاء ضمن المعايير المحددة.</div>
   </div>
 
-  <div id="empty" class="empty" style="display:none">لا يوجد عملاء ضمن المعايير.</div>
+  <div class="grid-2">
+    <div class="card">
+      <div style="display:flex;justify-content:space-between;align-items:center;gap:8px;margin-bottom:8px">
+        <div style="font-weight:700">ذكاء اصطناعي: وسوم تلقائية</div>
+        <div style="display:flex;gap:6px">
+          <input id="ai-days" type="number" class="input" value="120" min="7" max="365" style="width:110px">
+          <input id="ai-max" type="number" class="input" value="5" min="1" max="10" style="width:90px">
+          <select id="ai-mode" class="select" style="width:150px">
+            <option value="append">إضافة للوسوم الحالية</option>
+            <option value="replace">استبدال الوسوم</option>
+          </select>
+          <button id="btn-ai-preview" class="btn btn-ghost">معاينة</button>
+          <button id="btn-ai-apply" class="btn btn-primary">تطبيق للجميع</button>
+        </div>
+      </div>
+      <table class="table" id="tbl-ai">
+        <thead><tr><th>العميل</th><th>الوسوم المقترحة</th></tr></thead>
+        <tbody></tbody>
+      </table>
+    </div>
+
+    <div class="card">
+      <div style="display:flex;justify-content:space-between;align-items:center;gap:8px;margin-bottom:8px">
+        <div style="font-weight:700">كشف المكررات ودمج</div>
+        <button id="btn-dups" class="btn btn-ghost">بحث عن المكررات</button>
+      </div>
+      <div id="dups-body" style="display:flex;flex-direction:column;gap:10px"></div>
+    </div>
+  </div>
 </div>
 
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
+
 <script>
-(function(){
-  const rowsEl = document.getElementById('rows');
-  const emptyEl = document.getElementById('empty');
-  const selCount = document.getElementById('selCount');
-  const qs = (sel)=>document.querySelector(sel);
-  const period = qs('#period');
-  const search = qs('#search');
-  const minOrders = qs('#min_orders');
+const api = async (url)=>{const r=await fetch(url,{headers:{'X-Requested-With':'XMLHttpRequest'}}); if(!r.ok) throw new Error(r.status); return r.json();};
+const fmtMoney = v => (v||0).toLocaleString('ar-SA',{minimumFractionDigits:2,maximumFractionDigits:2})+' ر.س';
+const fmtDateRel = iso => { if(!iso) return '-'; const d=new Date(iso), now=new Date(); const diff=(now-d)/86400000; if(diff<1) return 'اليوم'; if(diff<7) return `منذ ${Math.floor(diff)} يوم`; if(diff<30) return `منذ ${Math.floor(diff/7)} أسبوع`; return d.toLocaleDateString('ar-SA'); };
 
-  let data = [];
-  let selected = new Set();
+function loyaltyTier(orders){ if(orders>=10) return {key:'vip', label:'VIP', pct:95}; if(orders>=5) return {key:'reg', label:'منتظم', pct:70}; return {key:'new', label:'جديد', pct:25}; }
 
-  function fmtMoney(v){ return Intl.NumberFormat('ar-SA',{style:'currency',currency:'SAR'}).format(v||0) }
-  function fmtDate(iso){ if(!iso) return "-"; const d=new Date(iso); return d.toLocaleDateString('ar-SA', {year:'numeric',month:'2-digit',day:'2-digit'}); }
+function qs(){
+  const p = new URLSearchParams();
+  const f=document.getElementById('from').value, t=document.getElementById('to').value;
+  if(f) p.set('start', f);
+  if(t) p.set('end', t);
+  const q=document.getElementById('q').value.trim(); if(q) p.set('q', q);
+  const tier=document.getElementById('tier').value; if(tier) p.set('tier', tier);
+  const minA=document.getElementById('min_amount').value; if(minA) p.set('min_amount', minA);
+  const maxA=document.getElementById('max_amount').value; if(maxA) p.set('max_amount', maxA);
+  const last=document.getElementById('last_days').value; if(last) p.set('last_days', last);
+  const tag=document.getElementById('tag').value.trim(); if(tag) p.set('tag', tag);
+  if(document.getElementById('has_phone').checked) p.set('has_phone','1');
+  if(document.getElementById('has_email').checked) p.set('has_email','1');
+  const s=p.toString();
+  return s?('?'+s):'';
+}
 
-  function updateSelectedCount(){ selCount.textContent = selected.size; }
+function fillKPIs(rows){
+  const total=rows.length;
+  const avg = total? (rows.reduce((s,r)=>s+(r.orders||0),0)/total):0;
+  const vip = rows.filter(r=> (r.orders||0)>=10).length;
+  const recent = rows.filter(r=> r.last && ((new Date()-new Date(r.last))/86400000)<=90 && (r.orders||0)>=2).length;
+  const loyalty = total? Math.round((recent/total)*100):0;
+  document.getElementById('kpi-customers').textContent = total.toLocaleString('ar-SA');
+  document.getElementById('kpi-avg').textContent = avg.toFixed(2);
+  document.getElementById('kpi-vip').textContent = vip.toLocaleString('ar-SA');
+  document.getElementById('kpi-loyalty').textContent = loyalty+'%';
+}
 
-  function render(){
-    if(!data.length){ rowsEl.innerHTML=""; emptyEl.style.display="block"; return; }
-    emptyEl.style.display="none";
-    rowsEl.innerHTML = data.map(r=>`
-      <tr>
-        <td><input type="checkbox" data-id="${r.id}" ${selected.has(r.id)?'checked':''}></td>
-        <td>
-          <div><strong>${r.name}</strong> <small class="pill">#${r.external_id}</small></div>
-          <div style="color:#777">${r.phone||''} ${r.email?('· '+r.email):''}</div>
-        </td>
-        <td>${r.orders}</td>
-        <td>${fmtMoney(r.amount)}</td>
-        <td>${fmtDate(r.last)}</td>
-        <td class="tags">${(r.tags||'').split(',').filter(Boolean).map(t=>`<span class="pill">${t}</span>`).join('')}</td>
-        <td>${r.blocked?'<span class="pill" style="background:#ffe7e7;color:#b30000">محظور</span>':'<span class="pill" style="background:#e8ffe8;color:#0b7">نشط</span>'}</td>
-      </tr>
-    `).join('');
-    rowsEl.querySelectorAll('input[type="checkbox"]').forEach(cb=>{
-      cb.addEventListener('change', ()=>{ const id=parseInt(cb.dataset.id); cb.checked?selected.add(id):selected.delete(id); updateSelectedCount(); });
+function renderRows(rows){
+  const tierFilter = document.getElementById('tier').value;
+  const body=document.querySelector('#tbl tbody'); body.innerHTML='';
+  let shown=0;
+  rows.forEach(r=>{
+    const t = loyaltyTier(r.orders||0);
+    if(tierFilter && t.key!==tierFilter) return;
+    shown++;
+    const tags = (r.tags||'').split(',').map(x=>x.trim()).filter(Boolean);
+    const aiChips = tags.slice(0,4);
+    const tr=document.createElement('tr');
+    tr.innerHTML = `
+      <td>
+        <div class="row-head">
+          <span class="name">${r.name || ('عميل #'+r.external_id)}</span>
+          <span class="sub">${(r.phone||'—')} • ${r.email||'—'}</span>
+        </div>
+      </td>
+      <td>
+        <div class="chips">${aiChips.length? aiChips.map(x=>`<span class="chip">${x}</span>`).join('') : '<span class="badge-muted">لا تفضيلات مسجلة</span>'}</div>
+      </td>
+      <td><span class="tag">${r.amount? 'إنفاق: '+fmtMoney(r.amount): '—'}</span></td>
+      <td>
+        <div class="loyal">
+          <div class="ring" style="--p:${t.pct}"><span>${t.pct}%</span></div>
+          <div><div>${t.label}</div><div class="badge-muted">${r.orders||0} طلب</div></div>
+        </div>
+      </td>
+      <td>${fmtDateRel(r.last)}</td>
+      <td>
+        <div class="tools">
+          ${r.wa ? `<a class="iconbtn" title="واتساب" href="${r.wa}" target="_blank"><i class="fab fa-whatsapp"></i></a>` : ``}
+          ${r.tel? `<a class="iconbtn" title="اتصال" href="${r.tel}"><i class="fas fa-phone"></i></a>` : ``}
+          ${r.mailto? `<a class="iconbtn" title="إيميل" href="${r.mailto}"><i class="fas fa-envelope"></i></a>` : ``}
+          <button class="iconbtn preview-btn" data-ext="${r.external_id}" title="عرض الطلبات"><i class="fas fa-eye"></i></button>
+        </div>
+      </td>`;
+    body.appendChild(tr);
+  });
+  document.getElementById('empty').style.display = shown? 'none':'block';
+  document.querySelectorAll('.preview-btn').forEach(btn=>{
+    btn.addEventListener('click', async ()=>{
+      const ext = btn.dataset.ext;
+      const d = await api("{% url 'reports:api_customer_orders_preview' %}?external_id="+encodeURIComponent(ext)+qs());
+      showPreview(ext, d.orders||[]);
     });
-    updateSelectedCount();
-  }
+  });
+}
 
-  function rangeDates(days){
-    const end = new Date(); const start = new Date(); start.setDate(end.getDate() - (parseInt(days)-1));
-    const iso = d => d.toISOString().slice(0,10);
-    return {start: iso(start), end: iso(end)};
-  }
+function showPreview(ext, orders){
+  alert(orders.length? orders.map(o=>`#${o.id} • ${new Date(o.at).toLocaleString('ar-SA')} • ${fmtMoney(o.total)}`).join('\n') : 'لا توجد طلبات أخيرة لهذا العميل ضمن المدى.')
+}
 
-  async function load(){
-    const {start,end} = rangeDates(period.value||30);
-    const url = `{% url 'reports:api_customers_list' %}?start=${start}&end=${end}&q=${encodeURIComponent(search.value||'')}&min_orders=${encodeURIComponent(minOrders.value||'')}`;
-    const r = await fetch(url, {headers:{'X-Requested-With':'XMLHttpRequest'}});
-    const j = await r.json();
-    data = j.rows||[];
-    if (selected.size) {
-      const ids = new Set(data.map(x=>x.id));
-      selected = new Set([...selected].filter(x=>ids.has(x)));
-    }
-    render();
-  }
+async function load(){
+  const today=new Date(); const end = today.toISOString().slice(0,10);
+  const fromInput=document.getElementById('from'); const toInput=document.getElementById('to');
+  if(!fromInput.value){const s=new Date(today); s.setDate(s.getDate()-29); fromInput.value=s.toISOString().slice(0,10);}
+  if(!toInput.value){toInput.value=end;}
+  const data = await api("{% url 'reports:api_customers_list' %}"+qs());
+  const rows = data.rows||[];
+  fillKPIs(rows);
+  renderRows(rows);
+  return rows;
+}
 
-  async function bulkTag(block=null){
-    if(!selected.size) return alert("اختر عملاء أولًا");
-    const ids = [...selected].join(',');
-    if(block===true || block===false){
-      const url = `{% url 'reports:api_customers_bulk_block' %}?ids=${ids}&block=${block?1:0}`;
-      await fetch(url); await load(); return;
-    }
-    const tag = (qs('#tagInput').value||'').trim();
-    if(!tag) return alert("أدخل وسمًا");
-    const url = `{% url 'reports:api_customers_bulk_tag' %}?ids=${ids}&tag=${encodeURIComponent(tag)}`;
-    await fetch(url); await load();
-  }
+document.getElementById('apply').addEventListener('click', load);
+document.getElementById('btn-refresh').addEventListener('click', load);
+document.getElementById('btn-export').addEventListener('click', ()=>{ window.location = "{% url 'reports:api_customers_export' %}"; });
+load();
 
-  qs('#refresh').addEventListener('click', load);
-  period.addEventListener('change', load);
-  minOrders.addEventListener('change', load);
-  search.addEventListener('input', ()=>{ clearTimeout(search._t); search._t=setTimeout(load, 300); });
+async function aiPreview(){
+  const days = document.getElementById('ai-days').value || 120;
+  const mx = document.getElementById('ai-max').value || 5;
+  const j = await api("{% url 'reports:api_customers_ai_tags' %}?days="+days+"&max="+mx);
+  const tb = document.querySelector('#tbl-ai tbody'); tb.innerHTML='';
+  (j.rows||[]).forEach(r=>{
+    const tr=document.createElement('tr');
+    tr.innerHTML=`<td>${r.name} <span class="badge-muted">#${r.external_id}</span></td><td>${r.tags||'—'}</td>`;
+    tb.appendChild(tr);
+  });
+}
+document.getElementById('btn-ai-preview').addEventListener('click', aiPreview);
 
-  qs('#selectAll').addEventListener('click', ()=>{ data.forEach(r=>selected.add(r.id)); render(); });
-  qs('#clearSel').addEventListener('click', ()=>{ selected.clear(); render(); });
-  qs('#bulkTag').addEventListener('click', ()=>bulkTag());
-  qs('#bulkBlock').addEventListener('click', ()=>bulkTag(true));
-  qs('#bulkUnblock').addEventListener('click', ()=>bulkTag(false));
-  qs('#exportCsv').addEventListener('click', (e)=>{ e.preventDefault(); window.location = `{% url 'reports:api_customers_export' %}`; });
+async function aiApply(){
+  const days = document.getElementById('ai-days').value || 120;
+  const mx = document.getElementById('ai-max').value || 5;
+  const mode = document.getElementById('ai-mode').value || 'append';
+  const j = await api("{% url 'reports:api_customers_tags_apply_all' %}?days="+days+"&max="+mx+"&mode="+mode);
+  alert('تم تحديث '+(j.updated||0)+' عميل');
+  load();
+}
+document.getElementById('btn-ai-apply').addEventListener('click', aiApply);
 
-  document.addEventListener('DOMContentLoaded', load);
-})();
+async function dupScan(){
+  const j = await api("{% url 'reports:api_customers_duplicates' %}");
+  const box = document.getElementById('dups-body'); box.innerHTML='';
+  if(!(j.groups||[]).length){ box.innerHTML='<div class="empty">لا توجد مكررات واضحة.</div>'; return; }
+  (j.groups||[]).forEach(g=>{
+    const wrap=document.createElement('div'); wrap.className='card';
+    const rows = g.ids.map((id,idx)=>`<tr><td>${g.names[idx]||'-'}</td><td>${g.phones[idx]||'-'}</td><td>${g.emails[idx]||'-'}</td><td>${g.orders[idx]||0}</td><td>${(g.spent[idx]||0).toLocaleString('ar-SA')}</td><td>${id===g.master?'<b>رئيسي</b>':'—'}</td></tr>`).join('');
+    wrap.innerHTML = `
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">
+        <div><b>${g.key}</b></div>
+        <button class="btn btn-primary" data-master="${g.master}" data-ids="${g.ids.join(',')}">دمج المقترح</button>
+      </div>
+      <table class="table"><thead><tr><th>الاسم</th><th>الجوال</th><th>الإيميل</th><th>الطلبات</th><th>الإنفاق</th><th>الدور</th></tr></thead><tbody>${rows}</tbody></table>
+    `;
+    box.appendChild(wrap);
+  });
+  box.querySelectorAll('button.btn-primary').forEach(b=>{
+    b.addEventListener('click', async ()=>{
+      const master=b.dataset.master, ids=b.dataset.ids;
+      const j2=await api("{% url 'reports:api_customers_merge' %}?master="+master+"&ids="+encodeURIComponent(ids));
+      alert('تم دمج '+(j2.merged||0)+' سجل');
+      dupScan(); load();
+    });
+  });
+}
+document.getElementById('btn-dups').addEventListener('click', dupScan);
 </script>
 {% endblock %}

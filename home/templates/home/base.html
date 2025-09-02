@@ -56,9 +56,10 @@
                 <li class="{% if current_page == 'branches' %}active{% endif %}">
                     <a href="{% url 'branches' %}"><i class="fa-solid fa-building"></i>الفروع</a>
                 </li>
-                <li data-page="customers">
+                <li
+                    class="{% if current_page == 'reports:customers' or '/reports/customers/' in request.path %}active{% endif %}">
                     <a href="{% url 'reports:customers' %}">
-                        <i class="fa-solid fa-users"></i>العملاء
+                        <i class="fa-solid fa-users"></i> العملاء
                     </a>
                 </li>
                 <li class="{% if request.path == '/users/all_users/' %}active{% endif %}">
@@ -70,12 +71,14 @@
                 <!-- <li data-page="products"><a href=""><i class="fa-solid fa-chart-pie"></i>التقارير</a></li>
                 {% endif %}
             </ul> -->
-                <li class="{% if current_page == 'reports:ai' or '/reports/ai/' in request.path %}active{% endif %}">
-                    <a href="{% url 'reports:ai' %}">
-                        <i class="fa-solid fa-wand-magic-sparkles"></i> التقارير الذكية
+                <li
+                    class="{% if current_page == 'reports:sales' or '/reports/sales/' in request.path %}active{% endif %}">
+                    <a href="{% url 'reports:sales' %}">
+                        <i class="fa-solid fa-chart-line"></i> تقارير المبيعات
                     </a>
                 </li>
-                <
+
+
 
         </div>
         <div class="content">
