@@ -23,7 +23,7 @@
                 </div>
                 {% endfor %}
                 <div class="w-100">
-                        <div id="map"></div>
+                        <div id="map" style="width:100%;height:300px;border-radius:1rem;margin-top:.5rem;"></div>
                         <small class="text-muted">يمكنك البحث أو تحديد الموقع من الخريطة.</small>
                     </div>
 
@@ -36,13 +36,15 @@
     </div>
 </div>
 <!-- Google Maps API -->
-    <script src="https://maps.googleapis.com/maps/api/js?key={{google_map_key}}&libraries=places"></script>
+    <script src="https://maps.googleapis.com/maps/api/js?key={{google_map_key}}&libraries=places&callback=initMap" async defer></script>
 <script>
     let map, marker, autocomplete;
 
     function initMap() {
         const defaultLocation = { lat: 21.543333, lng: 39.172778 }; // جدة كموقع افتراضي
-        map = new google.maps.Map(document.getElementById("map"), {
+        const mapEl = document.getElementById("map");
+        if(!mapEl){ return; }
+        map = new google.maps.Map(mapEl, {
             center: defaultLocation,
             zoom: 12,
         });
@@ -58,28 +60,53 @@
             const geocoder = new google.maps.Geocoder();
             geocoder.geocode({ location: marker.getPosition() }, function (results, status) {
                 if (status === 'OK' && results[0]) {
-                    document.getElementById("branch_address").value = results[0].formatted_address;
+                    const addressInput = document.querySelector('input[name="address"]') || document.getElementById("branch_address") || document.getElementById("id_address");
+                    if(addressInput){ addressInput.value = results[0].formatted_address; }
                 }
             });
         });
 
         // Autocomplete للعنوان
-        const input = document.getElementById("branch_address");
-        autocomplete = new google.maps.places.Autocomplete(input);
-        autocomplete.bindTo("bounds", map);
+        const input = document.getElementById("branch_address") || document.querySelector('input[name="address"]') || document.getElementById("id_address");
+        if (input) {
+            autocomplete = new google.maps.places.Autocomplete(input);
+            autocomplete.bindTo("bounds", map);
 
-        autocomplete.addListener("place_changed", () => {
-            const place = autocomplete.getPlace();
-            if (!place.geometry || !place.geometry.location) return;
+            autocomplete.addListener("place_changed", () => {
+                const place = autocomplete.getPlace();
+                if (!place.geometry || !place.geometry.location) return;
 
-            map.setCenter(place.geometry.location);
-            map.setZoom(16);
+                map.setCenter(place.geometry.location);
+                map.setZoom(16);
 
-            marker.setPosition(place.geometry.location);
-        });
+                marker.setPosition(place.geometry.location);
+            });
+
+            // لو العنوان موجود مسبقًا (نموذج تعديل)، حدّد الموقع على الخريطة
+            if (input.value && input.value.trim().length > 0) {
+                const geocoder = new google.maps.Geocoder();
+                geocoder.geocode({ address: input.value }, function (results, status) {
+                    if (status === 'OK' && results[0]) {
+                        map.setCenter(results[0].geometry.location);
+                        map.setZoom(16);
+                        marker.setPosition(results[0].geometry.location);
+                    }
+                });
+            }
+
+            // النقر على الخريطة يحدد الموقع ويحدّث العنوان 
+            map.addListener('click', function(e){
+                const pos = e.latLng;
+                marker.setPosition(pos);
+                const geocoder = new google.maps.Geocoder();
+                geocoder.geocode({ location: pos }, function (results, status) {
+                    if (status === 'OK' && results[0]) {
+                        if(input){ input.value = results[0].formatted_address; }
+                    }
+                });
+            });
+        }
     }
-
-    window.onload = initMap;
 </script>
 {% endblock dashboard_content %}
 

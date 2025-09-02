@@ -125,6 +125,9 @@
           <a href="#" class="hoa-pill {% if request.session.order_data.order_method == "dine_in" %}active{% endif %}" onclick="openModal('dineinModal')">داخل المطعم</a>
           <a href="#" class="hoa-pill {% if request.session.order_data.order_method == "pickup" %}active{% endif %}" onclick="openModal('pickupModal')">استلام</a>
           <a href="#" class="hoa-pill {% if request.session.order_data.order_method == "delivery" %}active{% endif %}" onclick="openModal('deliveryModal')">توصيل</a>
+          {% if last_order_id %}
+              <a class="hoa-pill" href="{% url 'payments:last_invoice' %}?slug={{ website.slug }}">عرض فاتورتي</a>
+          {% endif %}
       </nav>
 
 

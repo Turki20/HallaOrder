@@ -34,6 +34,8 @@ def _base_ctx(request, website, **extra):
         "website": website,
         "cart": cart,
         "cart_count": cart_count,
+        # يوفر آخر رقم طلب لتمكين رابط العودة إلى الفاتورة
+        "last_order_id": request.session.get("last_order_id"),
     }
     ctx.update(extra)
     return ctx

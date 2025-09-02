@@ -1,6 +1,7 @@
 from django.db import models
 # نماذج الدفع والفواتير الخاصة بتطبيق الدفع
 from orders.models import Order
+from restaurants.models import Restaurant
 
 class PaymentMethodGateway(models.TextChoices):
     # طرق الدفع المتاحة لواجهة بوابة الدفع
@@ -66,3 +67,26 @@ class Invoice(models.Model):
     def __str__(self):
         return f"Invoice #{self.pk} – Order #{self.order_id}"
 
+
+# ---- Wallet ----
+class WalletKind(models.TextChoices):
+    CREDIT = "credit", "credit"
+    REFUND = "refund", "refund"
+
+
+class WalletTransaction(models.Model):
+    restaurant = models.ForeignKey(Restaurant, on_delete=models.CASCADE, related_name="wallet_transactions")
+    order = models.ForeignKey(Order, on_delete=models.SET_NULL, null=True, blank=True, related_name="wallet_transactions")
+    kind = models.CharField(max_length=10, choices=WalletKind.choices)
+    amount_halalah = models.IntegerField()  # store amounts in halalah (1 SAR = 100 halalah)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        db_table = "wallet_transactions"
+        indexes = [
+            models.Index(fields=["restaurant", "-created_at"]),
+            models.Index(fields=["order"]),
+        ]
+
+    def __str__(self):
+        return f"{self.kind} – {self.amount_halalah}h for {getattr(self.order, 'id', None)}"

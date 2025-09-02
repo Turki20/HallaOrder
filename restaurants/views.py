@@ -125,7 +125,8 @@ def branch_update(request, pk):
             return redirect('branches')
     else:
         form = BranchForm(instance=branch)
-    return render(request, "restaurants/Branch_Form.html", {"form": form, "title": "تعديل فرع"})
+    google_map_key = os.getenv('google_map_key', "")
+    return render(request, "restaurants/Branch_Form.html", {"form": form, "title": "تعديل فرع", 'google_map_key': google_map_key})
 
 # حذف فرع
 @restaurant_owner_required
