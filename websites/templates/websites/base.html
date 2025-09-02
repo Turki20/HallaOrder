@@ -1,4 +1,7 @@
+{% load bootstrap5 %}
 {% load static %}
+{% now "Y-m-d" as today_date %}
+
 <!doctype html>
 <html lang="ar" dir="rtl">
 <head>
@@ -6,8 +9,12 @@
   <title>{% block title %}{% firstof website.restaurant.name website.display_name website.slug %}{% endblock %}</title>
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="theme-color" content="#0ea5e9">
+  {% bootstrap_css %}
+  {% bootstrap_javascript %}
   <link rel="stylesheet" href="{% static 'css/style.css' %}">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css">
+      <script src="https://kit.fontawesome.com/aa8d28d2d0.js" crossorigin="anonymous"></script>
+
   <style>
     /* حمايات عامة */
     img{max-width:100%;height:auto;vertical-align:middle}
@@ -22,7 +29,7 @@
     .hoa-title{font-weight:800}
     .hoa-nav{display:flex;gap:16px;background:#f0f2f68a;border-radius:24px;padding:8px 12px;position:absolute;left:50%;transform:translateX(-50%)}
     .hoa-pill{padding:10px 22px;border:0;background:#fff;border-radius:18px;font-weight:500}
-    .hoa-pill.active,.hoa-pill:hover{background:#ff7f50;color:#fff;box-shadow:0 4px 10px rgba(255,127,80,.35)}
+    .hoa-pill.active{border: 3px solid;color:#fff;box-shadow:0 4px 10px rgba(90, 90, 90, 0.35)}
     .hoa-btn{display:inline-flex;align-items:center;gap:6px;padding:8px 12px;border-radius:12px;border:1px solid #e5e7eb;background:#fff;cursor:pointer}
     .hoa-badge{min-width:20px;height:20px;display:inline-flex;align-items:center;justify-content:center;background:#ff7a45;color:#fff;border-radius:8px;font-size:12px;padding:0 6px}
 
@@ -56,13 +63,50 @@
     #hoa-open-cart .hoa-badge{position:absolute;top:-6px;inset-inline-start:-6px;background:#e74c3c;color:#fff;border-radius:999px}
     #hoa-open-cart span:last-child{display:none}
   </style>
+  <style>
+.modal {
+  display: none;
+  position: fixed;
+  z-index: 9999;
+  padding-top: 100px;
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 100%;
+  overflow: auto;
+  background-color: rgba(0,0,0,0.5);
+}
+
+.modal-content {
+  background-color: #fff;
+  margin: auto;
+  padding: 30px;
+  border: 1px solid #888;
+  width: 90%;
+  max-width: 500px;
+  border-radius: 10px;
+  position: relative;
+}
+
+.close {
+  color: #aaa;
+  position: absolute;
+  right: 15px;
+  top: 10px;
+  font-size: 28px;
+  font-weight: bold;
+  cursor: pointer;
+}
+</style>
+
   {% block head %}{% endblock %}
 </head>
+      
 <body>
 <div class="hoa-page">
-
+     
   <!-- Topbar -->
-  <header class="hoa-topbar">
+  <header class="hoa-topbar" style="padding: 10px;">
     <div class="hoa-container hoa-topbar__inner">
       <div class="hoa-logo">
         {% if website.logo %}
@@ -72,19 +116,20 @@
         {% endif %}
       </div>
       <div class="hoa-title">{% firstof website.restaurant.name website.display_name website.slug %}</div>
-
-      {# توليد آمن لمسارات الدخول/الخروج #}
-      {% url 'logout' as logout_url %}{% if not logout_url %}{% url 'users:logout' as logout_url %}{% endif %}{% if not logout_url %}{% url 'account_logout' as logout_url %}{% endif %}
-      {% url 'login'  as login_url  %}{% if not login_url  %}{% url 'users:login'  as login_url  %}{% endif %}{% if not login_url  %}{% url 'account_login'  as login_url  %}{% endif %}
-
+     
+      <!-- tab buttons -->
       <nav class="hoa-nav" style="background-color: #f0f2f691;">
-        <a class="hoa-pill {% if current_tab == 'home' %}active{% endif %}" href="{% url 'websites:menu' website.slug %}">داخل المطعم</a>
-        <a class="hoa-pill {% if current_tab == 'pickup' %}active{% endif %}" href="#">استلام</a>
-        <a class="hoa-pill {% if current_tab == 'delivery' %}active{% endif %}" href="#">توصيل</a>
-        {% if last_order_id %}
-          <a class="hoa-pill" href="{% url 'payments:last_invoice' %}?slug={{ website.slug }}">عرض فاتورتي</a>
-        {% endif %}
+          <!-- <a class="hoa-pill {% if current_tab == 'dine_in' %}active{% endif %}" href="#" onclick="showTab('dine_in')">داخل المطعم</a>
+          <a class="hoa-pill {% if current_tab == 'pickup' %}active{% endif %}" href="#" onclick="showTab('pickup')">استلام</a>
+          <a class="hoa-pill {% if current_tab == 'delivery' %}active{% endif %}" href="#" onclick="showTab('delivery')">توصيل</a> -->
+          <a href="#" class="hoa-pill {% if request.session.order_data.order_method == "dine_in" %}active{% endif %}" onclick="openModal('dineinModal')">داخل المطعم</a>
+          <a href="#" class="hoa-pill {% if request.session.order_data.order_method == "pickup" %}active{% endif %}" onclick="openModal('pickupModal')">استلام</a>
+          <a href="#" class="hoa-pill {% if request.session.order_data.order_method == "delivery" %}active{% endif %}" onclick="openModal('deliveryModal')">توصيل</a>
+          {% if last_order_id %}
+              <a class="hoa-pill" href="{% url 'payments:last_invoice' %}?slug={{ website.slug }}">عرض فاتورتي</a>
+          {% endif %}
       </nav>
+
 
       <button class="hoa-btn" id="hoa-open-cart" type="button" aria-haspopup="dialog" aria-controls="hoa-cart-drawer">
         <span class="hoa-badge">{{ cart_count|default:0 }}</span>
@@ -92,23 +137,22 @@
         <span>السلة</span>
       </button>
 
-      {% if request.user.is_authenticated %}
-        {% if logout_url %}<a class="hoa-btn" href="{{ logout_url }}?next={{ request.path }}">خروج</a>{% endif %}
+      <!-- إذا لم يكن المستخدم مسجل الدخول، أظهر أزرار التسجيل -->
+      {% if not request.user.is_authenticated %}
+        <a href="{% url 'users:customer_login' website.slug %}" class="hoa-btn add-btn">تسجيل الدخول</a>
+        <a href="{% url 'users:customer_sign_up' website.slug %}" class="hoa-btn add-btn">تسجيل</a>
       {% else %}
-        {% if login_url %}<a class="hoa-btn" href="{{ login_url }}?next={{ request.path }}">دخول</a>{% endif %}
+        <a href="{% url 'users:customer_logout_view' website.slug %}" class="hoa-btn add-btn">تسجيل الخروج</a>
+        <a href="" class="hoa-btn add-btn">طلباتي</a>
       {% endif %}
+
     </div>
   </header>
 
-  <!-- Toolbar -->
-  <div class="hoa-container hoa-toolbar">
-    <input class="hoa-input" type="search" placeholder="ابحث في الأصناف…">
-    {% block toolbar_extra %}{% endblock %}
-  </div>
 
   <!-- Main -->
   <main>
-    <div class="hoa-container">
+    <div class="hoa-container mt-4">
       {% block content %}
       <section class="card" style="padding:18px">
         <p>مرحبًا بك في <b>{% firstof website.restaurant.name website.display_name website.slug %}</b>.</p>
@@ -123,7 +167,7 @@
       <div class="hoa-footer-grid">
         <div>
           <h4>{% firstof website.restaurant.name website.display_name website.slug %}</h4>
-          <p class="muted">تجربة طلب سهلة وسريعة؛ داخل المطعم أو للاستلام أو التوصيل.</p>
+          <p>تجربة طلب سهلة وسريعة؛ داخل المطعم أو للاستلام أو التوصيل.</p>
         </div>
         <div>
           <h4>روابط سريعة</h4>
@@ -135,8 +179,8 @@
         </div>
         <div>
           <h4>تواصل</h4>
-          <div class="muted">العنوان: {% firstof website.restaurant.address "—" %}</div>
-          <div class="muted">الهاتف: {% firstof website.restaurant.phone "—" %}</div>
+          <div class="">العنوان: {% firstof website.restaurant.address "—" %}</div>
+          <div class="">الهاتف: {% firstof website.restaurant.phone "—" %}</div>
         </div>
       </div>
       <div class="hoa-footer-bottom">تم بناء هذا المتجر بواسطة <b>HalaOrder</b>. جميع الحقوق محفوظة.</div>
@@ -185,6 +229,68 @@
     </footer>
   </aside> 
 </div>
+
+
+
+<!-- ===== Modals ===== -->
+
+<!-- Dine-in Modal -->
+<div class="modal" id="dineinModal">
+  <div class="modal-content">
+    <span class="close" onclick="closeModal('dineinModal')">&times;</span>
+    <h3>حجز داخل المطعم</h3>
+    <form method="POST" action="{% url 'websites:save_dinein_details' %}" class="g-2 row">
+        {% csrf_token %}
+        <label>الفرع:</label>
+        <select class="form-select" name="branch_id" id="" required>
+          {% for branch in website.restaurant.branches.all %}
+            <option value="{{branch.id}}">{{branch.name}}</option>
+          {% endfor %}
+        </select>
+        <label>عدد الأشخاص:</label>
+        <input type="number" name="number_of_people" class="form-control" required>
+        <label>طلبات خاصة:</label>
+        <textarea name="special_requests" class="form-control"></textarea>
+        <button type="submit" class="btn add-btn">حفظ</button>
+    </form>
+  </div>
+</div>
+
+<!-- Pickup Modal -->
+<div class="modal" id="pickupModal">
+  <div class="modal-content">
+    <span class="close" onclick="closeModal('pickupModal')">&times;</span>
+    <h3>الاستلام من الفرع</h3>
+    <form method="POST" action="{% url 'websites:save_pickup_details' %}" class="row g-2">
+        {% csrf_token %}
+        <label>الفرع:</label>
+        <select class="form-select" name="branch_id" id="" required>
+          {% for branch in website.restaurant.branches.all %}
+            <option value="{{branch.id}}">{{branch.name}}</option>
+          {% endfor %}
+        </select>
+
+        <button type="submit" class="btn add-btn">حفظ</button>
+    </form>
+  </div>
+</div>
+
+<!-- Delivery Modal -->
+<div class="modal" id="deliveryModal">
+  <div class="modal-content">
+    <span class="close" onclick="closeModal('deliveryModal')">&times;</span>
+    <h3>التوصيل</h3>
+    <form method="POST" action="{% url 'websites:save_delivery_details' %}" class="row g-2">
+        {% csrf_token %}
+        <label>العنوان:</label>
+        <input type="text" name="address" class="form-control" required>
+        <label>المدينة:</label>
+        <input type="text" name="city" class="form-control" required>
+        <button type="submit" class="btn add-btn">حفظ</button>
+    </form>
+  </div>
+</div>
+
 
 <script>
   // Drawer بدون تعارض أسماء
@@ -243,6 +349,32 @@
   
 </script>
 
+<script>
+function openModal(id) {
+    document.getElementById(id).style.display = "block";
+}
+
+function closeModal(id) {
+    document.getElementById(id).style.display = "none";
+}
+
+// إغلاق المودال عند الضغط خارج المحتوى
+window.onclick = function(event) {
+    document.querySelectorAll(".modal").forEach(modal => {
+        if (event.target === modal) {
+            modal.style.display = "none";
+        }
+    });
+}
+</script>
+
+
+
+<!-- Swiper CSS -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css" />
+
+<!-- Swiper JS -->
+<script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js"></script>
 {% block extra_js %}{% endblock %}
 </body>
 </html>

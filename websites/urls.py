@@ -14,4 +14,9 @@ urlpatterns = [
 
     path("websites/preview/<int:pk>/", views.preview_by_pk, name="preview"),
     path("websites/preview/", views.preview_my_site, name="preview_my_site"),
+    
+    path('order/save_dinein/', views.save_dinein_details, name='save_dinein_details'),
+    path('order/save_pickup/', views.save_pickup_details, name='save_pickup_details'),
+    path('order/save_delivery/', views.save_delivery_details, name='save_delivery_details'),
+    # path('order/confirm/', views.confirm_order, name='confirm_order'),
 ]
