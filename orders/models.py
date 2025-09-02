@@ -93,7 +93,7 @@ class DeliveryDetails(models.Model):
     order = models.OneToOneField(Order, on_delete=models.CASCADE, related_name='delivery_details')
     address = models.TextField()
     city = models.CharField(max_length=100)
-    delivery_time = models.DateTimeField()
+    delivery_time = models.DateTimeField(null=True, blank=True)
 
     def __str__(self):
         return f"Delivery to {self.address}"
@@ -102,7 +102,7 @@ class DeliveryDetails(models.Model):
 class PickupDetails(models.Model):
     order = models.OneToOneField(Order, on_delete=models.CASCADE, related_name='pickup_details')
     branch = models.ForeignKey(Branch, on_delete=models.SET_NULL, null=True, blank=True)
-    pickup_time = models.DateTimeField()
+    pickup_time = models.DateTimeField(null=True, blank=True)
 
     def __str__(self):
         return f"Pickup from {self.branch}"
@@ -112,7 +112,7 @@ class DineInDetails(models.Model):
     order = models.OneToOneField(Order, on_delete=models.CASCADE, related_name='dinein_details')
     branch = models.ForeignKey(Branch, on_delete=models.SET_NULL, null=True, blank=True)
     number_of_people = models.IntegerField()
-    reservation_time = models.DateTimeField()
+    reservation_time = models.DateTimeField(null=True, blank=True)
     special_requests = models.TextField(blank=True)
 
     def __str__(self):

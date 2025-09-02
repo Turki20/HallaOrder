@@ -104,9 +104,76 @@
       
 <body>
 <div class="hoa-page">
-     
+
+    <nav class="navbar navbar-expand-lg bg-body-tertiary p-4" id="nav_color" style="padding: 0 50px;">
+    <div class="container-fluid">
+      <div class="d-none d-md-flex g-4">
+        <div class="hoa-logo" style="width: auto;">
+        {% if website.logo %}
+          <img src="{{ website.logo.url }}" alt="logo" style="width:100%;height:100%;object-fit:cover">
+        {% else %}
+          <img src="{% static 'images/placeholders/logo-placeholder.svg' %}" alt="logo" style="width:100%;height:100%;object-fit:cover">
+        {% endif %}
+        <a class="navbar-brand text_color">{% firstof website.restaurant.name website.display_name website.slug %}</a>
+      </div>
+      </div>
+
+      <!-- <nav class="hoa-nav" style="background-color: #f0f2f691;">
+          <a href="#" class="hoa-pill {% if request.session.order_data.order_method == "dine_in" %}active{% endif %}" onclick="openModal('dineinModal')">داخل المطعم</a>
+          <a href="#" class="hoa-pill {% if request.session.order_data.order_method == "pickup" %}active{% endif %}" onclick="openModal('pickupModal')">استلام</a>
+          <a href="#" class="hoa-pill {% if request.session.order_data.order_method == "delivery" %}active{% endif %}" onclick="openModal('deliveryModal')">توصيل</a>
+      </nav> -->
+            <!-- ✅ الشاشات الكبيرة فقط (أزرار عادية) -->
+      <nav class="hoa-nav d-none d-md-flex" style="background-color: #f0f2f691;">
+        <a href="#" class="hoa-pill {% if request.session.order_data.order_method == "dine_in" %}active{% endif %}" onclick="openModal('dineinModal')">داخل المطعم</a>
+        <a href="#" class="hoa-pill {% if request.session.order_data.order_method == "pickup" %}active{% endif %}" onclick="openModal('pickupModal')">استلام</a>
+        <a href="#" class="hoa-pill {% if request.session.order_data.order_method == "delivery" %}active{% endif %}" onclick="openModal('deliveryModal')">توصيل</a>
+      </nav>
+
+      <!-- ✅ الشاشات الصغيرة فقط (Dropdown) -->
+      <div class="dropdown d-flex d-md-none my-2">
+        <button class="btn add-btn dropdown-toggle w-100" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+          {% if request.session.order_data.order_method == "dine_in" %} داخل المطعم
+          {% elif request.session.order_data.order_method == "pickup" %} الاستلام من الفرع
+          {% elif request.session.order_data.order_method == "delivery" %} التوصيل
+          {% else %} اختر طريقة الاستلام {% endif %}
+        </button>
+        <ul class="dropdown-menu w-100 text-center">
+          <li><a class="dropdown-item" href="#" onclick="openModal('dineinModal')">داخل المطعم</a></li>
+          <li><a class="dropdown-item" href="#" onclick="openModal('pickupModal')">الاستلام من الفرع</a></li>
+          <li><a class="dropdown-item" href="#" onclick="openModal('deliveryModal')">التوصيل</a></li>
+        </ul>
+      </div>
+
+
+      <div class="d-flex" style="width: auto; justify-content: end;">
+        <a  class="nav-link dropdown-toggle text_color" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false" style="font-size: 20px;">
+            قائمة
+          </a>
+          <ul class="dropdown-menu">
+            {% if not request.user.is_authenticated %}
+              <li><a href="{% url 'users:customer_login' website.slug %}" class="dropdown-item">تسجيل الدخول</a></li>
+              <li><a href="{% url 'users:customer_sign_up' website.slug %}" class="dropdown-item">تسجيل</a></li>
+            {% else %}
+              <li><a href="{% url 'users:customer_logout_view' website.slug %}" class="dropdown-item">تسجيل الخروج</a></li>
+              <li><a href="" class="dropdown-item">طلباتي</a></li>
+            {% endif %}
+            {% if last_order_id %}
+              <li><a class="dropdown-item" href="{% url 'payments:last_invoice' %}?slug={{ website.slug }}">فاتورتي</a></li>
+            {% endif %}
+              <li><a class="dropdown-item" href="{% url 'websites:menu' website.slug %}">قائمة الطعام</a></li>
+          </ul>
+
+            <button class="hoa-btn" id="hoa-open-cart" type="button" aria-haspopup="dialog" aria-controls="hoa-cart-drawer">
+                <span class="hoa-badge">{{ cart_count|default:0 }}</span>
+                <i class="bi bi-basket2"></i>
+                <span>السلة</span>
+          </button>
+      </div>
+    </div>
+  </nav>
   <!-- Topbar -->
-  <header class="hoa-topbar" style="padding: 10px;">
+  <header class="hoa-topbar" style="padding: 10px; display: none;" >
     <div class="hoa-container hoa-topbar__inner">
       <div class="hoa-logo">
         {% if website.logo %}
@@ -125,9 +192,6 @@
           <a href="#" class="hoa-pill {% if request.session.order_data.order_method == "dine_in" %}active{% endif %}" onclick="openModal('dineinModal')">داخل المطعم</a>
           <a href="#" class="hoa-pill {% if request.session.order_data.order_method == "pickup" %}active{% endif %}" onclick="openModal('pickupModal')">استلام</a>
           <a href="#" class="hoa-pill {% if request.session.order_data.order_method == "delivery" %}active{% endif %}" onclick="openModal('deliveryModal')">توصيل</a>
-          {% if last_order_id %}
-              <a class="hoa-pill" href="{% url 'payments:last_invoice' %}?slug={{ website.slug }}">عرض فاتورتي</a>
-          {% endif %}
       </nav>
 
 
@@ -144,6 +208,9 @@
       {% else %}
         <a href="{% url 'users:customer_logout_view' website.slug %}" class="hoa-btn add-btn">تسجيل الخروج</a>
         <a href="" class="hoa-btn add-btn">طلباتي</a>
+      {% endif %}
+      {% if last_order_id %}
+              <a class="hoa-btn add-btn" href="{% url 'payments:last_invoice' %}?slug={{ website.slug }}">فاتورتي</a>
       {% endif %}
 
     </div>
@@ -338,6 +405,10 @@
   // تطبيق على العناصر
   applyColor(document.querySelector('.hoa-topbar'), mainColor);
   applyColor(document.querySelector('.hoa-footer'), mainColor);
+
+  applyColor(document.querySelector('#nav_color'), mainColor);
+  document.querySelectorAll('.text_color').forEach(el => applyColor(el, mainColor));
+
 
   document.querySelectorAll('.add-btn').forEach(el => applyColor(el, secondaryColor));
   document.querySelectorAll('.hoa-btn-primary').forEach(el => applyColor(el, secondaryColor));

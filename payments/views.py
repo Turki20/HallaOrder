@@ -16,7 +16,7 @@ from websites.models import Website
 from restaurants.models import Branch
 from restaurants.models import Restaurant
 from menu.models import Product
-from orders.models import Order, OrderStatus, OrderItem, PaymentMethod
+from orders.models import Order, OrderStatus, OrderItem, PaymentMethod, DeliveryDetails, PickupDetails, DineInDetails
 from .models import Invoice
 from django.db.models import Q
 from django.utils.http import urlencode
@@ -66,7 +66,7 @@ def _order_total(order: Order) -> Decimal:
 
 # نجاح الدفع: إنشاء طلب من السلة (إن لم يكن موجودًا) ثم عرض الفاتورة
 
-def success(request):
+def success(request:HttpRequest):
     session_id = request.GET.get("session_id")
     slug = request.GET.get("slug") or request.session.get("last_cart_slug")
     order_for_invoice = None
@@ -101,20 +101,66 @@ def success(request):
             website = Website.objects.select_related("restaurant").filter(slug=slug).first()
             if website:
                 cart = request.session.get(f"cart_{website.id}", [])
-                subtotal = sum((Decimal(str(i.get("price", 0))) * int(i.get("qty", 1) or 1)) for i in cart)
-                tax = (subtotal * Decimal("0.15")).quantize(Decimal("0.01"))
+                cart_meta = request.session.get(f"cart_meta_{website.id}")
+                subtotal = sum((Decimal(str(i.get("price", 0)))) for i in cart)
+                tax = 0 #(subtotal * Decimal("0.15")).quantize(Decimal("0.01"))
                 total = (subtotal + tax).quantize(Decimal("0.01"))
 
                 # اختيار فرع مناسب (أول فرع)
-                branch = Branch.objects.filter(restaurant=website.restaurant).order_by("id").first() or Branch.objects.order_by("id").first()
+                if 'order_data' in request.session:
+                    if request.session['order_data']['order_method'] == 'dine_in':
+                        branch = Branch.objects.get(pk = request.session['order_data']['dinein']['branch_id'])
+                    elif request.session['order_data']['order_method'] == 'pickup':
+                        branch = Branch.objects.get(pk = request.session['order_data']['pickup']['branch_id'])
+                    # elif request.session['order_data']['order_method'] == 'delivery':
+                    #     print('delivery')
+                    else:
+                        branch = Branch.objects.filter(restaurant=website.restaurant).order_by("id").first() or Branch.objects.order_by("id").first()
+                        
                 if branch:
-                    created_order = Order.objects.create(
-                        customer=request.user if request.user.is_authenticated else None,
-                        branch=branch,
-                        status=OrderStatus.NEW,
-                        total_price=total,
-                        payment_method=PaymentMethod.ONLINE,
-                    )
+                    if request.user.is_authenticated:
+                        created_order = Order.objects.create(
+                            customer=request.user,
+                            branch=branch,
+                            status=OrderStatus.NEW,
+                            total_price=total,
+                            payment_method=PaymentMethod.ONLINE,
+                        )
+                    else:
+                        print(cart_meta)
+                        created_order = Order.objects.create(
+                            guest_name=cart_meta['name'],
+                            guest_phone=cart_meta['phone'],
+                            branch=branch,
+                            status=OrderStatus.NEW,
+                            total_price=total,
+                            payment_method=PaymentMethod.ONLINE,
+                        )
+                    
+                    if request.session['order_data']['order_method'] == 'dine_in':
+                        created_order.order_method = 'dine_in'
+                        DineInDetails.objects.create(
+                            order=created_order,
+                            branch=branch,
+                            number_of_people=request.session['order_data']['dinein']['number_of_people'],
+                            special_requests=request.session['order_data']['dinein']['special_requests'],
+                        )
+                    elif request.session['order_data']['order_method'] == 'pickup':
+                        created_order.order_method = 'pickup'
+                        PickupDetails.objects.create(
+                            order=created_order,
+                            branch=branch,
+                        )
+                    elif request.session['order_data']['order_method'] == 'delivery':
+                        created_order.order_method = 'delivery'
+                        DeliveryDetails.objects.create(
+                            order=created_order,
+                            address=request.session['order_data']['delivery']['address'],
+                            city=''
+                        )
+                        
+                    created_order.save()
+                        
                     for i in cart:
                         try:
                             product = Product.objects.filter(pk=int(i.get("id"))).first()
@@ -126,7 +172,7 @@ def success(request):
                                 order=created_order,
                                 product=product,
                                 quantity=qty,
-                                options=(i.get("size") or ""),
+                                options=(i.get("size") or ""), # تحتاج تعديل الاضافات
                                 addons=",".join(i.get("addons", []) or []),
                             )
                     # تفريغ السلة وتخزين رقم الطلب لعرضه مباشرة
@@ -185,7 +231,8 @@ def success(request):
                         pass
 
     if order_for_invoice:
-        return render(request, "payments/invoice.html", {"order": order_for_invoice, "slug": slug})
+        website = Website.objects.get(slug=slug)
+        return render(request, "payments/invoice.html", {"order": order_for_invoice, "slug": slug, 'website':website})
 
     # في حال لم يتم الدفع أو حدث خطأ نعرض صفحة نجاح بسيطة
     return render(request, "payments/success.html", {"session_id": session_id, "status": status, "slug": slug})
@@ -304,6 +351,7 @@ def quick_checkout(request):
     session = stripe.checkout.Session.create(
         mode="payment",
         payment_method_types=["card"],
+        customer_email=request.GET.get("email"),
         line_items=[{
             "price_data": {
                 "currency": currency,
@@ -335,7 +383,14 @@ def public_order_status(request, order_id: int):
 
 
 def invoices_dashboard(request:HttpRequest):
-    invoices = Invoice.objects.all().order_by("-created_at") # عدلها عشان يصير الواتير الخاصه بكل مطعم
+    branches = request.user.restaurants.branches.all()
+    invoices = []
+    
+    for branch in branches:
+        for order in branch.orders.all():
+            for invoice in order.invoices.all():
+                invoices.append(invoice)
+    # invoices = Invoice.objects.all().order_by("-created_at") # عدلها عشان يصير الواتير الخاصه بكل مطعم
 
     query = None
     sent_via_filter = None

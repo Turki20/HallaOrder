@@ -21,6 +21,26 @@
 {% endblock %}
 
 {% block content %}
+
+<div class="row mt-2 mb-2">
+  <div class="col"></div>
+  <div class="col-8">
+    {% if not cart %}
+        <div class="alert alert-danger">
+            <i class="fa-solid fa-circle-exclamation"></i>
+            <span>يجب اضافة عناصر للسلة لاكمال الطلب</span>
+        </div>
+    {% endif %}
+    {% if not request.session.order_data.order_method %}
+        <div class="alert alert-danger">
+            <i class="fa-solid fa-circle-exclamation"></i>
+            <span>يجب اختيار طريقة الطلب لاتمام عملية الدفع</span>
+        </div>
+    {% endif %}
+  </div>
+  <div class="col"></div>
+</div>
+
 <div class="checkout">
   <!-- Left: payment + totals -->
   <aside class="pane stack">
@@ -37,7 +57,7 @@
       <div><b>SAR {{ total|floatformat:2 }}</b></div>
     </div>
 
-    <button class="pay-btn" type="submit" form="cart-meta-form" style="margin-top:auto">أكمل الطلب</button>
+    <button class="pay-btn" type="submit" form="cart-meta-form" style="margin-top:auto" {% if not cart %}hidden{% endif %}{% if not request.session.order_data.order_method %}hidden{% endif %}>أكمل الطلب</button>
   </aside>
 
   <!-- Right: items + customer fields -->

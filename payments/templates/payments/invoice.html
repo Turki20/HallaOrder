@@ -14,7 +14,7 @@
     .progress::before{content:"";position:absolute;inset-inline:8px;top:50%;height:4px;background:#edf0f4;transform:translateY(-50%)}
     .node{position:relative;display:flex;flex-direction:column;align-items:center;gap:6px;padding-inline:8px;background:transparent;z-index:1}
     .dot{width:18px;height:18px;border-radius:999px;background:#e5e7eb;border:3px solid #e5e7eb}
-    .node.is-active .dot{background:#ff7f50;border-color:#ff7f50}
+  /*  .node.is-active .dot{background:{{website.secondary_color}};border-color:{{website.secondary_color}}}*/
     .label{font-size:13px;color:#6b7280}
 
     /* Layout */
@@ -28,7 +28,7 @@
 
     .footer{margin-top:20px;display:flex;justify-content:space-between}
     .btn{padding:12px 18px;border-radius:12px;border:1px solid #e5e7eb;background:#fff;text-decoration:none;color:#111}
-    .btn-primary{background:#ff7f50;color:#fff;border:0}
+    /*.btn-primary{background:{{website.secondary_color}};color:#fff;border:0}*/
   </style>
   <body>
     <div class="container">
@@ -71,6 +71,9 @@
                 <li style="padding:8px 0;border-bottom:1px dashed #eee;display:flex;justify-content:space-between;gap:8px">
                   <span>{{ it.product.name }} <span class="muted">× {{ it.quantity }}</span></span>
                   <span>SAR {{ it.product.price|floatformat:2 }}</span>
+                </li>
+                <li>
+                  <span class="muted">{{it.options}}</span>
                 </li>
               {% empty %}
                 <li class="muted">لا توجد عناصر</li>
@@ -122,6 +125,8 @@
       </div>
     </div>
     {{ order.id|json_script:"order-id" }}
+
+    
     <script>
       (function(){
         const orderId = JSON.parse(document.getElementById('order-id').textContent);
@@ -144,6 +149,8 @@
         setInterval(tick, 5000);
       })();
     </script>
+
+    
   </body>
 </html>
 

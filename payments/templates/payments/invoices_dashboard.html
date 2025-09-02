@@ -16,23 +16,15 @@
             <form method="POST" class="row g-3 mb-4">
                 {% csrf_token %}
 
-                <div class="col-md-4">
+                <div class="col-md-5">
                     <input type="text" name="q" placeholder="بحث بالاسم أو البريد" class="form-control" value="{{ query }}">
                 </div>
 
-                <div class="col-md-3">
+                <div class="col-md-5">
                     <select name="sent_via" class="form-select">
                         <option value="">-- طريقة الإرسال --</option>
                         <option value="Email" {% if sent_via_filter == "Email" %}selected{% endif %}>Email</option>
                         <option value="SMS" {% if sent_via_filter == "SMS" %}selected{% endif %}>SMS</option>
-                    </select>
-                </div>
-
-                <div class="col-md-3">
-                    <select name="compliance_status" class="form-select">
-                        <option value="">-- حالة الالتزام --</option>
-                        <option value="true" {% if compliance_filter == "true" %}selected{% endif %}>ملتزم</option>
-                        <option value="false" {% if compliance_filter == "false" %}selected{% endif %}>غير ملتزم</option>
                     </select>
                 </div>
 
@@ -56,7 +48,6 @@
                             <th>البريد</th>
                             <th>المبلغ</th>
                             <th>الإرسال</th>
-                            <th>الالتزام</th>
                             <th>التاريخ</th>
                         </tr>
                     </thead>
@@ -70,16 +61,9 @@
                             <td>{{ invoice.total_amount }} ريال</td>
                             <td>
                                 {% if invoice.sent_via == "Email" %}
-                                📧 Email
+                                 Email
                                 {% elif invoice.sent_via == "SMS" %}
-                                📱 SMS
-                                {% endif %}
-                            </td>
-                            <td>
-                                {% if invoice.compliance_status %}
-                                ✅ ملتزم
-                                {% else %}
-                                ❌ غير ملتزم
+                                 SMS
                                 {% endif %}
                             </td>
                             <td>{{ invoice.created_at|date:"Y-m-d H:i" }}</td>

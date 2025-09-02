@@ -247,7 +247,7 @@ def _meta_key(website_id: int) -> str:
 
 def _get_cart_meta(request, website):
     # قراءة بيانات العميل المحفوظة (اسم/جوال/ملاحظات)
-    return request.session.get(_meta_key(website.id), {"name": "", "phone": "", "notes": ""})
+    return request.session.get(_meta_key(website.id), {"name": "", "phone": "", "notes": "", 'email': ''})
 
 
 def _set_cart_meta(request, website, value):
@@ -275,13 +275,13 @@ def save_cart_meta(request, slug):
 
     # حساب إجمالي الفاتورة ثم إنشاء جلسة دفع سريعة
     cart = _get_cart(request, website)
-    subtotal = sum((float(i.get("price", 0)) * int(i.get("qty", 1) or 1)) for i in cart)
-    tax = round(subtotal * 0.15, 2)
-    total = round(subtotal + tax, 2)
+    subtotal = sum((float(i.get("price", 0))) for i in cart)
+    tax = round(subtotal * 1, 2)
+    total = round(subtotal, 2)
 
     from django.urls import reverse
     from urllib.parse import urlencode
-    params = urlencode({"amount": f"{total}", "currency": "sar", "slug": slug})
+    params = urlencode({"amount": f"{total}", "currency": "sar", "slug": slug, "email": meta.get("email", "")})
     return redirect(f"{reverse('payments:quick_checkout')}?{params}")
 
 @require_POST
