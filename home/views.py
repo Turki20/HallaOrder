@@ -219,3 +219,12 @@ def add_branch_view(request:HttpRequest):
     
     google_map_key = os.getenv('google_map_key', "")
     return render(request, 'home/add_branch.html', {'google_map_key':google_map_key})
+
+
+@login_required(login_url='/users/login/')
+@restaurant_owner_required
+def settings_view(request:HttpRequest):
+    context = {
+        "current_page": "home:settings",
+    }
+    return render(request, 'home/settings.html', context)
