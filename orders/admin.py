@@ -1,6 +1,6 @@
 # orders/admin.py
 from django.contrib import admin, messages
-from .models import Order, OrderItem, OrderStatus
+from .models import Order, OrderItem, OrderStatus, DineInDetails, DeliveryDetails, PickupDetails, PaymentMethod
 
 # ---- Inlines ----
 class OrderItemInline(admin.TabularInline):
@@ -87,3 +87,8 @@ class OrderItemAdmin(admin.ModelAdmin):
     raw_id_fields = ("order", "product")
     ordering = ("-id",)
 
+
+admin.site.register(DeliveryDetails)
+admin.site.register(DineInDetails)
+# admin.site.register(PaymentMethod)
+admin.site.register(PickupDetails)

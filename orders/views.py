@@ -100,7 +100,9 @@ def order_board(request, branch_id: int | None = None):
             messages.error(request, 'الفرع غير موجود الرجاء اختيار الفرع المناسب', 'alert-danger')
             return redirect('orders:order_board')
 
+    # نجلب الطلبات مع العميل والفرع، ونُحضّر الفواتير لتفادي استعلامات إضافية في القالب
     qs = (Order.objects.select_related("customer", "branch")
+                     .prefetch_related("invoices")
                      .filter(branch__in=branches)
                      .order_by("-created_at"))
     if active_branch:
@@ -121,7 +123,7 @@ def order_board(request, branch_id: int | None = None):
 def order_detail(request, pk: int):
     order = (
         Order.objects.select_related("customer", "branch")
-        .prefetch_related("items__product")
+        .prefetch_related("items__product", "invoices")
         .get(pk=pk)
     )
     return render(request, "orders/detail.html", {"order": order})

@@ -4,6 +4,7 @@ from .forms import RestaurantForm ,BranchForm
 from django.contrib.auth.models import User
 from django.contrib import messages
 from websites.models import Website
+from .forms import WebsiteForm
 from users.decorators import restaurant_owner_required
 from dotenv import load_dotenv
 import os
@@ -33,9 +34,19 @@ def restaurants_list(request):
     
     restaurant = Restaurant.objects.get(pk = request.user.restaurants.id)
     website = Website.objects.get(restaurant=restaurant)
+    
+    if request.method == 'POST':
+        form = WebsiteForm(request.POST, request.FILES, instance=website)
+        if form.is_valid():
+            form.save()
+            return redirect('restaurants')  # استبدل باسم URL المناسب
+    else:
+        form = WebsiteForm(instance=website)
+        
     context = {
         "restaurant": restaurant,
         'website': website,
+        'form': form,
         "current_page": "restaurants",  
     }
     return render(request, "restaurants/restaurant_list.html", context)
@@ -114,7 +125,8 @@ def branch_update(request, pk):
             return redirect('branches')
     else:
         form = BranchForm(instance=branch)
-    return render(request, "restaurants/Branch_Form.html", {"form": form, "title": "تعديل فرع"})
+    google_map_key = os.getenv('google_map_key', "")
+    return render(request, "restaurants/Branch_Form.html", {"form": form, "title": "تعديل فرع", 'google_map_key': google_map_key})
 
 # حذف فرع
 @restaurant_owner_required
@@ -124,3 +136,5 @@ def branch_delete(request, pk):
         branch.delete()
         return redirect('branches')
     return render(request, "restaurants/Branch_Confirm_Delete.html", {"branch": branch})
+
+

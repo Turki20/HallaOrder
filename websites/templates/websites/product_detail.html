@@ -30,47 +30,102 @@
 <div class="detail">
 
   <div class="media">
-    {% if p.image %}
-      <img src="{{ p.image.url }}" alt="{{ p.name }}">
-    {% else %}
-      <img src="{% static 'websites/placeholder.png' %}" alt="">
-    {% endif %}
+       <div class="product-card-full">
+  <!-- سلايدر الصور يغطي الكارت بالكامل -->
+  <div class="swiper product-swiper">
+    <div class="swiper-wrapper">
+      {% for image in p.images.all %}
+        <div class="swiper-slide">
+          {% if image.image %}
+            <img src="{{ image.image.url }}" alt="{{ p.name }}">
+          {% else %}
+            <img src="{% static 'websites/placeholder.png' %}" alt="">
+          {% endif %}
+          <!-- Overlay info -->
+          <div class="product-overlay">
+            <h3>{{ p.name }}</h3>
+            <p>{{ p.price }} ﷼</p>
+          </div>
+        </div>
+      {% endfor %}
+    </div>
+
+    <!-- أزرار التنقل -->
+    <div class="swiper-button-prev"></div>
+    <div class="swiper-button-next"></div>
+  </div>
+</div>
+
   </div>
 
+
   <div class="info">
+    <div>
+      <span class="badge bg-dark p-2">{{p.category}}</span>
+    </div>
     <div class="h">{{ p.name }}</div>
     <div class="price">SAR {{ p.price|floatformat:2 }}</div>
-
+    <div>
+      <p>
+        {{p.description}}
+      </p>
+    </div>
+    <hr>
     <form method="post" action="{% url 'websites:add_to_cart' website.slug p.id %}">
       {% csrf_token %}
 
-      <div class="group">
+      <div class="row p-2">
         <label class="muted" style="width:100%">الكمية</label>
-        <div class="qty">
-          <button type="button" id="minus">−</button>
-          <input type="number" id="qty" name="qty" value="1" min="1" inputmode="numeric" pattern="[0-9]*">
-          <button type="button" id="plus">+</button>
+        <div class="col-12">
+          <input type="number" class="form-control" id="qty" name="qty" value="1" min="1" inputmode="numeric" pattern="[0-9]*">
         </div>
       </div>
 
-      <!-- الحجم اختياري -->
-      <div class="group">
-        <span class="muted" style="width:100%">الحجم (اختياري)</span>
-        <label class="pill"><input type="radio" name="size" value="صغير"> صغير</label>
-        <label class="pill"><input type="radio" name="size" value="وسط"> وسط</label>
-        <label class="pill"><input type="radio" name="size" value="كبير"> كبير</label>
-      </div>
+      {% for options in p.option_groups.all %}
+        {% if options.selection_type == 'SINGLE' %}
+        <div class="row w-100 p-2 mt-2 g-2">
+          <span class="muted" style="width:100%">{{options.name}}{% if options.is_required %}
+            <span class="badge bg-danger">اجباري</span>
+          {% endif %}</span>
+          {% for option in options.options.all %}
+            <label class="pill d-flex" style="justify-content: space-between;">
+              <div>
+                <input type="radio" name="{{options.name}}" value="{{option.name}}" {% if forloop.first %}required{% endif %}><span>{{option.name}}</span>
+              </div>
+              {% if option.price_adjustment > 0 %}
+                <span>{{option.price_adjustment}}+</span>
+              {% endif %}
+            </label>
+          {% endfor %}
+        </div>
+        {% endif %}
+        {% if options.selection_type == 'MULTIPLE' %}
+        <div class="row w-100 p-2 mt-2 g-2">
+            <span class="muted" style="width:100%">{{options.name}}{% if not options.is_required %}
+            <span class="badge bg-light text-dark">اختياري</span>
+          {% endif %}</span>
+          {% for option in options.options.all %}
+            <label class="pill d-flex" style="justify-content: space-between;">
+              <div>
+                <input type="checkbox" name="{{options.name}}" value="{{option.name}}">
+                <span>{{option.name}}</span>
+              </div>
+              {% if option.price_adjustment > 0 %}
+                <span>{{option.price_adjustment}}+</span>
+              {% endif %}
+            </label>
+          {% endfor %}
+        </div>
+        {% endif %}
+      {% endfor %}
 
-      <div class="group">
-        <span class="muted" style="width:100%">إضافات (اختياري)</span>
-        <label class="pill"><input type="checkbox" name="addons" value="جبنة"> جبنة</label>
-        <label class="pill"><input type="checkbox" name="addons" value="صوص"> صوص</label>
-        <label class="pill"><input type="checkbox" name="addons" value="مخلل"> مخلل</label>
-      </div>
+      <hr>
 
-      <div class="actions">
-        <button type="submit" class="btn">أضف للسلة</button>
-        <a class="btn-light" href="{% url 'websites:menu' website.slug %}">رجوع للقائمة</a>
+      <div class="row w-100 p-2 mt-2 g-2">
+        <div class="col">
+          <button type="submit" class="btn add-btn">أضف للسلة</button>
+          <a class="btn-light" href="{% url 'websites:menu' website.slug %}">رجوع للقائمة</a>
+        </div>
       </div>
     </form>
   </div>
@@ -91,5 +146,99 @@
   plus && plus.addEventListener('click', ()=>{ clamp(); qty.value = parseInt(qty.value,10)+1; });
   qty && qty.addEventListener('change', clamp);
 })();
+
 </script>
+
+<script>
+  document.addEventListener('DOMContentLoaded', function () {
+    const swipers = document.querySelectorAll('.product-swiper');
+
+    swipers.forEach(function (el) {
+      new Swiper(el, {
+        loop: true,
+        navigation: {
+          nextEl: el.querySelector('.swiper-button-next'),
+          prevEl: el.querySelector('.swiper-button-prev'),
+        },
+      });
+    });
+  });
+</script>
+
+
+
+<style>
+  .product-card-full {
+  width: 100%;
+  aspect-ratio: 1 / 1.2; /* أو استخدم height ثابت */
+  border-radius: 12px;
+  overflow: hidden;
+  position: relative;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.product-swiper {
+  width: 100%;
+  height: 100%;
+  position: relative;
+}
+
+.product-swiper .swiper-slide {
+  width: 100%;
+  height: 100%;
+  position: relative;
+}
+
+.product-swiper .swiper-slide img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+/* Overlay info */
+.product-overlay {
+  position: absolute;
+  bottom: 0;
+  width: 100%;
+  background: linear-gradient(to top, rgba(0,0,0,0.6), transparent);
+  color: #fff;
+  padding: 16px;
+  box-sizing: border-box;
+}
+
+.product-overlay h3 {
+  margin: 0;
+  font-size: 16px;
+  font-weight: bold;
+}
+
+.product-overlay p {
+  margin: 4px 0 0;
+  font-size: 14px;
+  color: #ffd9c0;
+}
+
+/* أزرار التنقل */
+.product-swiper .swiper-button-next,
+.product-swiper .swiper-button-prev {
+  color: #fff;
+  background: rgba(0,0,0,0.3);
+  padding: 6px;
+  border-radius: 50%;
+  width: 28px;
+  height: 28px;
+  top: 50%;
+  transform: translateY(-50%);
+}
+
+.product-swiper .swiper-button-next {
+  right: 10px;
+}
+
+.product-swiper .swiper-button-prev {
+  left: 10px;
+}
+
+</style>
 {% endblock %}

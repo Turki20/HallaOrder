@@ -63,20 +63,28 @@
                     </a>
                 </li>
                 <li class="{% if request.path == '/users/all_users/' %}active{% endif %}">
-                    <a href="{% url 'users:all_users' %}"><i class="fa-solid fa-users"></i>الموظفين</a>
+                    <a href="{% url 'users:all_users' %}"><i class="fa-solid fa-receipt"></i>الموظفين</a>
                 </li>
-                <!-- <li class="{% if current_page == 'subscription_plans' %}active{% endif %}">
-                    <a href="{% url 'subscription_plans' %}"><i class="fa-solid fa-file"></i>الباقات</a>
-                </li> -->
-                <!-- <li data-page="products"><a href=""><i class="fa-solid fa-chart-pie"></i>التقارير</a></li>
-                {% endif %}
-            </ul> -->
-                <li
-                    class="{% if current_page == 'reports:sales' or '/reports/sales/' in request.path %}active{% endif %}">
+
+                <li class="{% if request.path == '/invoices_dashboard/' %}active{% endif %}">
+                    <a href="{% url 'payments:invoices_dashboard' %}"><i class="fa-solid fa-users"></i>الفواتير</a>
+                </li>
+                <li class="{% if current_page == 'payments:wallet' %}active{% endif %}">
+                    <a href="{% url 'payments:wallet' %}"><i class="fa-solid fa-wallet"></i>المحفظة</a>
+                </li>
+              
+                <li class="{% if current_page == 'reports:sales' or '/reports/sales/' in request.path %}active{% endif %}">
                     <a href="{% url 'reports:sales' %}">
                         <i class="fa-solid fa-chart-line"></i> تقارير المبيعات
                     </a>
                 </li>
+                <li class="{% if current_page == 'home:settings' %}active{% endif %}">
+                    <a href="{% url 'home:settings' %}"><i class="fa-solid fa-cog"></i>الإعدادات</a>
+                </li>
+
+                {% endif %}
+            
+               
 
 
 
@@ -87,6 +95,15 @@
                 <span>Dashboard</span>
             </header>
             <div id="mainContent">
+                {% if messages %}
+                <div class="p-3">
+                    {% for message in messages %}
+                    <div class="alert {{ message.tags }}">
+                        <span>{{ message }}</span>
+                    </div>
+                    {% endfor %}
+                </div>
+                {% endif %}
                 {% block dashboard_content %}
                 <!-- <div class="row p-4 g-4">
                     <div class="col-12 col-md-6">

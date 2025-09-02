@@ -1,4 +1,4 @@
-from django.shortcuts import render, redirect
+from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.models import User
 from django.http import HttpRequest
 from .models import Profile
@@ -9,6 +9,9 @@ from django.contrib.auth.decorators import login_required
 from restaurants.models import Restaurant, Branch
 # Create your views here.
 from users.decorators import restaurant_owner_required
+from websites.models import Website
+
+
 
 def sign_up_view(request:HttpRequest):
     if request.method == "POST":
@@ -204,3 +207,85 @@ def delete_user(request):
     else:
         return redirect('users:all_users')
 
+
+
+def customer_sign_up(request:HttpRequest, slug):
+    website = get_object_or_404(Website.objects.select_related("restaurant"), slug=slug)
+    if request.method == "POST":
+        username = request.POST.get("username")
+        email = request.POST.get("email")
+        first_name = request.POST.get("first_name")
+        last_name = request.POST.get("last_name")
+        password1 = request.POST.get("password1")
+        password2 = request.POST.get("password2")
+
+        phone = request.POST.get("phone")
+
+        if password1 != password2:
+            messages.error(request, "كلمتا المرور غير متطابقتين.", 'alert-danger')
+            return redirect("users:customer_sign_up", slug)
+
+        try:
+            with transaction.atomic():
+                user = User.objects.create_user(
+                    username=username,
+                    email=email,
+                    first_name=first_name,
+                    last_name=last_name,
+                    password=password1,
+                )
+
+                profile = Profile.objects.create(
+                    phone=phone,
+                    role='Customer',
+                    user=user  
+                )
+
+                messages.success(request, "تم إنشاء الحساب بنجاح", 'alert-success')
+                return redirect("users:customer_sign_up", slug)
+
+        except Exception as e:
+            messages.error(request, f"حدث خطأ: {e}", 'alert-danger')
+            return redirect("users:customer_sign_up", slug)
+
+    return render(request, 'websites/signup.html', {'website':website})
+
+
+def customer_login(request:HttpRequest, slug):
+    website = get_object_or_404(Website.objects.select_related("restaurant"), slug=slug)
+    
+    if request.method == "POST":
+        username = request.POST.get("username")
+        password = request.POST.get("password")
+
+        user = authenticate(request, username=username, password=password)
+
+        if user is not None:
+            login(request, user)
+            # messages.success(request, f"مرحباً {user.username}", 'alert-success')
+            try:
+                if user.profile.role == 'Cashier':
+                    return redirect('orders:order_board')
+                
+                if user.profile.role == 'Customer':
+                    return redirect('websites:menu', slug)
+                
+                if user.restaurants:
+                    return redirect('reports:dashboard')
+                else:
+                    return redirect('users:customer_login', slug)
+                
+            except Exception as e:
+                return redirect('websites:menu', slug)
+        else:
+            messages.error(request, "اسم المستخدم أو كلمة المرور غير صحيحة", 'alert-danger')
+            return redirect('users:customer_login', slug)
+        
+        
+    return render(request, 'websites/login.html', {"website":website})
+
+
+def customer_logout_view(request:HttpRequest, slug):
+    if request.user.is_authenticated:
+        logout(request)
+    return redirect("websites:menu", slug)

@@ -1,7 +1,5 @@
 from django.shortcuts import render, get_object_or_404, redirect
-from django.http import HttpResponse, Http404
-from django.apps import apps
-from django.core.exceptions import FieldError
+from django.http import HttpResponse
 from django.contrib.auth.decorators import login_required
 from django.views.decorators.http import require_POST
 from menu.models import Product
@@ -36,14 +34,11 @@ def _base_ctx(request, website, **extra):
         "website": website,
         "cart": cart,
         "cart_count": cart_count,
+        # يوفر آخر رقم طلب لتمكين رابط العودة إلى الفاتورة
+        "last_order_id": request.session.get("last_order_id"),
     }
     ctx.update(extra)
     return ctx
-
-
-# صفحة تحويل سريعة إلى القائمة الافتراضية للموقع
-def site_home(request, slug):
-    return redirect("websites:menu", slug=slug)
 
 
 # =============================
@@ -80,32 +75,89 @@ def product_detail(request, slug, product_id):
 # =============================
 # عمليات السلة
 # =============================
-
 @require_POST
 def add_to_cart(request, slug, product_id):
-    # إضافة منتج للسلة مع الكمية والخيارات (الحجم/الإضافات)
+    # جلب الموقع والمنتج
     website = get_object_or_404(Website, slug=slug)
-    p = Product.objects.get(id=product_id)
+    p = get_object_or_404(Product, id=product_id)
     cart = _get_cart(request, website)
 
+    # الكمية
     qty = request.POST.get("qty", "1")
     try:
         qty = max(int(qty), 1)
     except (TypeError, ValueError):
         qty = 1
 
+    # السعر الأساسي
+    final_price = float(p.price)
+
+    # الخيارات
+    selected_options = {}
+    for group in p.option_groups.all():
+        if group.selection_type == "SINGLE":
+            value = request.POST.get(group.name, "")
+            if value:
+                selected_options[group.name] = value
+                # حساب تعديل السعر
+                option_obj = group.options.filter(name=value).first()
+                if option_obj and option_obj.price_adjustment:
+                    final_price += float(option_obj.price_adjustment)
+
+        elif group.selection_type == "MULTIPLE":
+            values = request.POST.getlist(group.name)
+            if values:
+                selected_options[group.name] = values
+                # حساب تعديل السعر لكل خيار
+                for val in values:
+                    option_obj = group.options.filter(name=val).first()
+                    if option_obj and option_obj.price_adjustment:
+                        final_price += float(option_obj.price_adjustment)
+
+    # ضرب الكمية
+    total_price = final_price * qty
+
+    # إضافة المنتج للسلة
     item = {
         "id": p.id,
         "name": str(p.name),
-        "price": str(p.price),
+        "base_price": float(p.price),
+        "final_price": final_price,  # سعر المنتج مع الخيارات (لكل قطعة)
+        "price": total_price,  # السعر النهائي × الكمية
         "qty": qty,
-        "size": request.POST.get("size", ""),
-        "addons": request.POST.getlist("addons"),
+        "options": selected_options,
     }
+
     cart.append(item)
     _set_cart(request, website, cart)
 
     return redirect("websites:menu", slug=slug)
+
+# @require_POST
+# def add_to_cart(request, slug, product_id):
+#     # إضافة منتج للسلة مع الكمية والخيارات (الحجم/الإضافات)
+#     website = get_object_or_404(Website, slug=slug)
+#     p = Product.objects.get(id=product_id)
+#     cart = _get_cart(request, website)
+
+#     qty = request.POST.get("qty", "1")
+#     try:
+#         qty = max(int(qty), 1)
+#     except (TypeError, ValueError):
+#         qty = 1
+
+#     item = {
+#         "id": p.id,
+#         "name": str(p.name),
+#         "price": str(p.price),
+#         "qty": qty,
+#         "size": request.POST.get("size", ""),
+#         "addons": request.POST.getlist("addons"),
+#     }
+#     cart.append(item)
+#     _set_cart(request, website, cart)
+
+#     return redirect("websites:menu", slug=slug)
 
 
 def cart_view(request, slug):
@@ -115,9 +167,9 @@ def cart_view(request, slug):
     meta = _get_cart_meta(request, website)
 
     # حساب الإجمالي والضريبة (15%)
-    subtotal = sum((float(i.get("price", 0)) * int(i.get("qty", 1) or 1)) for i in cart)
-    tax_rate = 0.15
-    tax = round(subtotal * tax_rate, 2)
+    subtotal = sum((float(i.get("price", 0))) for i in cart)
+    tax_rate = 1 #0.15
+    tax = 0 #round(subtotal * tax_rate, 2)
     total = round(subtotal + tax, 2)
 
     return render(
@@ -195,7 +247,7 @@ def _meta_key(website_id: int) -> str:
 
 def _get_cart_meta(request, website):
     # قراءة بيانات العميل المحفوظة (اسم/جوال/ملاحظات)
-    return request.session.get(_meta_key(website.id), {"name": "", "phone": "", "notes": ""})
+    return request.session.get(_meta_key(website.id), {"name": "", "phone": "", "notes": "", 'email': ''})
 
 
 def _set_cart_meta(request, website, value):
@@ -213,6 +265,7 @@ def save_cart_meta(request, slug):
         "name": request.POST.get("name", "").strip(),
         "phone": request.POST.get("phone", "").strip(),
         "notes": request.POST.get("notes", "").strip(),
+        "email": request.POST.get("email", "").strip(),
     })
     _set_cart_meta(request, website, meta)
 
@@ -222,11 +275,52 @@ def save_cart_meta(request, slug):
 
     # حساب إجمالي الفاتورة ثم إنشاء جلسة دفع سريعة
     cart = _get_cart(request, website)
-    subtotal = sum((float(i.get("price", 0)) * int(i.get("qty", 1) or 1)) for i in cart)
-    tax = round(subtotal * 0.15, 2)
-    total = round(subtotal + tax, 2)
+    subtotal = sum((float(i.get("price", 0))) for i in cart)
+    tax = round(subtotal * 1, 2)
+    total = round(subtotal, 2)
 
     from django.urls import reverse
     from urllib.parse import urlencode
-    params = urlencode({"amount": f"{total}", "currency": "sar", "slug": slug})
+    params = urlencode({"amount": f"{total}", "currency": "sar", "slug": slug, "email": meta.get("email", "")})
     return redirect(f"{reverse('payments:quick_checkout')}?{params}")
+
+@require_POST
+def save_dinein_details(request):
+    dine_data = {
+        'order_method': 'dine_in',
+        'dinein': {
+            'number_of_people': request.POST.get('number_of_people'),
+            'branch_id': request.POST.get('branch_id'),
+            'reservation_time': request.POST.get('reservation_time', ''),
+            'special_requests': request.POST.get('special_requests', ''),
+        }
+    }
+    request.session['order_data'] = dine_data
+    return redirect(request.META.get('HTTP_REFERER', '/'))  # أو إلى صفحة المراجعة
+
+
+@require_POST
+def save_pickup_details(request):
+    pickup_data = {
+        'order_method': 'pickup',
+        'pickup': {
+            'branch_id': request.POST.get('branch_id'),
+            'pickup_time': request.POST.get('pickup_time', ''),
+        }
+    }
+    request.session['order_data'] = pickup_data
+    return redirect(request.META.get('HTTP_REFERER', '/'))
+
+
+@require_POST
+def save_delivery_details(request):
+    delivery_data = {
+        'order_method': 'delivery',
+        'delivery': {
+            'address': request.POST.get('address'),
+            'city': request.POST.get('city'),
+            'delivery_time': request.POST.get('delivery_time', ''),
+        }
+    }
+    request.session['order_data'] = delivery_data
+    return redirect(request.META.get('HTTP_REFERER', '/'))
