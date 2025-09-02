@@ -1,0 +1,128 @@
+{% extends "home/base.html" %}
+{% load static %}
+
+{% block style %}
+<style>
+  #dashbaord { display: none; }
+  .services-container { max-width: 1100px; margin: 0 auto; }
+  .intro-card { border-radius: 1rem; border: 1px solid #e9ecef; background: var(--white_color); }
+  .service-card { border: 1px solid #e9ecef; border-radius: 1rem; background: var(--white_color); height: 100%; transition: transform .2s ease, box-shadow .2s ease; }
+  .service-card:hover { transform: translateY(-3px); box-shadow: 0 10px 24px rgba(0,0,0,0.06); }
+  .service-icon { width: 60px; height: 60px; border-radius: 50%; background: rgba(1, 167, 194, 0.12); color: var(--light_blue_color); display: inline-flex; align-items: center; justify-content: center; font-size: 28px; }
+  .service-card h5 { color: var(--dark_blue_color); margin-bottom: 8px; }
+  .service-card p { color: #3a3a3a; margin: 0; }
+  .why-card, .how-card { border-radius: 1rem; border: 1px solid #e9ecef; background: var(--white_color); }
+  .title { color: var(--dark_blue_color); }
+</style>
+{% endblock style %}
+
+{% block title %}خدماتنا{% endblock title %}
+
+{% block content %}
+{% include "home/header_platform.html" %}
+
+<div class="services-container p-4">
+  <div class="card intro-card mb-4">
+    <div class="card-body p-4">
+      <h1 class="mb-3 title">خدماتنا</h1>
+      <p class="lead mb-0">حلول متكاملة لإدارة المطاعم من الطلب حتى التحصيل.<br>منصة واحدة لإنشاء المتجر، إدارة القوائم والطلبات، المدفوعات، والتقارير — بدون عمولة على المبيعات.</p>
+    </div>
+  </div>
+
+  <div class="row g-3">
+    <div class="col-12 col-md-6 col-lg-4">
+      <div class="service-card p-3">
+        <div class="d-flex align-items-center gap-2 mb-2">
+          <span class="service-icon"><i class="bi bi-shop-window"></i></span>
+          <h5 class="mb-0">متجر إلكتروني جاهز للمطعم</h5>
+        </div>
+        <p>نطاق مخصص ورابط قصير وصفحات عربية.</p>
+      </div>
+    </div>
+
+    <div class="col-12 col-md-6 col-lg-4">
+      <div class="service-card p-3">
+        <div class="d-flex align-items-center gap-2 mb-2">
+          <span class="service-icon"><i class="bi bi-list-check"></i></span>
+          <h5 class="mb-0">إدارة القوائم والإضافات</h5>
+        </div>
+        <p>أصناف، خيارات، أحجام، إضافات وأسعار ذكية.</p>
+      </div>
+    </div>
+
+
+    <div class="col-12 col-md-6 col-lg-4">
+      <div class="service-card p-3">
+        <div class="d-flex align-items-center gap-2 mb-2">
+          <span class="service-icon"><i class="bi bi-display"></i></span>
+          <h5 class="mb-0">إدارة الطلبات وشاشة المطبخ (KDS)</h5>
+        </div>
+        <p>لوحة للكاشير وتتبع الحالة لحظيًا حتى التسليم.</p>
+      </div>
+    </div>
+
+    <div class="col-12 col-md-6 col-lg-4">
+      <div class="service-card p-3">
+        <div class="d-flex align-items-center gap-2 mb-2">
+          <span class="service-icon"><i class="bi bi-credit-card"></i></span>
+          <h5 class="mb-0">مدفوعات إلكترونية آمنة</h5>
+        </div>
+        <p>بطاقة/مدى/Apple Pay مع محفظة وتسوية أسبوعية وزر سحب الرصيد.</p>
+      </div>
+    </div>
+
+
+
+
+
+    <div class="col-12 col-md-6 col-lg-4">
+      <div class="service-card p-3">
+        <div class="d-flex align-items-center gap-2 mb-2">
+          <span class="service-icon"><i class="bi bi-graph-up-arrow"></i></span>
+          <h5 class="mb-0">تقارير وتحليلات</h5>
+        </div>
+        <p>مبيعات، متوسط الطلب، الأصناف الأكثر بيعًا، وأوقات الذروة.</p>
+      </div>
+    </div>
+
+    <div class="col-12 col-md-6 col-lg-4">
+      <div class="service-card p-3">
+        <div class="d-flex align-items-center gap-2 mb-2">
+          <span class="service-icon"><i class="bi bi-shield-lock"></i></span>
+          <h5 class="mb-0">صلاحيات المستخدمين</h5>
+        </div>
+        <p>مالك/مدير/كاشير/مطبخ وتتبع النشاط.</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="row g-3 mt-1">
+    <div class="col-12 col-lg-6">
+      <div class="why-card p-4 h-100">
+        <h3 class="mb-3 title">لماذا HalaOrder؟</h3>
+        <ul class="mb-0" style="padding-inline-start:1.1rem;">
+          <li>بدون عمولة على المبيعات</li>
+          <li>انطلاق سريع خلال يوم واحد</li>
+          <li>دعم عربي وفريق مساندة فعّال</li>
+          <li>أمان واستضافة موثوقة مع نسخ احتياطي</li>
+          <li>تصميم سريع الاستجابة وتجربة سلسة للعملاء</li>
+        </ul>
+      </div>
+    </div>
+    <div class="col-12 col-lg-6">
+      <div class="how-card p-4 h-100">
+        <h3 class="mb-3 title">كيف تبدأ؟</h3>
+        <ol class="mb-0" style="padding-inline-start:1.1rem;">
+          <li>سجّل وأنشئ هوية المطعم</li>
+          <li>أضف الفروع والقائمة</li>
+          <li>فعّل بوابة الدفع واضبط التوصيل</li>
+          <li>انشر الرابط واستقبل الطلبات</li>
+        </ol>
+      </div>
+    </div>
+  </div>
+</div>
+
+{% endblock content %}
+
+

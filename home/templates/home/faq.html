@@ -1,0 +1,209 @@
+{% extends "home/base.html" %}
+{% load static %}
+
+{% block style %}
+<style>
+  #dashbaord { display: none; }
+  .faq-container { max-width: 1100px; margin: 0 auto; }
+  .card-soft { border-radius: 1rem; border: 1px solid #e9ecef; background: var(--white_color); }
+  .title { color: var(--dark_blue_color); }
+  .nav-pills .nav-link { color: var(--dark_blue_color); }
+  .nav-pills .nav-link.active { background: var(--light_blue_color); color: var(--white_color); }
+</style>
+{% endblock style %}
+
+{% block title %}الأسئلة الشائعة{% endblock title %}
+
+{% block content %}
+{% include "home/header_platform.html" %}
+
+<div class="faq-container p-4">
+  <div class="card card-soft mb-4">
+    <div class="card-body p-4">
+      <h1 class="title mb-3">الأسئلة الشائعة</h1>
+      <p class="mb-0">إجابات مختصرة عن أكثر الأسئلة شيوعًا حول HalaOrder.</p>
+    </div>
+  </div>
+
+  <div class="card card-soft">
+    <div class="card-body p-4">
+      <ul class="nav nav-pills mb-3" id="faqTabs" role="tablist">
+        <li class="nav-item"><button class="nav-link active" data-bs-toggle="tab" data-bs-target="#tab-general" type="button">عام</button></li>
+        <li class="nav-item"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab-store" type="button">المتجر والقوائم</button></li>
+        <li class="nav-item"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab-orders" type="button">الطلبات وKDS</button></li>
+        <li class="nav-item"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab-payments" type="button">المدفوعات والمحفظة</button></li>
+        <li class="nav-item"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab-delivery" type="button">التوصيل والاستلام</button></li>
+        <li class="nav-item"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab-accounts" type="button">الحساب والصلاحيات</button></li>
+        <li class="nav-item"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab-pricing" type="button">التسعير والاشتراك</button></li>
+        <li class="nav-item"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab-security" type="button">الأمان والخصوصية</button></li>
+        <li class="nav-item"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab-integrations" type="button">التكاملات وAPI</button></li>
+        <li class="nav-item"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab-support" type="button">الدعم</button></li>
+      </ul>
+
+      <div class="tab-content">
+        <div class="tab-pane fade show active" id="tab-general">
+          <div class="row g-3">
+            <div class="col-12 col-md-6">
+              <div class="card card-soft h-100"><div class="card-body">
+                <h5 class="title mb-2">ما هي HalaOrder؟</h5>
+                <p class="mb-0">منصة متعددة المستأجرين مبنية بـ Django تمكّن المطاعم من إنشاء متجر إلكتروني، إدارة القوائم والطلبات والمدفوعات ولوحات تحكم للمالك والموظفين.</p>
+              </div></div>
+            </div>
+            <div class="col-12 col-md-6">
+              <div class="card card-soft h-100"><div class="card-body">
+                <h5 class="title mb-2">هل تأخذون عمولة على المبيعات؟</h5>
+                <p class="mb-0">لا، بدون عمولة. قد تُطبق رسوم على بوابة الدفع أو التحويل البنكي بحسب مزوّد الخدمة.</p>
+              </div></div>
+            </div>
+            <div class="col-12">
+              <div class="card card-soft h-100"><div class="card-body">
+                <h5 class="title mb-2">هل أحتاج استضافة منفصلة؟</h5>
+                <p class="mb-0">لا. الاستضافة وإدارة الخوادم ضمن الاشتراك.</p>
+              </div></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="tab-pane fade" id="tab-store">
+          <div class="row g-3">
+            <div class="col-12 col-md-6">
+              <div class="card card-soft h-100"><div class="card-body">
+                <h5 class="title mb-2">كيف أضيف الأصناف والإضافات؟</h5>
+                <p class="mb-0">من لوحة المطعم → القوائم → أضف فئة/طبق، ثم أضف الخيارات والإضافات (أحجام/إضافات وأسعار).</p>
+              </div></div>
+            </div>
+            <div class="col-12 col-md-6">
+              <div class="card card-soft h-100"><div class="card-body">
+                <h5 class="title mb-2">هل يدعم النظام لغتين؟</h5>
+                <p class="mb-0">نعم، واجهة RTL عربية + إنجليزية، ويمكنك إدخال أسماء/أوصاف باللغتين.</p>
+              </div></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="tab-pane fade" id="tab-orders">
+          <div class="row g-3">
+            <div class="col-12 col-md-6">
+              <div class="card card-soft h-100"><div class="card-body">
+                <h5 class="title mb-2">ما حالات الطلب؟</h5>
+                <p class="mb-0">جديد → قيد التحضير → جاهز → قيد التوصيل/الاستلام → مكتمل (مع إمكانية الإلغاء والملاحظات).</p>
+              </div></div>
+            </div>
+            <div class="col-12 col-md-6">
+              <div class="card card-soft h-100"><div class="card-body">
+                <h5 class="title mb-2">هل توجد شاشة مطبخ (KDS)؟</h5>
+                <p class="mb-0">نعم، شاشة لحظية بالمطبخ لعرض وترتيب الطلبات حسب الوقت والأولوية.</p>
+              </div></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="tab-pane fade" id="tab-payments">
+          <div class="row g-3">
+            <div class="col-12 col-md-6">
+              <div class="card card-soft h-100"><div class="card-body">
+                <h5 class="title mb-2">كيف أستقبل المدفوعات؟</h5>
+                <p class="mb-0">بطاقات، مدى، Apple Pay (حسب مزوّد الدفع المفعّل).</p>
+              </div></div>
+            </div>
+            <div class="col-12 col-md-6">
+              <div class="card card-soft h-100"><div class="card-body">
+                <h5 class="title mb-2">متى تصل أرباحي؟</h5>
+                <p class="mb-0">تسوية أسبوعية إلى محفظتك داخل المنصة، مع زر سحب الرصيد للتحويل للحساب البنكي.</p>
+              </div></div>
+            </div>
+            <div class="col-12">
+              <div class="card card-soft h-100"><div class="card-body">
+                <h5 class="title mb-2">هل يمكن تتبع الفواتير والعمليات؟</h5>
+                <p class="mb-0">نعم، من صفحة المحفظة ستجد الرصيد، التحويلات، والعمليات مع إمكانية التصدير CSV.</p>
+              </div></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="tab-pane fade" id="tab-delivery">
+          <div class="row g-3">
+            <div class="col-12">
+              <div class="card card-soft h-100"><div class="card-body">
+                <h5 class="title mb-2">كيف أضبط رسوم ومناطق التوصيل؟</h5>
+                <p class="mb-0">من الإعدادات → التوصيل، حدّد المناطق ونطاقات الأسعار وزمن التوصيل وطرق الاستلام من الفرع.</p>
+              </div></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="tab-pane fade" id="tab-accounts">
+          <div class="row g-3">
+            <div class="col-12">
+              <div class="card card-soft h-100"><div class="card-body">
+                <h5 class="title mb-2">هل يمكن تحديد أدوار المستخدمين؟</h5>
+                <p class="mb-0">نعم (مالك، مدير، كاشير، مطبخ)، مع صلاحيات مخصّصة وتتبع النشاط.</p>
+              </div></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="tab-pane fade" id="tab-pricing">
+          <div class="row g-3">
+            <div class="col-12 col-md-6">
+              <div class="card card-soft h-100"><div class="card-body">
+                <h5 class="title mb-2">هل يوجد تجريب مجاني؟</h5>
+                <p class="mb-0">يمكن توفير فترة تجريبية مبكرة لعملائنا المؤسسين (Early Adopters).</p>
+              </div></div>
+            </div>
+            <div class="col-12 col-md-6">
+              <div class="card card-soft h-100"><div class="card-body">
+                <h5 class="title mb-2">كيف ألغِي أو أعدّل خطتي؟</h5>
+                <p class="mb-0">من الاشتراكات داخل لوحة التحكم في أي وقت، ويطبّق التغيير على دورة الفوترة القادمة.</p>
+              </div></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="tab-pane fade" id="tab-security">
+          <div class="row g-3">
+            <div class="col-12">
+              <div class="card card-soft h-100"><div class="card-body">
+                <h5 class="title mb-2">أين تُحفظ البيانات؟ وهل يوجد نسخ احتياطي؟</h5>
+                <p class="mb-0">تُحفظ على خوادم آمنة مع نسخ احتياطي دوري وتشفير أثناء النقل (HTTPS).</p>
+              </div></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="tab-pane fade" id="tab-integrations">
+          <div class="row g-3">
+            <div class="col-12 col-md-6">
+              <div class="card card-soft h-100"><div class="card-body">
+                <h5 class="title mb-2">ما التكاملات المتاحة؟</h5>
+                <p class="mb-0">بوابات دفع وشحن، وإمكانية التكامل عبر API (حسب الخطة).</p>
+              </div></div>
+            </div>
+            <div class="col-12 col-md-6">
+              <div class="card card-soft h-100"><div class="card-body">
+                <h5 class="title mb-2">هل يمكن التصدير؟</h5>
+                <p class="mb-0">نعم، تقارير المبيعات والطلبات بصيغ CSV/Excel.</p>
+              </div></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="tab-pane fade" id="tab-support">
+          <div class="row g-3">
+            <div class="col-12">
+              <div class="card card-soft h-100"><div class="card-body">
+                <h5 class="title mb-2">كيف أتواصل مع الدعم؟</h5>
+                <p class="mb-0">من داخل لوحة التحكم → مركز المساعدة، أو عبر البريد. يتوفر دعم عربي.</p>
+              </div></div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+</div>
+
+{% endblock content %}
+
+

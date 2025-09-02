@@ -1,0 +1,44 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+  <meta charset="utf-8" />
+  <body style="font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial;color:#111;">
+    <div style="max-width:640px;margin:auto;border:1px solid #eee;border-radius:10px;padding:16px;">
+      <h2 style="margin-top:0;margin-bottom:8px;">فاتورة الطلب #{{ order.id }}</h2>
+      <p style="margin:0 0 12px 0;">شكرًا لطلبك من HalaOrder. فيما يلي تفاصيل فاتورتك:</p>
+      <div style="background:#f8f9fa;border:1px solid #eee;border-radius:8px;padding:12px;margin-bottom:12px;">
+        <div>الاسم: {{ invoice.customer_name|default:"-" }}</div>
+        <div>الهاتف: {{ invoice.customer_phone|default:"-" }}</div>
+        <div>المبلغ الإجمالي: SAR {{ invoice.total_amount }}</div>
+        <div>حالة الطلب: {{ order.get_status_display|default:order.status }}</div>
+        <div>تاريخ الطلب: {{ order.created_at|date:"Y-m-d H:i" }}</div>
+      </div>
+      <h3 style="margin:12px 0 8px 0;">العناصر</h3>
+      <table style="width:100%;border-collapse:collapse;">
+        <thead>
+          <tr>
+            <th style="text-align:right;border-bottom:1px solid #eee;padding:6px;">العنصر</th>
+            <th style="text-align:right;border-bottom:1px solid #eee;padding:6px;">الكمية</th>
+            <th style="text-align:right;border-bottom:1px solid #eee;padding:6px;">السعر</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% with rows=items|default:order.items.all %}
+          {% for it in rows %}
+          <tr>
+            <td style="padding:6px;border-bottom:1px solid #f1f1f1;">{{ it.product.name }}</td>
+            <td style="padding:6px;border-bottom:1px solid #f1f1f1;">{{ it.quantity }}</td>
+            <td style="padding:6px;border-bottom:1px solid #f1f1f1;">SAR {{ it.product.price|floatformat:2 }}</td>
+          </tr>
+          {% empty %}
+          <tr><td colspan="3" style="padding:6px;">لا توجد عناصر</td></tr>
+          {% endfor %}
+          {% endwith %}
+        </tbody>
+      </table>
+      <p style="margin-top:12px;">في حال وجود أي استفسارات، يمكنك الرد على هذه الرسالة.</p>
+      <p style="color:#6b7280;">مع التحية، فريق HalaOrder</p>
+    </div>
+  </body>
+</html>
+
+

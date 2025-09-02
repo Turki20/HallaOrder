@@ -1,0 +1,71 @@
+{% extends "home/base.html" %}
+{% load static %}
+
+{% block style %}
+<style>
+  #dashbaord { display: none; }
+  .clients-container { max-width: 1100px; margin: 0 auto; }
+  .card-soft { border-radius: 1rem; border: 1px solid #e9ecef; background: var(--white_color); }
+  .badge-soft { background: rgba(1,167,194,0.1); color: var(--light_blue_color); border-radius: .75rem; }
+  .title { color: var(--dark_blue_color); }
+  .sector-badge { background: rgba(255,175,0,0.12); color: #8a5a00; border-radius: .75rem; }
+</style>
+{% endblock style %}
+
+{% block title %}عملاؤنا{% endblock title %}
+
+{% block content %}
+{% include "home/header_platform.html" %}
+
+<div class="clients-container p-4">
+  <div class="card card-soft mb-4">
+    <div class="card-body p-4">
+      <h1 class="title mb-3">عملاؤنا</h1>
+      <p class="lead mb-0">
+        نحن في <strong>HalaOrder</strong> نبدأ مشوارنا بدعم المطاعم الطموحة التي تبحث عن حلول رقمية سهلة وسريعة.
+        نعمل حاليًا مع مجموعة من العملاء الأوائل (Early Adopters)، ونرحّب بانضمام شركاء جدد ليكونوا جزءًا من التجربة من اليوم الأول.
+      </p>
+    </div>
+  </div>
+
+  <div class="row g-3">
+    <div class="col-12 col-lg-8">
+      <div class="card card-soft h-100">
+        <div class="card-body p-4">
+          <div class="d-flex align-items-center justify-content-between mb-2">
+            <h3 class="title mb-0">برنامج العملاء المؤسسين (Early Adopters)</h3>
+            <span class="badge badge-soft px-3 py-2">حصري الآن</span>
+          </div>
+          <ul class="mb-3" style="padding-inline-start:1.1rem;">
+            <li>إعداد مجاني ومرافقة في الإطلاق.</li>
+            <li>خصم مبكر على الاشتراك خلال الفترة التجريبية.</li>
+            <li>أولوية لميزاتكم المطلوبة وخارطة الطريق.</li>
+            <li>دعم عربي مباشر وسريع.</li>
+            <li>شارة عميل مؤسِس على صفحتكم داخل المنصة (اختياري).</li>
+          </ul>
+          <a href="{% url 'home:subscriptionplan_view' %}" class="btn btn-blue">انضم كعميل مؤسِس</a>
+        </div>
+      </div>
+    </div>
+    <div class="col-12 col-lg-4">
+      <div class="card card-soft h-100">
+        <div class="card-body p-4">
+          <h4 class="title mb-3">القطاعات التي نخدمها</h4>
+          <div class="d-flex flex-wrap gap-2">
+            <span class="badge sector-badge px-3 py-2">مطاعم عائلية</span>
+            <span class="badge sector-badge px-3 py-2">قهوة ومقاهٍ</span>
+            <span class="badge sector-badge px-3 py-2">بيتزا وبرجر</span>
+            <span class="badge sector-badge px-3 py-2">مخابز وحلويات</span>
+            <span class="badge sector-badge px-3 py-2">عربات طعام</span>
+            <span class="badge sector-badge px-3 py-2">سلاسل متعددة الفروع</span>
+            <span class="badge sector-badge px-3 py-2">مطابخ سحابية</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+{% endblock content %}
+
+

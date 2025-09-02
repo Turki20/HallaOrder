@@ -19,6 +19,22 @@ def index_view(request:HttpRequest):
     
     return render(request, 'home/index.html')
 
+
+def about_view(request:HttpRequest):
+    return render(request, 'home/about.html')
+
+
+def services_view(request:HttpRequest):
+    return render(request, 'home/services.html')
+
+
+def clients_view(request:HttpRequest):
+    return render(request, 'home/clients.html')
+
+
+def faq_view(request:HttpRequest):
+    return render(request, 'home/faq.html')
+
 @login_required(login_url='/users/login/')
 @restaurant_owner_required
 def subscriptionplan_view(request:HttpRequest):
