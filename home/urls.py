@@ -14,5 +14,6 @@ urlpatterns = [
     path('restaurant_identity/', home.restaurant_identity, name='restaurant_identity'),
     path('add_food_plate/', home.add_food_plate, name='add_food_plate'),
     path('add_branch_view/', home.add_branch_view, name='add_branch_view'),
+    path('create_restaurant_verification/', home.create_restaurant_verification, name='create_restaurant_verification'),
     path('settings/', home.settings_view, name='settings'),
 ]

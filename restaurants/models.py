@@ -27,6 +27,27 @@ class Restaurant(models.Model):
         return self.name
 
 
+class RestaurantVerification(models.Model):
+    restaurant = models.OneToOneField(
+        "Restaurant",
+        on_delete=models.CASCADE,
+        related_name="verification"
+    )
+
+    category = models.CharField(max_length=100)  # مثل: مطعم - كوفي - حلويات
+    phone = models.CharField(max_length=20)
+    email = models.EmailField(blank=True, null=True)
+    commercial_registration = models.CharField(max_length=50)  # السجل التجاري
+    vat_number = models.CharField(max_length=50)  # رقم الضريبة
+    iban = models.CharField(max_length=34)  # الآيبان البنكي
+
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    def __str__(self):
+        return f"توثيق {self.restaurant.name}"
+    
+
 # Branches
 class Branch(models.Model):
     restaurant = models.ForeignKey(Restaurant, on_delete=models.CASCADE, related_name="branches")

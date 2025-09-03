@@ -1,0 +1,82 @@
+{% extends "home/base.html" %}
+
+{% load static %}
+
+{% block style %}
+<link rel="stylesheet" href="{% static 'css/index.css' %}">
+{% endblock style %}
+
+{% block content %}
+<style>
+    #dashbaord {
+        display: none;
+    }
+</style>
+
+{% include "home/header_platform.html" %}
+
+<div class="w-100">
+    {% if messages %}
+    <ul>
+        {% for message in messages %}
+        <div class="alert {{message.tags}}">
+            <i class="fa-solid fa-circle-exclamation"></i>
+            <span>{{message}}</span>
+        </div>
+        {% endfor %}
+    </ul>
+    {% endif %}
+</div>
+
+<div class="row w-100 p-4">
+    <div class="col-md-8 mx-auto">
+        <div class="card">
+            <h1 class="p-3">توثيق المطعم</h1>
+            <div class="card-body">
+                <form action="" method="post" class="row g-3">
+                    {% csrf_token %}
+                    
+                    <div class="col-md-6">
+                        <label for="id_category" class="form-label">التصنيف</label>
+                        {{ form.category }}
+                    </div>
+
+                    <div class="col-md-6">
+                        <label for="id_phone" class="form-label">رقم الهاتف</label>
+                        {{ form.phone }}
+                    </div>
+
+                    <div class="col-md-6">
+                        <label for="id_email" class="form-label">البريد الإلكتروني</label>
+                        {{ form.email }}
+                    </div>
+
+                    <div class="col-md-6">
+                        <label for="id_commercial_registration" class="form-label">السجل التجاري</label>
+                        {{ form.commercial_registration }}
+                    </div>
+
+                    <div class="col-md-6">
+                        <label for="id_vat_number" class="form-label">رقم ضريبة القيمة المضافة</label>
+                        {{ form.vat_number }}
+                    </div>
+
+                    <div class="col-md-6">
+                        <label for="id_iban" class="form-label">الآيبان البنكي</label>
+                        {{ form.iban }}
+                    </div>
+
+                    <hr class="mt-4" />
+
+                    <div class="col-12 d-flex gap-2 mt-4">
+                        <button type="submit" class="btn btn-blue">حفظ</button>
+                        <button type="reset" class="btn btn-orange">تفريغ الحقول</button>
+                        <a href="{% url 'home:create_restaurant_identity' %}" class="btn btn-dark">رجوع</a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock content %}

@@ -1,0 +1,46 @@
+
+{% extends "websites/base.html" %}  
+{% load static %}
+
+{% block title %}طلباتي{% endblock %}
+
+{% block content %}
+
+
+<div class="container my-4">
+    <h2 class="mb-4 text-center">طلباتي السابقة</h2>
+
+    {% if orders %}
+        <div class="row g-4">
+            {% for order in orders %}
+            <div class="col-md-6 col-lg-4">
+                <div class="card shadow-sm h-100">
+                    <div class="card-body">
+                        <h5 class="card-title">طلب رقم #{{ order.id }}</h5>
+                        <p class="card-text">
+                            <strong>الفرع:</strong> {{ order.branch.name }} <br>
+                            <strong>الطريقة:</strong> {{ order.get_order_method_display }} <br>
+                            <strong>الحالة:</strong> 
+                            <span class="badge bg-info">{{ order.get_status_display }}</span> <br>
+                            <strong>المبلغ:</strong> {{ order.total_price }} ريال <br>
+                            <strong>طريقة الدفع:</strong> {{ order.get_payment_method_display }}
+                        </p>
+                        <p class="text-muted small">
+                            <i class="bi bi-clock"></i> {{ order.created_at|date:"Y-m-d H:i" }}
+                        </p>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    {% else %}
+        <div class="alert alert-light text-center">
+            لا توجد طلبات بعد.
+        </div>
+    {% endif %}
+</div>
+
+
+{% endblock %}
+
+

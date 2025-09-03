@@ -160,7 +160,9 @@ def success(request:HttpRequest):
                         )
                         
                     created_order.save()
-                        
+                    
+                    # print()
+                    
                     for i in cart:
                         try:
                             product = Product.objects.filter(pk=int(i.get("id"))).first()
@@ -172,7 +174,7 @@ def success(request:HttpRequest):
                                 order=created_order,
                                 product=product,
                                 quantity=qty,
-                                options=(i.get("size") or ""), # تحتاج تعديل الاضافات
+                                options=cart[0]['options'], # تحتاج تعديل الاضافات
                                 addons=",".join(i.get("addons", []) or []),
                             )
                     # تفريغ السلة وتخزين رقم الطلب لعرضه مباشرة
@@ -230,7 +232,7 @@ def success(request:HttpRequest):
                     except Exception:
                         pass
 
-    if order_for_invoice:
+    if order_for_invoice:                
         website = Website.objects.get(slug=slug)
         return render(request, "payments/invoice.html", {"order": order_for_invoice, "slug": slug, 'website':website})
 

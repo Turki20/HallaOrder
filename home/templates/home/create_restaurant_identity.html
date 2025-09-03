@@ -102,13 +102,20 @@
         <div class="card">
             <div class="row">
                 <div class="col-1" style="font-size: x-large;">
+                    {% if request.user.restaurants.branches.first %}
+                    <i class="fa-solid fa-square-check text-blue"></i>
+                    {% else %}
                     <i class="fa-regular fa-square"></i>
+                    {% endif %}
                 </div>
                 <div class="col-10 text-end">
                     <p>اضافة الفرع الرئيسي للمطعم</p>
                 </div>
                 <div class="col-1">
+                    {% if request.user.restaurants.branches.first %}
+                    {% else %}
                     <a href="{% url 'home:add_branch_view' %}" class="btn btn-dark">ابدأ</a>
+                    {% endif %}
                 </div>
             </div>
         </div>
@@ -126,7 +133,7 @@
                     <p>توثيق المطعم</p>
                 </div>
                 <div class="col-1">
-                    <a href="" class="btn btn-dark">ابدأ</a>
+                    <a href="{% url 'home:create_restaurant_verification' %}" class="btn btn-dark">ابدأ</a>
                 </div>
             </div>
         </div>

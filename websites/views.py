@@ -324,3 +324,21 @@ def save_delivery_details(request):
     }
     request.session['order_data'] = delivery_data
     return redirect(request.META.get('HTTP_REFERER', '/'))
+
+
+@login_required(login_url='/users/login/')
+def user_orders(request, slug):
+    website = get_object_or_404(Website, slug=slug)
+    
+    # إذا كان المستخدم مسجل دخول
+    if request.user.is_authenticated:
+        orders = []
+        branches = website.restaurant.branches.all()
+        for branch in branches:
+            for order in branch.orders.all():
+                if order.customer == request.user:
+                    orders.append(order)
+    else:
+        orders = []
+
+    return render(request, "websites/my_orders.html", {"orders": orders, 'website':website})

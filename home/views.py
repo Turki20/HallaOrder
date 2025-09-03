@@ -1,12 +1,13 @@
 from django.shortcuts import render, redirect
 from django.http import HttpRequest
 from django.contrib.auth.decorators import login_required
-from restaurants.models import SubscriptionPlan, Restaurant, Branch
+from restaurants.models import SubscriptionPlan, Restaurant, Branch, RestaurantVerification
 from menu.models import Product, Category, ProductImage
 from django.contrib import messages
 from django.db import transaction
 from websites.models import Website
 from django.contrib.auth.models import User
+from .forms import RestaurantVerificationForm
 from users.decorators import restaurant_owner_required
 from dotenv import load_dotenv
 import os
@@ -222,16 +223,9 @@ def add_branch_view(request:HttpRequest):
                 name=branch_name,
                 address=branch_address
             )
-            # messages.success(request, "تم إضافة الفرع بنجاح", 'alert-success')
-            rest_id = request.user.restaurants.id
-            restaurant = Restaurant.objects.get(pk = rest_id)
-            restaurant.is_active = True
-            restaurant.save()
+            messages.success(request, "تم إضافة الفرع بنجاح", 'alert-success')
             
-            user = User.objects.get(pk = request.user.id)
-            user.profile.restaurant = restaurant
-            user.profile.save()
-            return redirect('restaurants')
+            return redirect('home:create_restaurant_identity')
     
     google_map_key = os.getenv('google_map_key', "")
     return render(request, 'home/add_branch.html', {'google_map_key':google_map_key})
@@ -244,3 +238,35 @@ def settings_view(request:HttpRequest):
         "current_page": "home:settings",
     }
     return render(request, 'home/settings.html', context)
+
+@login_required(login_url='/users/login/')
+@restaurant_owner_required
+def create_restaurant_verification(request:HttpRequest):
+    try:
+        restaurant = request.user.restaurants
+    except:
+        messages.error(request, "يجب انشاء هوية المطعم اولا", 'alert-danger')
+        return redirect('home:create_restaurant_identity')
+
+    if request.method == "POST":
+        form = RestaurantVerificationForm(request.POST)
+        if form.is_valid():
+            verification = form.save(commit=False)
+            verification.restaurant = restaurant
+            verification.save()
+            messages.success(request, "تم إضافة بيانات التوثيق بنجاح", 'alert-success')
+            rest_id = request.user.restaurants.id
+            restaurant = Restaurant.objects.get(pk = rest_id)
+            restaurant.is_active = True
+            restaurant.save()
+            
+            user = User.objects.get(pk = request.user.id)
+            user.profile.restaurant = restaurant
+            user.profile.save()
+            return redirect("restaurants")  
+        else:
+            messages.error(request, "يرجى التحقق من صحة البيانات المدخلة", 'alert-danger')
+    else:
+        form = RestaurantVerificationForm()
+    
+    return render(request, 'home/restaurant_verification.html', {'form':form})
