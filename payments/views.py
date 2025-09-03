@@ -9,6 +9,10 @@ from django.urls import reverse
 from django.views.decorators.csrf import csrf_exempt
 from django.middleware.csrf import get_token
 from django.db import models
+from django.db import transaction
+from django.core.mail import send_mail
+from django.template.loader import render_to_string
+from django.utils.html import strip_tags
 
 from .models import Payment, Invoice, WalletTransaction, WalletKind
 # نماذج الطلبات والفروع والمنتجات
@@ -89,19 +93,13 @@ def success(request:HttpRequest):
                 p.order.save(update_fields=["status"])
 
     if status == "paid":
-        # لو كان لدينا Order تم إنشاؤه مسبقًا في نفس الجلسة، نستخدمه
-        last_order_id = request.session.get("last_order_id")
-        if last_order_id:
-            order_for_invoice = (
-                Order.objects.select_related("branch").prefetch_related("items__product").filter(pk=last_order_id).first()
-            )
-
-        # وإلا ننشئ Order جديد من عناصر السلة المحفوظة في Session
-        if not order_for_invoice and slug:
-            website = Website.objects.select_related("restaurant").filter(slug=slug).first()
-            if website:
-                cart = request.session.get(f"cart_{website.id}", [])
-                cart_meta = request.session.get(f"cart_meta_{website.id}")
+        # أنشئ طلبًا جديدًا من السلة الحالية أولاً إن وُجدت عناصر، وإلاFallback لآخر طلب
+        website = Website.objects.select_related("restaurant").filter(slug=slug).first() if slug else None
+        created_from_cart = False
+        if website:
+            cart = request.session.get(f"cart_{website.id}", [])
+            if cart:
+                cart_meta = request.session.get(f"cart_meta_{website.id}", {"name": "", "phone": "", "notes": "", "email": ""})
                 subtotal = sum((Decimal(str(i.get("price", 0)))) for i in cart)
                 tax = 0 #(subtotal * Decimal("0.15")).quantize(Decimal("0.01"))
                 total = (subtotal + tax).quantize(Decimal("0.01"))
@@ -112,11 +110,8 @@ def success(request:HttpRequest):
                         branch = Branch.objects.get(pk = request.session['order_data']['dinein']['branch_id'])
                     elif request.session['order_data']['order_method'] == 'pickup':
                         branch = Branch.objects.get(pk = request.session['order_data']['pickup']['branch_id'])
-                    # elif request.session['order_data']['order_method'] == 'delivery':
-                    #     print('delivery')
                     else:
                         branch = Branch.objects.filter(restaurant=website.restaurant).order_by("id").first() or Branch.objects.order_by("id").first()
-                        
                 if branch:
                     if request.user.is_authenticated:
                         created_order = Order.objects.create(
@@ -127,7 +122,6 @@ def success(request:HttpRequest):
                             payment_method=PaymentMethod.ONLINE,
                         )
                     else:
-                        print(cart_meta)
                         created_order = Order.objects.create(
                             guest_name=cart_meta['name'],
                             guest_phone=cart_meta['phone'],
@@ -136,7 +130,6 @@ def success(request:HttpRequest):
                             total_price=total,
                             payment_method=PaymentMethod.ONLINE,
                         )
-                    
                     if request.session['order_data']['order_method'] == 'dine_in':
                         created_order.order_method = 'dine_in'
                         DineInDetails.objects.create(
@@ -158,11 +151,7 @@ def success(request:HttpRequest):
                             address=request.session['order_data']['delivery']['address'],
                             city=''
                         )
-                        
                     created_order.save()
-                    
-                    # print()
-                    
                     for i in cart:
                         try:
                             product = Product.objects.filter(pk=int(i.get("id"))).first()
@@ -174,51 +163,72 @@ def success(request:HttpRequest):
                                 order=created_order,
                                 product=product,
                                 quantity=qty,
-                                options=cart[0]['options'], # تحتاج تعديل الاضافات
+                                options=cart[0]['options'],
                                 addons=",".join(i.get("addons", []) or []),
                             )
-                    # تفريغ السلة وتخزين رقم الطلب لعرضه مباشرة
+                    # تفريغ السلة وتخزين رقم الطلب
                     request.session[f"cart_{website.id}"] = []
                     request.session["last_order_id"] = created_order.id
                     request.session.modified = True
 
-                    # إنشاء الفاتورة باستخدام بيانات الاسم والجوال المحفوظة من صفحة السلة
+                    # إنشاء/تحديث الفاتورة (يشمل بريد الضيف)
                     meta = request.session.get(f"cart_meta_{website.id}", {"name": "", "phone": "", "notes": ""})
                     try:
-                        # احصل على الفاتورة إن كانت الإشارة قد أنشأتها مسبقًا، أو أنشئ واحدة جديدة
                         invoice, inv_created = Invoice.objects.get_or_create(
                             order=created_order,
                             defaults={
                                 "customer_name": (meta.get("name") or "").strip(),
                                 "customer_phone": (meta.get("phone") or "").strip(),
-                                "customer_email": (request.user.email if request.user.is_authenticated else ""),
+                                "customer_email": (request.user.email if request.user.is_authenticated else (meta.get("email") or "")),
                                 "total_amount": created_order.total_price,
                                 "compliance_status": False,
                                 "sent_via": "Email",
                             }
                         )
                         if not inv_created:
-                            # حدث موجود: حدّث البيانات القادمة من النموذج لتظهر في التفاصيل
                             changed = False
                             name = (meta.get("name") or "").strip()
                             phone = (meta.get("phone") or "").strip()
-                            email = (request.user.email if request.user.is_authenticated else "")
+                            email = (request.user.email if request.user.is_authenticated else (meta.get("email") or ""))
                             if name and invoice.customer_name != name:
                                 invoice.customer_name = name; changed = True
                             if phone and invoice.customer_phone != phone:
                                 invoice.customer_phone = phone; changed = True
+                            email_changed = False
                             if email and invoice.customer_email != email:
-                                invoice.customer_email = email; changed = True
+                                invoice.customer_email = email; changed = True; email_changed = True
                             if invoice.total_amount != created_order.total_price:
                                 invoice.total_amount = created_order.total_price; changed = True
                             if changed:
                                 invoice.save()
+                                if email_changed:
+                                    def _send_after_commit():
+                                        try:
+                                            inv = Invoice.objects.select_related("order").get(pk=invoice.pk)
+                                            order = inv.order
+                                            items = list(getattr(order, "items", []).select_related("product").all()) if hasattr(order, "items") else []
+                                            subject = f"فاتورة طلبك #{getattr(order, 'id', '')} - HalaOrder"
+                                            context = {"invoice": inv, "order": order, "items": items}
+                                            html_message = render_to_string("payments/email_invoice.html", context)
+                                            plain_message = strip_tags(html_message)
+                                            from_email = getattr(settings, "DEFAULT_FROM_EMAIL", "no-reply@halaorder.local")
+                                            send_mail(
+                                                subject=subject,
+                                                message=plain_message,
+                                                from_email=from_email,
+                                                recipient_list=[email],
+                                                html_message=html_message,
+                                                fail_silently=True,
+                                            )
+                                        except Exception:
+                                            pass
+                                    transaction.on_commit(_send_after_commit)
                     except Exception:
-                        # لا نمنع إكمال العملية إذا فشلت الفاتورة لأي سبب
                         pass
                     order_for_invoice = created_order
+                    created_from_cart = True
 
-                    # إنشاء معاملة محفظة (رصيد) بقيمة إجمالي الطلب بالهللة
+                    # إنشاء معاملة محفظة (رصيد)
                     try:
                         r = website.restaurant if hasattr(website, "restaurant") else None
                         if r and created_order and created_order.total_price is not None:
@@ -231,6 +241,14 @@ def success(request:HttpRequest):
                             )
                     except Exception:
                         pass
+
+        if not created_from_cart:
+            # استخدم آخر طلب محفوظ فقط إن لم ننشئ طلبًا جديدًا الآن
+            last_order_id = request.session.get("last_order_id")
+            if last_order_id:
+                order_for_invoice = (
+                    Order.objects.select_related("branch").prefetch_related("items__product").filter(pk=last_order_id).first()
+                )
 
     if order_for_invoice:                
         website = Website.objects.get(slug=slug)
