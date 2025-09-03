@@ -1,0 +1,80 @@
+:root {
+    --bg-light: #f8f9fa;
+    --primary-teal: #00AAB0;
+    --primary-yellow: #FFC107;
+    --dark-teal: #004B59;
+    --white: #FFFFFF;
+    --grey-text: #6c757d;
+    --border-color: #e9ecef;
+}
+
+/* المحتوى الأساسي */
+.main-content {
+    flex-grow: 1;
+    padding: 20px;
+    height: 100vh;
+    overflow-y: auto;
+}
+
+/* كروت الـ KPI */
+.card {
+    background: var(--white);
+    border-radius: 12px;
+    padding: 20px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+    text-align: center;
+}
+
+.card .title {
+    font-size: 14px;
+    color: var(--grey-text);
+}
+
+.card .value {
+    font-size: 28px;
+    font-weight: 700;
+}
+
+/* جدول الموظفين */
+.staff-table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.staff-table th,
+.staff-table td {
+    padding: 15px;
+    text-align: right;
+    border-bottom: 1px solid var(--border-color);
+    vertical-align: middle;
+}
+
+.staff-table thead {
+    background-color: var(--bg-light);
+}
+
+/* بيانات الموظف داخل الجدول */
+.staff-info .name {
+    font-weight: 700;
+}
+
+.staff-info .email {
+    font-size: 13px;
+    color: var(--grey-text);
+}
+
+/* أزرار الأكشن */
+.action-btn-sm {
+    background: none;
+    border: none;
+    color: var(--grey-text);
+    cursor: pointer;
+    font-size: 18px;
+    padding: 5px;
+}
+
+/* السويتش */
+.form-switch .form-check-input:checked {
+    background-color: var(--primary-teal);
+    border-color: var(--primary-teal);
+}

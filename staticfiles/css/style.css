@@ -1,0 +1,192 @@
+:root {
+  --hoa-primary: #0ea5e9;
+  --hoa-primary-50: #e0f2fe;
+  --hoa-primary-200: #bae6fd;
+  --hoa-secondary: #8b5cf6;
+  --hoa-secondary-50: #ede9fe;
+  --hoa-secondary-200: #ddd6fe;
+  --hoa-accent: #ff7a45;
+  --hoa-accent-50: #ffeddc;
+  --hoa-accent-200: #ffd4ba;
+  --ink: #0f172a;
+  --muted: #64748b;
+  --bg: #f6f7fb;
+  --card: #fff;
+  --sep: #eef2f7;
+  --success: #16a34a;
+  --warn: #f59e0b;
+  --danger: #ef4444;
+  --shadow: 0 10px 20px rgba(0, 0, 0, .04);
+  --rad: 12px;
+  --container: 1120px;
+}
+
+* {
+  box-sizing: border-box
+}
+
+html,
+body {
+  height: 100%
+}
+
+body {
+  margin: 0;
+  background: whitesmoke;
+  color: var(--ink);
+  font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial
+}
+
+a {
+  color: inherit;
+  text-decoration: none
+}
+
+.container {
+  max-width: var(--container);
+  margin: auto;
+  padding: 0 16px
+}
+
+.card {
+  background: #fff;
+  border: 1px solid var(--sep);
+  border-radius: var(--rad);
+  box-shadow: var(--shadow)
+}
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 14px;
+  border: 0;
+  border-radius: var(--rad);
+  cursor: pointer;
+  background: var(--hoa-primary);
+  color: #fff
+}
+
+.btn-outline {
+  background: #fff;
+  color: #111;
+  border: 1px solid #e5e7eb
+}
+
+.pill {
+  padding: 8px 12px;
+  border: 1px solid #e5e7eb;
+  background: #fff;
+  border-radius: var(--rad)
+}
+
+.pill.active,
+.pill:hover {
+  background: var(--hoa-accent-50);
+  border-color: var(--hoa-accent-200)
+}
+
+.badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  height: 20px;
+  min-width: 20px;
+  padding: 0 6px;
+  border-radius: 8px;
+  background: var(--hoa-accent);
+  color: #fff;
+  font-size: 12px
+}
+
+.input {
+  width: 100%;
+  padding: 10px 12px;
+  border: 1px solid #e5e7eb;
+  border-radius: var(--rad);
+  background: #fff
+}
+
+.topbar {
+  background: #fff;
+  border-bottom: 1px solid var(--sep);
+  position: sticky;
+  top: 0;
+  z-index: 30
+}
+
+.topbar__inner {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 10px 0
+}
+
+.logo-rect {
+  width: 36px;
+  height: 36px;
+  border-radius: 10px;
+  overflow: hidden;
+  background: #eef2f7;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center
+}
+
+.nav {
+  display: flex;
+  gap: 10px;
+  align-items: center
+}
+
+.nav a {
+  padding: 8px 12px;
+  border: 1px solid #e5e7eb;
+  border-radius: var(--rad);
+  background: #fff;
+  font-size: 14px
+}
+
+.nav a.active,
+.nav a:hover {
+  background: var(--hoa-primary-50);
+  border-color: var(--hoa-primary-200)
+}
+
+.footer {
+  margin-top: 24px;
+  background: #fff;
+  border-top: 1px solid var(--sep)
+}
+
+.footer__inner {
+  max-width: var(--container);
+  margin: auto;
+  padding: 20px 16px
+}
+
+.footer-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px
+}
+
+.footer-col h4 {
+  margin: 0 0 10px;
+  font-size: 16px
+}
+
+.footer-bottom {
+  margin-top: 12px;
+  border-top: 1px solid var(--sep);
+  padding-top: 12px;
+  text-align: center;
+  color: #6b7280;
+  font-size: 13px
+}
+
+@media(max-width:720px) {
+  .footer-grid {
+    grid-template-columns: 1fr
+  }
+}

@@ -1,0 +1,324 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+:root {
+    --orange_color: #FFAF00;
+    --white_color: #ffffff;
+    --gray_color: #F8F9FA;
+    --light_blue_color: #01A7C2;
+    --blue_color: #007090;
+    --dark_blue_color: #004B59;
+    --black_color: #0000;
+}
+
+body {
+    min-height: 100vh;
+    background-color: var(--gray_color);
+    display: flex;
+    flex-direction: column;
+    justify-content: start;
+    align-items: center;
+    flex: 0 0 auto;
+    overflow-x: hidden;
+}
+
+.btn-blue {
+    background-color: var(--light_blue_color);
+    color: var(--white_color);
+}
+
+.btn-orange {
+    background-color: var(--orange_color);
+    color: var(--dark_blue_color);
+}
+
+.btn-dark {
+    background-color: var(--dark_blue_color);
+    color: var(--white_color);
+}
+
+.btn {
+    transition: all 0.2s ease-in-out;
+    font-weight: 500;
+    padding: 5px 15px;
+}
+
+.btn-orange:hover {
+    transform: scale(1.05);
+    color: var(--dark_blue_color);
+    box-shadow: 2px 2px 5px lightgray;
+}
+
+.btn-dark:hover {
+    transform: scale(1.05);
+    color: var(--white_color);
+    background-color: var(--dark_blue_color);
+    box-shadow: 2px 2px 5px lightgray;
+}
+
+.btn-blue:hover {
+    transform: scale(1.05);
+    color: var(--white_color);
+    box-shadow: 2px 2px 5px lightgray;
+}
+
+.card {
+    padding: 20px;
+    border: none;
+    background-color: var(--white_color);
+    color: var(--dark_blue_color);
+    box-shadow: 0 8px 30px rgba(0, 75, 89, 0.08);
+    border-radius: 12px;
+}
+
+
+#header_platform {
+    width: 100%;
+    height: 80px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 10px;
+    background-color: var(--white_color);
+}
+
+#header_platform img {
+    height: 60px;
+}
+
+#header_platform div:first-child {
+    display: flex;
+    width: auto;
+    gap: 20px;
+    height: 100%;
+    align-items: center;
+}
+
+#header_platform .nav-item a {
+    padding: 10px;
+    text-decoration: none;
+    color: var(--dark_blue_color);
+    font-weight: 500;
+    transition: all 0.2s ease-in-out;
+}
+
+#header_platform .nav-item a:hover {
+    color: var(--orange_color);
+}
+
+.element-bg {
+  background: linear-gradient(
+    135deg,
+    var(--light_blue_color) 0%,
+    var(--blue_color) 65%,
+    var(--dark_blue_color) 100%
+  );
+  color: #fff; /* لو النص أبيض يبان فوق التدرج */
+}
+
+.alert-danger {
+
+}
+
+.text-blue {
+    color: var(--light_blue_color);
+    text-decoration: none;
+}
+
+.text-orange {
+    color: var(--orange_color);
+    text-decoration: none;
+}
+
+/* slidebar  */
+
+.sidebar {
+    width: 250px;
+    background-color: var(--dark_blue_color);
+    color: var(--white_color);
+    border-right: 1px solid #ddd;
+    transition: all 0.3s;
+    overflow: hidden;
+    min-height: 100vh;
+    height: auto;
+    z-index: 1000;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.sidebar ul li a i {
+    color: var(--light_blue_color);
+}
+
+.sidebar h3 {
+    width: 100%;
+    text-align: center;
+    margin: 20px 0;
+}
+
+.sidebar.hidden {
+    width: 0;
+    padding: 0;
+    border: none;
+}
+
+.sidebar ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    width: 90%;
+    border: 1px solid var(--blue_color);
+    border-radius: 10px;
+}
+
+.sidebar li {
+    cursor: pointer;
+}
+
+.sidebar li a {
+    text-decoration: none;
+    font-weight: 500;
+    color: var(--white_color);
+    display: block;
+    width: 100%;
+    padding: 15px;
+    border-bottom: 1px solid var(--blue_color)
+}
+
+.sidebar li a i {
+    padding-left: 15px;
+}
+.sidebar li.active {
+    background-color: var(--light_blue_color);
+    border-right: 5px solid var(--orange_color);
+    font-weight: bold;
+    transform: scale(1.12);
+}
+
+.sidebar li.active a i {
+    color: var(--orange_color);
+}
+
+.content {
+    flex: 1;
+    padding: 1rem;
+}
+
+header {
+    background: var(--white_color);
+    padding: 10px 20px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-radius: 10px;
+    color: var(--dark_blue_color);
+    font-weight: 500;
+}
+
+header button {
+    background: none;
+    border: none;
+    font-size: 30px;
+}
+
+header button i {
+    color: var(--dark_blue_color);
+}
+.toggle-btn {
+    cursor: pointer;
+    padding: 5px 10px;
+    border: 1px solid #333;
+    background: #fff;
+}
+
+#close_menu {
+    padding: 20px;
+    background: none;
+    border: none;
+    display: none;
+}
+#close_menu i {
+    color: var(--gray_color);
+    font-size: x-large;
+}
+
+main {
+    width: 100%;
+    display: flex;
+}
+
+
+
+/* <button class="button-53" role="button">Button 53</button> */
+
+/* CSS */
+.button-53 {
+  background-color: var(--light_blue_color);
+  border: 0 solid #E5E7EB;
+  box-sizing: border-box;
+  color: var(--white_color);
+  display: flex;
+  font-family: ui-sans-serif,system-ui,-apple-system,system-ui,"Segoe UI",Roboto,"Helvetica Neue",Arial,"Noto Sans",sans-serif,"Apple Color Emoji","Segoe UI Emoji","Segoe UI Symbol","Noto Color Emoji";
+  font-size: 2rem;
+  font-weight: 700;
+  justify-content: center;
+  line-height: 1.75rem;
+  padding: .75rem 1.65rem;
+  position: relative;
+  text-align: center;
+  text-decoration: none #000000 solid;
+  text-decoration-thickness: auto;
+  width: 100%;
+  max-width: 460px;
+  position: relative;
+  cursor: pointer;
+  transform: rotate(-2deg);
+  user-select: none;
+  -webkit-user-select: none;
+  touch-action: manipulation;
+}
+
+.button-53:focus {
+  outline: 0;
+}
+
+.button-53:after {
+  content: '';
+  position: absolute;
+  border: 1px solid #000000;
+  bottom: 4px;
+  left: 4px;
+  width: calc(100% - 1px);
+  height: calc(100% - 1px);
+}
+
+.button-53:hover:after {
+  bottom: 2px;
+  left: 2px;
+}
+
+@media (min-width: 768px) {
+  .button-53 {
+    padding: .75rem 3rem;
+    font-size: 1.25rem;
+  }
+}
+
+@media screen and (max-width: 900px) {
+    .sidebar {
+        position: absolute;
+
+    }
+
+    #close_menu {
+        display: block;
+    }
+
+    .button-53 {
+    font-size: 0.8rem;
+  }
+}

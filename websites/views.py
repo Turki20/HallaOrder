@@ -341,4 +341,4 @@ def user_orders(request, slug):
     else:
         orders = []
 
-    return render(request, "websites/my_orders.html", {"orders": orders, 'website':website})
+    return render(request, "websites/my_orders.html", _base_ctx(request, website, orders=orders))

@@ -39,7 +39,7 @@
 
     /* Drawer (سلة) — أسماء مُسمّاة لمنع التعارض */
     .hoa-drawer{position:fixed;inset:0;display:none}
-    .hoa-drawer.is-open{display:block}
+    .hoa-drawer.is-open{display:block; z-index: 1000;}
     .hoa-mask{position:absolute;inset:0;background:rgba(0,0,0,.25)}
     .hoa-panel{position:absolute;inset-inline-end:0;top:0;height:100%;width:min(420px,90%);background:#fff;box-shadow:0 10px 20px rgba(0,0,0,.04);display:flex;flex-direction:column}
     .hoa-panel header{padding:14px 16px;border-bottom:1px solid #eef2f7;display:flex;justify-content:space-between;align-items:center}
