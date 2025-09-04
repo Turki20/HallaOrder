@@ -1,4 +1,5 @@
 # HalaOrder – Restaurant Ordering & Management Platform
+<img width="2088" height="882" alt="image" src="https://github.com/user-attachments/assets/c488a52f-a53f-475d-b42c-532d1ea903c1" />
 
 HalaOrder is a multi-tenant platform built with **Django** that helps restaurants create their own online store, manage menus, process orders, and receive payments.  
 It also provides dashboards for platform admins, restaurant owners, and staff, as well as a simple customer-facing interface for online ordering.
