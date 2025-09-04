@@ -96,15 +96,6 @@
                 <span>Dashboard</span>
             </header>
             <div id="mainContent">
-                {% if messages %}
-                <div class="p-3">
-                    {% for message in messages %}
-                    <div class="alert {{ message.tags }}">
-                        <span>{{ message }}</span>
-                    </div>
-                    {% endfor %}
-                </div>
-                {% endif %}
                 {% block dashboard_content %}
                 <!-- <div class="row p-4 g-4">
                     <div class="col-12 col-md-6">
