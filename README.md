@@ -30,10 +30,10 @@ It also provides dashboards for platform admins, restaurant owners, and staff, a
   - **New → Preparing → Ready → Delivered → Cancelled**
 - Order history for customers.
 
-### Payments (Next Phase)
+### Payments 
 - Integration with Mada, Apple Pay, Visa, and Cash.
 
-### Reports & Analytics (Next Phase)
+### Reports & Analytics 
 - Restaurant performance reports.
 - Platform-wide analytics (total orders, revenue, growth trends).
 
